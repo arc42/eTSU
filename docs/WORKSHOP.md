@@ -89,3 +89,68 @@ Flask app directly in a local Python virtual environment, no Docker required.
 Decide which mode you're using *before* the room fills up; switching mid-session
 costs time you don't have. Both modes serve the same dashboard at
 `http://localhost:8080` (Docker) or `http://localhost:8000` (`local`).
+
+## Rehearsal log
+
+A record of full "naked runs" — the whole workshop rehearsed end to end against
+a throwaway clone. Add an entry each time the run is repeated.
+
+### [2026-09-06] naked run
+
+**Mode:** Docker (`./dashboard.sh`). The `local` fallback was **not** exercised
+in this run — rehearse it separately before relying on it in the room.
+
+**What worked.**
+
+- Cold start from a fresh `git clone` needed nothing but Docker: build to
+  serving in about 7 seconds, all 15 page routes HTTP 200 against a vault with
+  zero pages, every one showing its deliberate empty state. Unknown pages
+  (`/page/<folder>/<stem>`, `/functional-requirements/<stem>`) return 404, not
+  500.
+- Bootstrap: naming the system in `_system/wiki.yaml` re-branded the hero on
+  the next refresh with no restart, exactly as the workflow promises. The
+  glossary, stakeholder and req42 block counts moved as pages were written.
+- Ingest of `raw/examples/interview-notes-example.md` produced 18 pages and
+  updated 5 more. All four findings planted in that source were surfaced by the
+  grill pass and filed as Issues rather than resolved: the two vocabularies for
+  one concept, the unquantified "it should be fast", the reservation-loss
+  contradiction, and the unnamed weekend colleague.
+- **No template/parser drift.** Detail pages were rendered for all ten created
+  content types and inspected section by section: every `**Definition.**`,
+  `**Snapshot.**`, `**Purpose.**`, `**Attributes.**`, `**Relationships.**` and
+  ATAM sub-bullet carried its content. Nothing came back blank.
+- The term network rendered 10 nodes and 11 edges, including cross-type edges to
+  data models, issues, stakeholders and constraints. The context diagram
+  projected itself from stakeholder `provides:`/`receives:` with no context page
+  written at all.
+- `./reset.sh --force` returned `git status --short` to empty: 24 files created
+  or modified, all gone, `raw/examples/` untouched. The dashboard served the
+  naked state again immediately afterwards.
+
+**Defects found and fixed.** Six, all committed separately:
+
+1. Compose derived its project name from the `dashboard` directory, so starting
+   this dashboard destroyed the container of any other vault at the same path.
+   Pinned to `name: tsu-demo`.
+2. ADR-0001 to ADR-0004 still carried the literal `{{date}}` placeholder, which
+   `/adrs` renders verbatim.
+3. `"Platzhalter"` — untranslated German — appeared on the **empty-vault home
+   page**, the very first screen of the workshop. Four German source comments
+   went with it.
+4. `app.py` read a `tile_claim` field from the vision page that no template
+   declared, so the Vision tile's claim line and the req42 block-01 sub-headline
+   were permanently blank. Declared in `_templates/goal.md`; bootstrap step 3
+   now fills it.
+5. `/goals` printed "No goals yet" directly underneath the rendered goal — the
+   empty state guards the *objectives* loop but was labelled "goals".
+6. The Goal type showed as lowercase `goals` in search results; `FOLDER_LABELS`
+   had no entry for that folder.
+
+**Worth knowing for the day.**
+
+- The dashboard's self-shutdown (ADR-0022) is real and quick: in this run the
+  server stopped 17 seconds after start once the browser tab went away. If you
+  close the projector tab to switch apps, the dashboard is gone — reopen with
+  `./dashboard.sh`. Nothing is lost; it re-reads the vault on start.
+- `reset.sh` deletes every top-level file in `raw/`, not only `.md` ones. Do not
+  park anything there you want to keep between runs.
