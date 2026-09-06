@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Suche{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Suche</nav>{% endblock %}
+{% block title %}Search{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Search</nav>{% endblock %}
 {% block content %}
-<h1 class="page-h1">Suche <span class="count-pill">{{ total }}</span></h1>
-<p class="lead">Volltextsuche über alle Inhalte — Begriffe, Stakeholder, Issues, ADRs und mehr.</p>
+<h1 class="page-h1">Search <span class="count-pill">{{ total }}</span></h1>
+<p class="lead">Full-text search across all content — terms, stakeholders, issues, ADRs, and more.</p>
 
 <div class="toolbar">
-  <input type="search" id="search-box" class="search-input" placeholder="Suchbegriff eingeben…"
-         autocomplete="off" spellcheck="false" autofocus aria-label="Wiki durchsuchen">
+  <input type="search" id="search-box" class="search-input" placeholder="Enter a search term…"
+         autocomplete="off" spellcheck="false" autofocus aria-label="Search the wiki">
   <div class="filterbar" role="tablist">
-    <button class="fbtn active" data-type="all">Alle <span class="fnum">{{ total }}</span></button>
+    <button class="fbtn active" data-type="all">All <span class="fnum">{{ total }}</span></button>
     {% for type, count in facets %}
     <button class="fbtn" data-type="{{ type }}">{{ type }} <span class="fnum">{{ count }}</span></button>
     {% endfor %}
@@ -25,7 +25,7 @@
         <code class="sresult-id">{{ r.id }}</code>
         <span class="sresult-title">{{ r.title }}</span>
         {% if r.status %}<span class="status status-{{ r.status }}">{{ r.status }}</span>{% endif %}
-        <span class="sresult-score" title="Relevanz" hidden>
+        <span class="sresult-score" title="Relevance" hidden>
           <span class="score-track"><span class="score-fill"></span></span>
           <span class="score-pct"></span>
         </span>
@@ -33,8 +33,8 @@
     </li>
     {% endfor %}
   </ul>
-  <p class="empty-hint" id="search-empty" hidden>Keine Treffer.</p>
-  <p class="search-hint" id="search-prompt">Tippen, um zu suchen — oder einen Typ-Filter wählen.</p>
+  <p class="empty-hint" id="search-empty" hidden>No matches.</p>
+  <p class="search-hint" id="search-prompt">Start typing to search — or choose a type filter.</p>
 </div>
 
 <script>

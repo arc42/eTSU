@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Glossar{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Glossar</nav>{% endblock %}
+{% block title %}Glossary{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Glossary</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Glossar <span class="count-pill">{{ total }} Begriffe</span></h1>
-<p class="lead">Ubiquitäre Sprache der Kinderschwimmliga — eine kanonische Bedeutung je Begriff.</p>
+<h1 class="page-h1">Glossary <span class="count-pill">{{ total }} terms</span></h1>
+<p class="lead">Ubiquitous language of {{ system_name }} — one canonical meaning per term.</p>
 
 <div class="filterbar" role="tablist" id="glossary-sort">
-  <span class="fbar-label">Sortieren:</span>
+  <span class="fbar-label">Sort:</span>
   <button class="fbtn active" data-sort="alpha">Alpha</button>
-  <button class="fbtn" data-sort="newest">Neueste</button>
-  <button class="fbtn" data-sort="oldest">Älteste</button>
-  <button class="fbtn" data-sort="relations">Vernetzung</button>
+  <button class="fbtn" data-sort="newest">Newest</button>
+  <button class="fbtn" data-sort="oldest">Oldest</button>
+  <button class="fbtn" data-sort="relations">Connections</button>
 </div>
 
 {% if rows %}
@@ -20,9 +20,9 @@
   <thead>
     <tr>
       <th class="c-id">ID</th>
-      <th class="c-term">Begriff</th>
+      <th class="c-term">Term</th>
       <th class="c-def">Definition</th>
-      <th class="c-rel">Relationen</th>
+      <th class="c-rel">Relations</th>
       <th class="c-status">Status</th>
     </tr>
   </thead>
@@ -32,7 +32,7 @@
       <td class="c-id"><code>{{ r.id }}</code></td>
       <td class="c-term">
         <a class="term term-link" href="/page/glossary/{{ r.stem }}">{{ r.title }}</a>
-        {% if r.assumption %}<span class="badge badge-assume" title="Definition ist eine unbestätigte Annahme">Annahme</span>{% endif %}
+        {% if r.assumption %}<span class="badge badge-assume" title="Definition is an unconfirmed assumption">Assumption</span>{% endif %}
         {% if r.aliases %}<span class="aliases">alias: {{ r.aliases | join(", ") }}</span>{% endif %}
       </td>
       <td class="c-def">{{ r.definition | safe }}</td>

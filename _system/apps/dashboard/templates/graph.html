@@ -1,26 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Begriffsnetz{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/glossary">Glossar</a> <span>/</span> Begriffsnetz</nav>{% endblock %}
+{% block title %}Term network{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/glossary">Glossary</a> <span>/</span> Term network</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Begriffsnetz <span class="count-pill">{{ n_glo }} Begriffe</span></h1>
-<p class="lead">Die ubiquitäre Sprache als Netz — projiziert aus den <code>related:</code>-Kanten
-(ADR-0023). Standard: nur Glossarbegriffe. Blende benachbarte Typen schichtweise ein.
-Knoten frei ziehen — beim Loslassen rücken in <em>cola</em> nur die direkten Nachbarn zur
-Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes Antippen
-öffnet die Seite. <strong>Layout</strong> wählt die Anordnung (<em>cola</em> überlappungsfrei,
-<em>fcose</em> Feder); ein Klick auf das aktive Layout ordnet neu an.</p>
+<h1 class="page-h1">Term network <span class="count-pill">{{ n_glo }} terms</span></h1>
+<p class="lead">The ubiquitous language as a network, projected from the <code>related:</code> edges
+(ADR-0023). By default only glossary terms are shown — bring in neighbouring types layer
+by layer. Drag a node freely; on release, <em>cola</em> nudges only its direct neighbours
+aside and leaves everything else where it is. Tap a node to highlight its neighbours; tap
+again to open its page. <strong>Layout</strong> picks the arrangement (<em>cola</em> avoids
+overlaps, <em>fcose</em> is spring-based); clicking the active layout re-tidies it.</p>
 
 {% if n_glo %}
 <div class="graph-toolbar" id="graph-layers">
-  <span class="fbar-label">Erweitern:</span>
+  <span class="fbar-label">Expand:</span>
   {% for L in named_layers %}
   <button class="layer-btn layer-{{ L.key }}" data-layer="{{ L.key }}" aria-pressed="false">{{ L.label }} <span class="layer-n">{{ L.count }}</span></button>
   {% endfor %}
   {% if rest.count %}
-  <button class="layer-btn layer-REST" data-layer="{{ rest.types|join(',') }}" aria-pressed="false">Weitere <span class="layer-n">{{ rest.count }}</span></button>
+  <button class="layer-btn layer-REST" data-layer="{{ rest.types|join(',') }}" aria-pressed="false">More <span class="layer-n">{{ rest.count }}</span></button>
   {% endif %}
-  <button class="layer-btn layer-reset" id="graph-reset">Nur GLO</button>
+  <button class="layer-btn layer-reset" id="graph-reset">GLO only</button>
 </div>
 
 <div class="graph-toolbar" id="graph-layout">
@@ -30,23 +30,23 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
 </div>
 
 <div class="graph-legend">
-  <div class="lg-row"><span class="lg-label">Typ</span>
-    <span class="lg-item"><span class="lg-dot lg-GLO"></span>Begriff</span>
-    <span class="lg-item"><span class="lg-dot lg-DM"></span>Datenmodell</span>
+  <div class="lg-row"><span class="lg-label">Type</span>
+    <span class="lg-item"><span class="lg-dot lg-GLO"></span>Term</span>
+    <span class="lg-item"><span class="lg-dot lg-DM"></span>Data model</span>
     <span class="lg-item"><span class="lg-dot lg-STK"></span>Stakeholder</span>
-    <span class="lg-item"><span class="lg-dot lg-EIF"></span>Schnittstelle</span>
-    <span class="lg-item"><span class="lg-dot lg-GOAL"></span>Ziel</span>
-    <span class="lg-item"><span class="lg-dot lg-REST"></span>Weitere</span>
+    <span class="lg-item"><span class="lg-dot lg-EIF"></span>Interface</span>
+    <span class="lg-item"><span class="lg-dot lg-GOAL"></span>Goal</span>
+    <span class="lg-item"><span class="lg-dot lg-REST"></span>More</span>
   </div>
-  <div class="lg-row"><span class="lg-label">Zustand (Begriffe)</span>
-    <span class="lg-item"><span class="lg-dot lg-state-agreed"></span>abgestimmt</span>
-    <span class="lg-item"><span class="lg-dot lg-state-draft"></span>Entwurf</span>
-    <span class="lg-item"><span class="lg-dot lg-state-deprecated"></span>veraltet</span>
-    <span class="lg-item"><span class="lg-dot lg-state-assume"></span>Annahme (gestrichelt)</span>
+  <div class="lg-row"><span class="lg-label">State (terms)</span>
+    <span class="lg-item"><span class="lg-dot lg-state-agreed"></span>agreed</span>
+    <span class="lg-item"><span class="lg-dot lg-state-draft"></span>draft</span>
+    <span class="lg-item"><span class="lg-dot lg-state-deprecated"></span>deprecated</span>
+    <span class="lg-item"><span class="lg-dot lg-state-assume"></span>assumption (dashed)</span>
   </div>
 </div>
 
-<div id="cy" class="graph-canvas" role="img" aria-label="Begriffsnetz des Glossars"></div>
+<div id="cy" class="graph-canvas" role="img" aria-label="Term network of the glossary"></div>
 {% else %}
 {{ empty_state("glossary terms") }}
 {% endif %}
@@ -172,7 +172,7 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
 
   // --- layout buttons (ADR-0023 amendment: cola vs fcose) --------------------
   // Switching engines lays out fresh; clicking the ALREADY-active engine re-tidies from
-  // the current positions — the "neu anordnen" action that resolves overlaps you created
+  // the current positions — the "re-arrange" action that resolves overlaps you created
   // by dragging, without reshuffling the whole net.
   function setActiveLayoutBtn() {
     document.querySelectorAll('#graph-layout .lay-btn').forEach(function (b) {
@@ -182,7 +182,7 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
     });
   }
   document.querySelectorAll('#graph-layout .lay-btn').forEach(function (b) {
-    if (!AVAIL[b.dataset.lay]) { b.disabled = true; b.title = b.dataset.lay + ' nicht geladen'; return; }
+    if (!AVAIL[b.dataset.lay]) { b.disabled = true; b.title = b.dataset.lay + ' not loaded'; return; }
     b.addEventListener('click', function () {
       var same = (LAYOUT === b.dataset.lay);
       LAYOUT = b.dataset.lay;

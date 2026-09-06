@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Vision & Ziele{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Vision & Ziele</nav>{% endblock %}
+{% block title %}Vision & goals{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Vision & goals</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
 
-<h1 class="page-h1">Vision & Ziele</h1>
+<h1 class="page-h1">Vision & goals</h1>
 
 {% if diagram %}
 <figure class="goals-diagram">
@@ -27,40 +27,40 @@
   <header class="goal-card-head">
     <code class="ml-id">{{ o.id }}</code>
     <h2>{{ o.title }}</h2>
-    <span class="stereo">Ziel</span>
+    <span class="stereo">Goal</span>
   </header>
 
   <dl class="pam-fields">
-    <dt title="Angestrebtes Ergebnis (keine Aktivität) — was soll erreicht werden">Purpose</dt>
+    <dt title="Intended outcome (not an activity) — what should be achieved">Purpose</dt>
     <dd{% if not o.purpose %} class="empty"{% endif %}>{{ o.purpose | safe or '—' }}</dd>
-    <dt title="Nutzen — für wen welcher konkrete Vorteil entsteht">Advantage</dt>
+    <dt title="Benefit — who gets what concrete advantage">Advantage</dt>
     <dd{% if not o.advantage %} class="empty"{% endif %}>{{ o.advantage | safe or '—' }}</dd>
-    <dt title="Indikator (Metric) und Soll-Wert (Target) der Zielerreichung">Metric</dt>
+    <dt title="Indicator (metric) and target value for achieving the goal">Metric</dt>
     <dd{% if not o.metric %} class="empty"{% endif %}>
-      {{ o.metric | safe or '—' }}{% if o.target %} <span class="pam-target">— Ziel: {{ o.target | safe }}</span>{% endif %}
+      {{ o.metric | safe or '—' }}{% if o.target %} <span class="pam-target">— Target: {{ o.target | safe }}</span>{% endif %}
     </dd>
-    <dt title="Ist-Wert der Metric vor Beginn (Ausgangsbasis)">Baseline</dt>
+    <dt title="Metric's value before starting (baseline)">Baseline</dt>
     <dd{% if not o.baseline %} class="empty"{% endif %}>{{ o.baseline | safe or '—' }}</dd>
-    <dt title="Wer hat den Vorteil — die adressierten Stakeholder">Beneficiary</dt>
+    <dt title="Who benefits — the stakeholders addressed">Beneficiary</dt>
     <dd{% if not o.beneficiary %} class="empty"{% endif %}>
       {% if o.beneficiary %}{{ o.beneficiary | join(' · ') }}{% else %}—{% endif %}
     </dd>
   </dl>
 
   <div class="goal-drives">
-    <span class="goal-drives-label">treibt</span>
+    <span class="goal-drives-label">drives</span>
     {% if o.epics %}
       {% for fr in o.epics %}<a href="/functional-requirements/{{ fr.stem }}">{{ fr.id }} {{ fr.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
     {% else %}
-      <span class="goal-drives-empty">keine Epics verlinkt</span>
+      <span class="goal-drives-empty">no epics linked</span>
     {% endif %}
   </div>
 </section>
 {% endfor %}
 
 <section class="goal-matrix">
-  <h2>Goal-Coverage-Matrix</h2>
-  <p class="lead">Projektion aus dem <code>goal:</code>-Feld jeder FR (ADR-0018). Enabler (FR mit <code>goal: []</code>) als eigene Spaltengruppe rechts, gestrichelt abgesetzt.</p>
+  <h2>Goal coverage matrix</h2>
+  <p class="lead">Projected from the <code>goal:</code> field on each FR (ADR-0018). Enablers (FRs with <code>goal: []</code>) form their own column group on the right, set off with a dashed border.</p>
   <div class="goal-matrix-card">
     <table>
       <thead>
@@ -87,7 +87,7 @@
       </tbody>
     </table>
   </div>
-  <p class="goal-matrix-legend">● = FR adressiert dieses Ziel · gestrichelte Spalten = Enabler (Plattform-Schiene, nicht aus Vision motiviert).</p>
+  <p class="goal-matrix-legend">● = FR addresses this goal · dashed columns = enablers (platform track, not motivated by the vision).</p>
 </section>
 {% else %}
 {{ empty_state("goals") }}

@@ -124,11 +124,11 @@ def test_fr_route_redirect_and_404():
         s["stem"] for e in bl["epics"] for f in e["features"] for s in f["stories"]
     )
 
-    # epic page: full text + breakdown + Product-Backlog breadcrumb (not "Suche")
+    # epic page: full text + breakdown + Product-Backlog breadcrumb (not "Search")
     resp = client.get(f"/functional-requirements/{epic_stem}")
     assert resp.status_code == 200, resp.status_code
     body = resp.get_data(as_text=True)
-    assert "Product Backlog" in body and "Aufschlüsselung" in body
+    assert "Product Backlog" in body and "Breakdown" in body
     assert "FR-002" in body                       # a child feature listed
 
     # story page: a leaf still resolves (full text, no breakdown diagram)

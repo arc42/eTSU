@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Product Backlog{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> Product Backlog</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> Product Backlog</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
 
 <h1 class="page-h1">Product Backlog</h1>
-<p class="lead">Ziele und die Epics, die zu ihnen beitragen (projiziert aus dem <code>goal:</code>-Feld jeder Anforderung, ADR-0018). Jedes Epic öffnet seine eigene Feature&nbsp;→&nbsp;Story-Aufschlüsselung.</p>
+<p class="lead">Goals and the epics that contribute to them, projected from each requirement's <code>goal:</code> field (ADR-0018). Each epic opens its own feature&nbsp;→&nbsp;story breakdown.</p>
 
 {% if diagram %}
 <figure class="goals-diagram">
@@ -24,12 +24,12 @@
       {% if e.priority %}<span class="badge badge-prio">{{ e.priority }}</span>{% endif %}
       {% if e.release %}<span class="badge">{{ e.release }}</span>{% endif %}
       {% if e.status %}<span class="badge">{{ e.status }}</span>{% endif %}
-      <span class="backlog-counter" title="S = Stories, F = Features (darunter)">{{ e.n_stories }}S · {{ e.n_features }}F</span>
+      <span class="backlog-counter" title="S = Stories, F = Features (below)">{{ e.n_stories }}S · {{ e.n_features }}F</span>
     </header>
     {% if e.n_features or e.n_stories %}
-    <p class="backlog-card-sub">{{ e.n_features }} Features · {{ e.n_stories }} Stories — Aufschlüsselung ansehen →</p>
+    <p class="backlog-card-sub">{{ e.n_features }} Features · {{ e.n_stories }} Stories — View breakdown →</p>
     {% else %}
-    <p class="backlog-card-sub backlog-empty">noch nicht heruntergebrochen →</p>
+    <p class="backlog-card-sub backlog-empty">not broken down yet →</p>
     {% endif %}
   </a>
   {% endfor %}
@@ -40,8 +40,8 @@
 
 {% if backlog.orphans %}
 <section class="backlog-card backlog-orphans">
-  <header class="backlog-card-head"><h2>Verwaiste Anforderungen</h2></header>
-  <p class="lead">Feature/Story ohne auflösbaren <code>parent:</code> — vermutlich ein Tippfehler im Wikilink.</p>
+  <header class="backlog-card-head"><h2>Orphaned requirements</h2></header>
+  <p class="lead">Feature/story with an unresolvable <code>parent:</code> — probably a typo in the wikilink.</p>
   <ul class="backlog-stories">
     {% for o in backlog.orphans %}
     <li>

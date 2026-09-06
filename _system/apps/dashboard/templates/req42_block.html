@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ block.title }} · req42{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> {{ block.num }} {{ block.title }}</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> {{ block.num }} {{ block.title }}</nav>{% endblock %}
 {% block content %}
 <h1 class="page-h1"><span class="req42-num">{{ block.num }}</span> {{ block.title }} <span class="count-pill">{{ total }}</span></h1>
-<p class="lead">{{ block.title }} — req42-Baustein {{ block.num }}.{% if block.note %} {{ block.note }}{% endif %}</p>
+<p class="lead">{{ block.title }} — req42 block {{ block.num }}.{% if block.note %} {{ block.note }}{% endif %}</p>
 
 {% if context_diagram %}
 <figure class="ctx-diagram">
-  <figcaption>Systemkontext · live projiziert aus Schnittstellen &amp; Datenflüssen (ADR-0013)</figcaption>
+  <figcaption>System context · projected live from interfaces &amp; data flows (ADR-0013)</figcaption>
   <pre class="mermaid">{{ context_diagram }}</pre>
 </figure>
 {% endif %}
@@ -17,10 +17,10 @@
   <thead>
     <tr>
       <th class="c-id">ID</th>
-      <th class="c-status">Typ</th>
-      <th>Titel</th>
+      <th class="c-status">Type</th>
+      <th>Title</th>
       <th class="c-status">Status</th>
-      <th class="c-rel" title="verknüpfte Wiki-Seiten">⤳</th>
+      <th class="c-rel" title="linked wiki pages">⤳</th>
     </tr>
   </thead>
   <tbody>
@@ -35,7 +35,7 @@
     {% endfor %}
   </tbody>
 </table>
-{% if not rows %}<p class="empty-hint">Noch keine Einträge in diesem req42-Baustein erfasst.</p>{% endif %}
+{% if not rows %}<p class="empty-hint">No entries captured in this req42 block yet.</p>{% endif %}
 </div>
 {% endblock %}
 {% block scripts %}{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}{% endblock %}

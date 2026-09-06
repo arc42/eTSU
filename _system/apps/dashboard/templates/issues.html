@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Issues{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Issues</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Issues</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Issues <span class="count-pill">{{ total }}</span></h1>
-<p class="lead">Offene Fragen, Widersprüche und Lücken — quer zu allen Inhaltstypen.</p>
+<p class="lead">Open questions, contradictions, and gaps — cutting across every content type.</p>
 
 {% if items %}
 <div class="filterbar" role="tablist">
-  <button class="fbtn active" data-filter="all">Alle <span class="fnum">{{ total }}</span></button>
-  <button class="fbtn" data-filter="open">Offen <span class="fnum">{{ open_count }}</span></button>
-  <button class="fbtn" data-filter="closed">Geschlossen <span class="fnum">{{ closed_count }}</span></button>
+  <button class="fbtn active" data-filter="all">All <span class="fnum">{{ total }}</span></button>
+  <button class="fbtn" data-filter="open">Open <span class="fnum">{{ open_count }}</span></button>
+  <button class="fbtn" data-filter="closed">Closed <span class="fnum">{{ closed_count }}</span></button>
 </div>
 
 <div class="table-card">
@@ -18,9 +18,9 @@
   <thead>
     <tr>
       <th class="c-id">ID</th>
-      <th>Titel</th>
-      <th class="c-status">Art</th>
-      <th class="c-status">Schwere</th>
+      <th>Title</th>
+      <th class="c-status">Kind</th>
+      <th class="c-status">Severity</th>
       <th class="c-status">Status</th>
     </tr>
   </thead>
@@ -36,11 +36,11 @@
     {% endfor %}
   </tbody>
 </table>
-<p class="empty-hint" id="empty-hint" hidden>Keine Issues in dieser Ansicht.</p>
+<p class="empty-hint" id="empty-hint" hidden>No issues in this view.</p>
 </div>
 
 <section id="issue-detail" class="detail-pane" aria-live="polite">
-  <p class="detail-placeholder">Ein Issue in der Liste anklicken, um die Details hier zu sehen.</p>
+  <p class="detail-placeholder">Click an issue in the list to see the details here.</p>
 </section>
 
 {# hidden store of pre-rendered issue bodies, pulled into the detail pane on click #}

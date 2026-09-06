@@ -125,7 +125,6 @@ code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-si
   gap: .55rem; flex-wrap: wrap; letter-spacing: -.01em; }
 .req42-num { font-variant-numeric: tabular-nums; color: var(--accent); font-weight: 700; }
 .req42-title { color: var(--ink); }
-.req42-en { color: var(--ink-dim); font-size: .82rem; font-weight: 400; }
 .req42-note { color: var(--ink-soft); font-size: .9rem; margin: .1rem 0 .6rem; }
 .req42-sample { list-style: none; margin: .3rem 0 .5rem; padding: 0; }
 .req42-sample li { display: flex; align-items: baseline; gap: .55rem;

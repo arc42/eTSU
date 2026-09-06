@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block title %}req42{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> req42</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> req42</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1 visually-hidden">req42</h1>
 <img class="req42-logo-head" src="{{ url_for('static', filename='req42-logo-white.png') }}"
      alt="req42" width="142" height="75">
-<p class="lead">Die zwölf Bausteine des req42-Frameworks — der methodische Rahmen dieses Wikis.
-  Jeder Block zeigt seine ersten Einträge; <em>Alle ansehen</em> führt zur vollständigen Liste.</p>
+<p class="lead">The twelve building blocks of the req42 framework — the methodological
+  backbone of this wiki. Each block shows its first few entries; <em>View all</em> leads
+  to the complete list.</p>
 
 {% for b in blocks %}
 <section class="req42-block{% if b.scope == 'out' %} is-out{% endif %}">
@@ -15,7 +16,7 @@
     <span class="req42-num">{{ b.num }}</span>
     <span class="req42-title">{{ b.title }}</span>
     {% if b.scope == 'out' %}
-      <span class="badge badge-demo">außerhalb Scope</span>
+      <span class="badge badge-demo">Out of scope</span>
     {% else %}
       <span class="count-pill">{{ b.count }}</span>
     {% endif %}
@@ -24,12 +25,12 @@
   {% if b.note %}<p class="req42-note">{{ b.note }}</p>{% endif %}
 
   {% if b.diagram %}
-    {% if b.claim %}<p class="req42-claim">„{{ b.claim }}"</p>{% endif %}
+    {% if b.claim %}<p class="req42-claim">"{{ b.claim }}"</p>{% endif %}
     <figure class="goals-diagram req42-diagram">
       <pre class="mermaid">{{ b.diagram }}</pre>
     </figure>
     {% if b.href %}
-    <a class="req42-all" href="{{ b.href }}">Vision & Ziele im Detail →</a>
+    <a class="req42-all" href="{{ b.href }}">Vision & goals in detail →</a>
     {% endif %}
   {% elif b.scope == 'in' and b.count > 0 %}
     <ul class="req42-sample">
@@ -42,7 +43,7 @@
       {% endfor %}
     </ul>
     {% if b.href %}
-    <a class="req42-all" href="{{ b.href }}">Alle {{ b.count }} ansehen →</a>
+    <a class="req42-all" href="{{ b.href }}">View all {{ b.count }} →</a>
     {% endif %}
   {% elif b.scope == 'in' and not b.note %}
     {{ empty_state("requirements") }}

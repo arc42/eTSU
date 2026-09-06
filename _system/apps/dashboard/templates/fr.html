@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ fr.id }} · {{ fr.title }}{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42/backlog">Product Backlog</a>{% for a in ancestors %} <span>/</span> <a href="/functional-requirements/{{ a.stem }}">{{ a.id }}</a>{% endfor %} <span>/</span> {{ fr.id }}</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42/backlog">Product Backlog</a>{% for a in ancestors %} <span>/</span> <a href="/functional-requirements/{{ a.stem }}">{{ a.id }}</a>{% endfor %} <span>/</span> {{ fr.id }}</nav>{% endblock %}
 {% block content %}
 
 <div class="detail-head">
@@ -10,7 +10,7 @@
   {% if fr.priority %}<span class="badge badge-prio">{{ fr.priority }}</span>{% endif %}
   {% if fr.release %}<span class="badge">{{ fr.release }}</span>{% endif %}
   {% if fr.stereotype in ('epic', 'feature') and (fr.n_stories or fr.n_features) %}
-  <span class="backlog-counter" title="S = Stories, F = Features (darunter)">{{ fr.n_stories }}S{% if fr.stereotype == 'epic' %} · {{ fr.n_features }}F{% endif %}</span>
+  <span class="backlog-counter" title="S = Stories, F = Features (below)">{{ fr.n_stories }}S{% if fr.stereotype == 'epic' %} · {{ fr.n_features }}F{% endif %}</span>
   {% endif %}
 </div>
 <h1 class="page-h1">{{ fr.title }}</h1>
@@ -25,7 +25,7 @@
 
 {% if fr.features or fr.direct_stories or fr.stories %}
 <section class="fr-breakdown">
-  <h2 class="fr-breakdown-head">Aufschlüsselung</h2>
+  <h2 class="fr-breakdown-head">Breakdown</h2>
 
   {% if fr.features or fr.direct_stories %}
   {# epic: feature blocks, each with its stories, plus any epic-direct stories #}
@@ -49,14 +49,14 @@
         {% endfor %}
       </ul>
       {% else %}
-      <p class="backlog-empty">noch keine Stories</p>
+      <p class="backlog-empty">no stories yet</p>
       {% endif %}
     </div>
     {% endfor %}
 
     {% if fr.direct_stories %}
     <div class="backlog-feature">
-      <div class="backlog-feature-head"><span class="stereo stereo-feature">direkt am Epic</span></div>
+      <div class="backlog-feature-head"><span class="stereo stereo-feature">Direct on epic</span></div>
       <ul class="backlog-stories">
         {% for s in fr.direct_stories %}
         <li>

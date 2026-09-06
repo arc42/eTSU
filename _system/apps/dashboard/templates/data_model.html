@@ -1,31 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Datenmodell · req42{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> 05 Unterstützende Modelle <span>/</span> Datenmodell</nav>{% endblock %}
+{% block title %}Data model · req42{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> 05 Supporting Models <span>/</span> Data model</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Datenmodell</h1>
-<p class="lead">Vollständige Projektion aller modellierten Entitäten als Klassendiagramm.
-  Kardinalitäten an den Enden, Pfeil zeigt zur „1"-Seite einer n:1-Beziehung;
-  bidirektionale Linien stehen für m:n. Quelle:
-  <code>wiki/data-models/</code> ({{ entities|length }} Entitäten).</p>
+<h1 class="page-h1">Data model</h1>
+<p class="lead">A class diagram of every modelled entity. Cardinalities sit at the line
+  ends; an arrow points to the "1" side of an n:1 relationship, and bidirectional
+  lines mean m:n. Source:
+  <code>wiki/data-models/</code> ({{ entities|length }} entities).</p>
 
 {% if diagram %}
 <figure class="goals-diagram dm-diagram">
   <pre class="mermaid">{{ diagram }}</pre>
 </figure>
 
-<p class="dm-note">Testphase: Beziehungen sind aktuell als Konstantenliste in
-  <code>app.py</code> gepflegt. Sobald die Beziehungs-Syntax in den DM-Bodies
-  stabil ist, ersetzt ein Live-Extraktor diese Liste.</p>
+<p class="dm-note">Test stage: relationships are currently maintained as a constant
+  list in <code>app.py</code>. Once the relationship syntax in DM page bodies
+  stabilizes, a live extractor will replace this list.</p>
 {% endif %}
 
 {% if entities %}
 <section class="dm-overview">
-  <h2>Entity-Typen im Überblick</h2>
-  <p class="lead">Schnellübersicht aller Entitäten mit ihren Attribut-Namen.
-    Sortierbar pro Spalte; ID und Name verlinken auf den Detailblock weiter unten.</p>
+  <h2>Entity types at a glance</h2>
+  <p class="lead">A quick overview of every entity with its attribute names.
+    Sortable per column; ID and name link down to the detail block below.</p>
 
-  <nav class="dm-toc" aria-label="Sprungmarken zu Entitäten">
+  <nav class="dm-toc" aria-label="Jump links to entities">
     {% for e in entities %}
     <a href="#{{ e.id }}"><code>{{ e.id }}</code> {{ e.title }}</a>
     {% endfor %}
@@ -36,8 +36,8 @@
     <thead>
       <tr>
         <th class="c-id sortable sort-asc" data-sort="text">ID</th>
-        <th class="dm-col-name sortable" data-sort="text">Entität</th>
-        <th class="dm-col-attrs sortable" data-sort="numeric" title="Anzahl der Attribute">Attribute</th>
+        <th class="dm-col-name sortable" data-sort="text">Entity</th>
+        <th class="dm-col-attrs sortable" data-sort="numeric" title="Number of attributes">Attributes</th>
       </tr>
     </thead>
     <tbody>
@@ -58,9 +58,9 @@
 </section>
 
 <section class="dm-catalog">
-  <h2>Entitäten im Detail</h2>
-  <p class="lead">Pro Entität: Zweck, Identität, Attribute, Beziehungen, Invarianten
-    und vertagte Punkte — extrahiert aus den jeweiligen DM-Seiten.</p>
+  <h2>Entities in detail</h2>
+  <p class="lead">Per entity: purpose, identity, attributes, relationships,
+    invariants, and deferred points — extracted from the respective DM pages.</p>
 
   {% for e in entities %}
   <article id="{{ e.id }}" class="dm-entity">

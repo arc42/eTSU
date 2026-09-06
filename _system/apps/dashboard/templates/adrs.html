@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% block title %}ADRs{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> ADRs</nav>{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> ADRs</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Architektur&shy;entscheidungen <span class="count-pill">{{ total }}</span></h1>
-<p class="lead">Strukturelle Entscheidungen über die Anforderungs-Wiki (Nygard-ADRs, <code>_system/adr/</code>).</p>
+<h1 class="page-h1">Architecture decisions <span class="count-pill">{{ total }}</span></h1>
+<p class="lead">Structural decisions about the requirements wiki (Nygard ADRs, <code>_system/adr/</code>).</p>
 
 {% if items %}
 <div class="toolbar">
-  <input type="search" id="adr-search" class="search-input" placeholder="ADRs durchsuchen — Titel, ID, Volltext…"
-         autocomplete="off" spellcheck="false" aria-label="ADRs durchsuchen">
+  <input type="search" id="adr-search" class="search-input" placeholder="Search ADRs — title, ID, full text…"
+         autocomplete="off" spellcheck="false" aria-label="Search ADRs">
   <div class="filterbar" role="tablist">
-    <button class="fbtn active" data-filter="all">Alle <span class="fnum">{{ total }}</span></button>
+    <button class="fbtn active" data-filter="all">All <span class="fnum">{{ total }}</span></button>
     {% for b in buckets %}
     <button class="fbtn" data-filter="{{ b.key }}">{{ b.label }} <span class="fnum">{{ b.count }}</span></button>
     {% endfor %}
@@ -23,8 +23,8 @@
   <thead>
     <tr>
       <th class="c-id">ID</th>
-      <th>Titel</th>
-      <th class="c-status">Datum</th>
+      <th>Title</th>
+      <th class="c-status">Date</th>
       <th class="c-status">Status</th>
     </tr>
   </thead>
@@ -39,11 +39,11 @@
     {% endfor %}
   </tbody>
 </table>
-<p class="empty-hint" id="empty-hint" hidden>Keine ADRs in dieser Ansicht.</p>
+<p class="empty-hint" id="empty-hint" hidden>No ADRs in this view.</p>
 </div>
 
 <section id="adr-detail" class="detail-pane" aria-live="polite">
-  <p class="detail-placeholder">Eine Entscheidung in der Liste anklicken, um den vollständigen ADR-Text hier zu sehen.</p>
+  <p class="detail-placeholder">Click a decision in the list to see the full ADR text here.</p>
 </section>
 
 {# hidden store of pre-rendered ADR bodies, pulled into the detail pane on click #}

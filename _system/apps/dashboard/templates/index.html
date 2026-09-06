@@ -19,13 +19,13 @@
     </div>
     <p class="tile-vision-claim">{{ t.claim }}</p>
     <div class="tile-head tile-head-second">
-      <h2>Ziele</h2>
+      <h2>Goals</h2>
     </div>
     <ul class="mini-list mini-list-vision">
       {% for o in t.objective_rows %}
       <li>
         <span class="ml-title"><code class="ml-id">{{ o.id }}</code> {{ o.title }}</span>
-        <span class="ml-count" title="abdeckende Epics">→{{ o.epics }}</span>
+        <span class="ml-count" title="covering epics">→{{ o.epics }}</span>
       </li>
       {% endfor %}
     </ul>
@@ -56,7 +56,7 @@
       {% for e in t.epic_rows %}
       <li>
         <span class="ml-title"><code class="ml-id">{{ e.id }}</code> {{ e.title }}</span>
-        <span class="ml-count{% if e.n_features == 0 and e.n_stories == 0 %} ml-out{% endif %}" title="S = Stories, F = Features (darunter)">{{ e.n_stories }}S&nbsp;·&nbsp;{{ e.n_features }}F</span>
+        <span class="ml-count{% if e.n_features == 0 and e.n_stories == 0 %} ml-out{% endif %}" title="S = Stories, F = Features (below)">{{ e.n_stories }}S&nbsp;·&nbsp;{{ e.n_features }}F</span>
       </li>
       {% endfor %}
     </ul>
@@ -83,10 +83,10 @@
         <span class="ml-title"><code class="ml-id">{{ r.id }}</code> {{ r.title }}</span>
         {% elif t.key == 'req42' %}
         <span class="ml-title{% if r.scope == 'out' %} ml-out{% endif %}"><code class="ml-id">{{ r.num }}</code> {{ r.title }}</span>
-        <span class="ml-count" title="Einträge in diesem Block">{% if r.scope == 'out' %}<span class="ml-out">—</span>{% else %}{{ r.count }}{% endif %}</span>
+        <span class="ml-count" title="entries in this block">{% if r.scope == 'out' %}<span class="ml-out">—</span>{% else %}{{ r.count }}{% endif %}</span>
         {% else %}
         <span class="ml-title">{{ r.title }}</span>
-        <span class="ml-count" title="verknüpfte Wiki-Seiten">{{ r.relations }}<span class="ml-rel">⤳</span></span>
+        <span class="ml-count" title="linked wiki pages">{{ r.relations }}<span class="ml-rel">⤳</span></span>
         {% endif %}
       </li>
       {% endfor %}
@@ -100,11 +100,11 @@
       {% else %}{{ empty_state(t.label|lower) }}
       {% endif %}
     {% elif not t.active %}
-    <p class="tile-empty">Noch nicht erfasst — folgt.</p>
+    <p class="tile-empty">Not yet captured — coming soon.</p>
     {% endif %}
     {% if t.links %}
     <div class="tile-ctas">{% for l in t.links %}<a class="tile-cta" href="{{ l.href }}">{{ l.label }} →</a>{% endfor %}</div>
-    {% elif t.href %}<span class="tile-cta">Details ansehen →</span>{% endif %}
+    {% elif t.href %}<span class="tile-cta">View details →</span>{% endif %}
   {% endset %}
 
   {% if t.search %}
@@ -114,11 +114,11 @@
         <h2>{{ t.label }}</h2>
       </div>
       <form class="tile-searchform" action="{{ t.href }}" method="get" role="search">
-        <input type="search" name="q" id="tile-search-input" class="search-input" placeholder="Alles durchsuchen…"
-               autocomplete="off" spellcheck="false" aria-label="Wiki durchsuchen">
+        <input type="search" name="q" id="tile-search-input" class="search-input" placeholder="Search everything…"
+               autocomplete="off" spellcheck="false" aria-label="Search the wiki">
       </form>
       <ul class="mini-list tile-search-preview" id="tile-search-preview" hidden></ul>
-      <a class="tile-cta" id="tile-search-all" href="{{ t.href }}">Alle Treffer ansehen →</a>
+      <a class="tile-cta" id="tile-search-all" href="{{ t.href }}">View all matches →</a>
     </div>
   {% elif t.links %}
     {# multiple CTAs → not a whole-tile anchor (no nested <a>); cf. search tile #}
@@ -150,7 +150,7 @@
     if (!q) { preview.hidden = true; preview.innerHTML = ''; return; }
     const hits = DATA.filter(r => r.key.includes(q)).slice(0, PREVIEW_MAX);
     if (!hits.length) {
-      preview.innerHTML = '<li class="ml-empty">Keine Treffer — Enter für Volltextsuche</li>';
+      preview.innerHTML = '<li class="ml-empty">No matches — press Enter for full-text search</li>';
     } else {
       preview.innerHTML = hits.map(r =>
         '<li><a class="ml-hit" href="' + r.url + '">' +

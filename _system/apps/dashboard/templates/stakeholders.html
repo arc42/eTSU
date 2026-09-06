@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Stakeholder{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Stakeholder</nav>{% endblock %}
-{% set lvl = {'high': 'hoch', 'medium': 'mittel', 'low': 'gering'} %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Stakeholder</nav>{% endblock %}
+{% set lvl = {'high': 'high', 'medium': 'medium', 'low': 'low'} %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Stakeholder <span class="count-pill">{{ total }} Personas</span></h1>
-<p class="lead">Vereinfachte Personas: Ziele, Anliegen, Einfluss und Interesse.</p>
+<h1 class="page-h1">Stakeholder <span class="count-pill">{{ total }} personas</span></h1>
+<p class="lead">Simplified personas: goals, concerns, influence, and interest.</p>
 
 {% if rows %}
 <div class="table-card">
@@ -14,9 +14,9 @@
     <tr>
       <th class="c-id">ID</th>
       <th class="c-term">Stakeholder</th>
-      <th class="c-def">Kurzprofil &amp; Bezüge</th>
-      <th class="c-status">Einfluss</th>
-      <th class="c-status">Interesse</th>
+      <th class="c-def">Snapshot &amp; relations</th>
+      <th class="c-status">Influence</th>
+      <th class="c-status">Interest</th>
       <th class="c-status">Status</th>
     </tr>
   </thead>
@@ -31,9 +31,9 @@
       <td class="c-def">
         <div class="stk-profile">{{ r.snapshot | safe }}</div>
         {% if r.rel_links %}
-        <div class="stk-bezuege" aria-label="Verweist auf">
+        <div class="stk-bezuege" aria-label="Links to">
           {% for it in r.rel_links %}<a class="bz bz-{{ it.type }}" href="{{ it.url }}" title="{{ it.id }} · {{ it.label }}">{{ it.label }}</a>{% endfor %}
-          {% if r.rel_more %}<a class="bz bz-more" href="/page/stakeholders/{{ r.stem }}" title="alle Bezüge auf der Detailseite">+{{ r.rel_more }}</a>{% endif %}
+          {% if r.rel_more %}<a class="bz bz-more" href="/page/stakeholders/{{ r.stem }}" title="all relations on the detail page">+{{ r.rel_more }}</a>{% endif %}
         </div>
         {% endif %}
       </td>

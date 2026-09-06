@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,26 +16,26 @@
   </main>
   <footer class="foot">
     <div class="foot-title">Live view · {{ system_name }} requirements wiki</div>
-    <div class="foot-sub">Daten zuletzt aktualisiert: {{ refreshed_at }} · nur lesend · Karpathy LLM-Wiki-Muster</div>
+    <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki pattern</div>
   </footer>
   {% block scripts %}{% endblock %}
   <script>
-  // Lebenszyklus: ein leichter Heartbeat hält den Server am Leben; verschwindet
-  // die Seite (Tab/Fenster zu), stoppt der Server von selbst. Kein gehaltener
-  // Stream, kein Button. Siehe app.py / ADR-0022.
+  // Lifecycle: a lightweight heartbeat keeps the server alive; when the page
+  // disappears (tab/window closed), the server stops itself. No held stream,
+  // no button. See app.py / ADR-0022.
   (function () {
-    var HEARTBEAT_MS = 20000;   // < Heartbeat-Schonfrist (90 s); auch ein gedrosselter
-                                // Hintergrund-Tab (~1 Ping/min) bleibt am Leben
+    var HEARTBEAT_MS = 20000;   // < heartbeat grace period (90s); even a throttled
+                                // background tab (~1 ping/min) stays alive
     function ping() {
       fetch("/ping", { method: "POST", keepalive: true }).catch(function () {});
     }
-    ping();                     // sofort beim Laden (hebt ein „/leaving" der Vorseite auf)
-    setTimeout(ping, 2500);     // „settle"-Ping gegen ein spät eintreffendes /leaving
+    ping();                     // immediately on load (cancels a "/leaving" from the previous page)
+    setTimeout(ping, 2500);     // "settle" ping against a late-arriving /leaving
     setInterval(ping, HEARTBEAT_MS);
 
-    // Beim Verschwinden der Seite (Tab/Fenster zu ODER Navigation) Bescheid geben:
-    // bei Navigation pingt die Folgeseite sofort wieder und hebt es auf; bei
-    // echtem Schließen stoppt der Server nach kurzer Frist (~5 s).
+    // Signal when the page disappears (tab/window closed OR navigation):
+    // on navigation, the next page pings again immediately and cancels it; on an
+    // actual close, the server stops after a short grace period (~5s).
     window.addEventListener("pagehide", function () {
       if (navigator.sendBeacon) { navigator.sendBeacon("/leaving"); }
     });
