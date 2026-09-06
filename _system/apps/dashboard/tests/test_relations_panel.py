@@ -2,11 +2,19 @@
 
     .venv/bin/python tests/test_relations_panel.py
 
-WIKI_DIR unset → app.py falls back to the repo's wiki/, so the real link graph
-is the oracle. Powers the detail-page 'Verweist auf' / 'Taucht auf in' section.
+WIKI_DIR points at tests/fixtures/wiki, a small neutral vault, so the suite is
+independent of whatever content this starter is filled with. Powers the
+detail-page 'Verweist auf' / 'Taucht auf in' section.
 """
+import os
 import sys
 from pathlib import Path
+
+_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "wiki"
+os.environ["WIKI_DIR"] = str(_FIXTURE)
+os.environ["ADR_DIR"] = str(_FIXTURE.parent / "adr")
+os.environ["DASH_STARTUP_GRACE"] = "3600"
+os.environ["DASH_HEARTBEAT_GRACE"] = "3600"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -19,7 +27,7 @@ def _flat(groups):
 
 def test_relations_panel_outbound_inbound_and_dedup():
     with app.app.test_request_context("/"):
-        rel = app.build_relations_panel("STK-009-offizieller")
+        rel = app.build_relations_panel("STK-001-librarian")
 
     out = _flat(rel["outbound"])
     inb = _flat(rel["inbound"])
@@ -29,11 +37,11 @@ def test_relations_panel_outbound_inbound_and_dedup():
     # a link never appears in both buckets (inbound excludes outbound)
     assert not (out_ids & inb_ids), out_ids & inb_ids
     # never links to itself
-    assert "STK-009" not in out_ids and "STK-009" not in inb_ids
+    assert "STK-001" not in out_ids and "STK-001" not in inb_ids
 
-    # outbound carries the glossary term + the concrete role stakeholders
-    assert "GLO-007" in out_ids, "glossary term Offizieller missing from outbound"
-    assert {"STK-002", "STK-003"} <= out_ids, "Kampf-/Punktrichter missing"
+    # outbound carries the glossary terms this stakeholder relates to
+    assert "GLO-003" in out_ids, "glossary term Member missing from outbound"
+    assert "GLO-002" in out_ids, "glossary term Loan missing from outbound"
     # inbound surfaces where the role is used (functional requirements)
     assert any(i.startswith("FR-") for i in inb_ids), "no FR backlinks"
 
@@ -50,7 +58,7 @@ def test_relations_panel_outbound_inbound_and_dedup():
     types = [g["type"] for g in rel["outbound"]]
     assert types == sorted(types, key=app._REL_TYPE_ORDER.index), types
 
-    print(f"OK: STK-009 → {len(out)} outbound, {len(inb)} inbound links")
+    print(f"OK: STK-001 → {len(out)} outbound, {len(inb)} inbound links")
 
 
 if __name__ == "__main__":

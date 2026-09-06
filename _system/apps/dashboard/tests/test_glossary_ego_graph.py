@@ -3,9 +3,19 @@
 The per-term ego snippet on a glossary detail page (ADR-0023): a 1-hop slice of
 build_glossary_graph() around one focal term. Run like the sibling test:
     .venv/bin/python tests/test_glossary_ego_graph.py
+
+WIKI_DIR points at tests/fixtures/wiki, a small neutral vault, so the suite is
+independent of whatever content this starter is filled with.
 """
+import os
 import sys
 from pathlib import Path
+
+_FIXTURE = Path(__file__).resolve().parent / "fixtures" / "wiki"
+os.environ["WIKI_DIR"] = str(_FIXTURE)
+os.environ["ADR_DIR"] = str(_FIXTURE.parent / "adr")
+os.environ["DASH_STARTUP_GRACE"] = "3600"
+os.environ["DASH_HEARTBEAT_GRACE"] = "3600"
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # import app.py
 
@@ -67,15 +77,18 @@ def test_ego_is_a_valid_1hop_slice():
     # a non-glossary / unknown stem yields no snippet
     assert app.build_glossary_ego_graph("does-not-exist") is None
 
-    # GLO-027 Familie: 0 glossary-internal edges, but its cross relations still surface
-    fam = app.build_glossary_ego_graph("GLO-027-familie")
-    assert fam is not None
-    assert not any(e["data"].get("cross") is False for e in fam["edges"]), \
-        "Familie has no GLO-GLO edge"
-    assert fam["layer_counts"], "Familie's STK/GOAL relations should give buttons"
+    # GLO-004-shelf: exactly one glossary-internal edge (to GLO-001-book), and no
+    # cross-type relations of its own — so, unlike the old GLO-027 special case,
+    # its ego graph offers no layer buttons at all.
+    shelf = app.build_glossary_ego_graph("GLO-004-shelf")
+    assert shelf is not None
+    glo_internal = [e for e in shelf["edges"] if e["data"].get("cross") is False]
+    assert len(glo_internal) == 1, "GLO-004-shelf should have exactly one GLO-GLO edge"
+    assert shelf["layer_counts"] == {}, \
+        "GLO-004-shelf has no cross-type relations, so no layer buttons"
 
     print(f"OK: ego graphs valid for {checked} GLO terms; "
-          f"Familie layers={fam['layer_counts']}")
+          f"GLO-004-shelf layers={shelf['layer_counts']}")
 
 
 if __name__ == "__main__":
