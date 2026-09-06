@@ -24,12 +24,12 @@ Keep the wiki consistent, current, and complete. Run periodically or on request.
   an Issue.
 - **Coverage gaps** — features with no stories/use-cases; stakeholders with no
   linked use-cases; use-cases with no acceptance path.
-- **Kontext-Kanten & Projektion** — die Kanten, aus denen das Kontextdiagramm
-  projiziert wird (`EIF.flows`, `STK.provides`/`receives`), sind die Single Source of
-  Truth (ADR-0013). Prüfe: jeder Flow nennt einen existierenden Partner/eine Rolle,
-  die Flüsse sind widerspruchsfrei (vgl. ISS-011), und `build_context_diagram()`
-  rendert valides mermaid. Drift gibt es konstruktionsbedingt keine (reine Projektion,
-  kein persistiertes Diagramm) — daher kein Redraw-Loop, nur dieser Konsistenz-Check.
+- **Context edges & projection** — the edges the context diagram is projected from
+  (`EIF.flows`, `STK.provides`/`receives`) are the single source of truth (ADR-0013).
+  Check: every flow names an existing partner/role, the flows are mutually
+  consistent, and `build_context_diagram()` renders valid mermaid. There is no
+  drift by construction (a pure projection, nothing persisted) — so this is a
+  consistency check only, not a redraw loop.
 - **Relationship / graph edges** — reciprocal `related:`, concept-identity links across
   types (e.g. `GLO-` term ⇄ `DM-` entity of the same slug), entity ⇄ import-format. This
   is a structural check over the edge graph; run the dedicated **`relations.md`** (the

@@ -35,7 +35,9 @@ hat keinen Parent). Zusätzliche frontmatter-Felder: `beneficiary:` (`[[STK-...]
 `horizon:` (leer → PAM, gefüllt → SMART-tauglich).
 
 Titel-Grammatik gemäß [[ADR-0015]]: **Substantivphrase mit klarem Outcome**
-(Goals benennen Ergebnisse, nicht Aktivitäten). Sprache DE ([[ADR-0005]]).
+(Goals benennen Ergebnisse, nicht Aktivitäten). Sprache: siehe ADR-0005 — zum
+Zeitpunkt dieses ADR (2026-05-28) Deutsch, seit der Neufassung vom 2026-09-06
+Englisch.
 
 Damit wächst die Typtabelle von **12 auf 13 Typen**.
 

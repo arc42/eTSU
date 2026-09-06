@@ -1,55 +1,55 @@
 ---
 id: GOAL-NNN
 type: goal
-title: <Name>           # Substantivphrase, Outcome-orientiert (z. B. „Echtzeit-Transparenz für Familien"), DE (ADR-0005)
+title: <Name>           # Noun phrase, outcome-oriented (e.g. "Real-time transparency for families"), EN (ADR-0005)
 status: draft           # draft | review | accepted | deprecated
 created: {{date}}
 updated: {{date}}
 sources: []
 related: []             # [[STK-...]], [[FR-...]], [[QR-...]], [[CON-...]]
 tags: [goal]
-stereotype: objective   # vision | objective  (vision = Dach-Narrativ; objective = PAM-Teilziel)
-parent: []              # [[GOAL-...]] — Vision hat keinen Parent; Teilziele zeigen auf die Vision
-beneficiary: []         # [[STK-...]] — wer den Vorteil hat (PAM „Advantage")
-metric:                 # ein einziger Indikator (PAM); leer bei Vision
-baseline:               # Ist-Wert, sobald erhoben/geschätzt — sonst leer
-target:                 # Soll-Wert (z. B. „≤ 50 %", „< 15 Min")
-horizon:                # Zeithorizont (z. B. „ab Saison 2027"); leer → noch PAM, gefüllt → [[SMART]]-tauglich
+stereotype: objective   # vision | objective  (vision = the overarching narrative; objective = a PAM sub-goal)
+parent: []              # [[GOAL-...]] — the vision has no parent; objectives point to the vision
+beneficiary: []         # [[STK-...]] — who gets the benefit (PAM "Advantage")
+metric:                 # a single indicator (PAM); empty for a vision
+baseline:               # current value, once measured/estimated — otherwise empty
+target:                 # target value (e.g. "≤ 50%", "< 15 min")
+horizon:                # time horizon (e.g. "from season 2027"); empty → still PAM, filled → [[SMART]]-ready
 ---
 
 # {{title}}
 
-<!-- Ein Typ, zwei Stereotypen — analog ADR-0012 (FR mit epic|feature|story).
-     Vision = Dach (genau ein GOAL pro System); Objectives = Teilziele unter der Vision.
-     Hierarchie via `parent:`-Wikilinks. Titel-Grammatik: Substantivphrase mit klarem
-     Outcome (ADR-0015). DE-Fachsprache (ADR-0005). -->
+<!-- One type, two stereotypes — mirrors ADR-0012 (FR with epic|feature|story).
+     Vision = the roof (exactly one GOAL per system); Objectives = sub-goals under
+     the vision. Hierarchy via `parent:` wikilinks. Title grammar: noun phrase with
+     a clear outcome (ADR-0015). English ubiquitous language (ADR-0005). -->
 
-## Vision  — when `stereotype: vision`   > Format nach Geoffrey Moore (Kontrast-Klausel optional)
+## Vision  — when `stereotype: vision`   > follows the Geoffrey Moore format (contrast clause optional)
 
-Für **<Zielgruppe>**, die **<Bedarf/Problem>**, ist **<System>** ein/eine
-**<Kategorie>**, das/die **<Schlüsselnutzen>**.
+For **<target group>** who **<need / problem>**, **<system>** is a
+**<category>** that **<key benefit>**.
 
-*Optional:* `Anders als <Alternative> <Differenzierung>.` — nur einsetzen, wenn
-Markt-Positionierung gegen konkrete Alternativen Teil der Vision ist. Für eine
-positive, einladende Vision **weglassen** (so gehandhabt in [[GOAL-001-aquarius]]).
+*Optional:* `Unlike <alternative>, <differentiator>.` — include only when
+market positioning against concrete alternatives is part of the vision; for a
+positive, inviting vision, **omit it**.
 
-**Teilziele.** siehe `parent:`-Backlinks (Objectives, die auf diese Vision zeigen).
+**Objectives.** see `parent:` backlinks (objectives that point to this vision).
 
-## Objective  — when `stereotype: objective`   > folgt [[PAM]]; promotion zu [[SMART]] sobald `horizon` gesetzt
+## Objective  — when `stereotype: objective`   > follows [[PAM]]; promotes to [[SMART]] once `horizon` is set
 
-- **Purpose.** <Ergebnis, keine Aktivität — was angestrebt wird>
-- **Advantage.** <für wen (siehe `beneficiary:`) welcher konkrete Vorteil — „so what?">
-- **Metric.** <der eine Indikator (siehe `metric:` / `baseline:` / `target:`)>
+- **Purpose.** <the outcome sought, not an activity>
+- **Advantage.** <for whom (see `beneficiary:`), what concrete benefit — "so what?">
+- **Metric.** <the one indicator (see `metric:` / `baseline:` / `target:`)>
 
-**Parent.** siehe `parent:` (üblicherweise die Vision).
+**Parent.** see `parent:` (usually the vision).
 
-## Wirkung
+## Impact
 
-- **Adressierte Stakeholder:** siehe `beneficiary:` (+ ggf. weitere unter `related:`).
-- **Bedient durch:** projiziert aus den **FR-Backlinks** (Obsidian-Backlink-Pane bzw. Dashboard-Coverage-Matrix). Jeder `[[FR-...]]`, der dieses Ziel im `goal:`-Feld führt, erscheint hier automatisch — **nicht** manuell pflegen (Projektions-Prinzip, ADR-0018).
+- **Addressed stakeholders:** see `beneficiary:` (plus any further ones under `related:`).
+- **Served by:** projected from the **FR backlinks** (Obsidian backlink pane / dashboard coverage matrix). Every `[[FR-...]]` that names this goal in its `goal:` field appears here automatically — **do not** maintain this by hand (projection principle, ADR-0018).
 
-> [!note] Offene Punkte
-> <fehlende Baseline, untestbare Metric, ungeklärter Zeithorizont → als [[ISS-...]] aufnehmen>
+> [!note] Open points
+> <missing baseline, untestable metric, unclear horizon → capture as [[ISS-...]]>
 
-<!-- Goals decken req42-Block 01 „Zielsetzung" ab (ADR-0016). Sie sind der Zielraum
-     (warum), nicht der Lösungsraum (wie); Letzteren tragen FR/QR/CON. -->
+<!-- Goals cover req42 block 01 "Business Goals" (ADR-0016). They are the goal
+     space (why), not the solution space (how); FR/QR/CON carry the latter. -->

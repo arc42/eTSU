@@ -25,7 +25,8 @@ goal: []              # [[GOAL-...]] one or more goals this item serves; [] = ex
      (`parent`), and a story map is just a projection over it ([[story-mapping]]) — hence
      order + priority + release. Title grammar (convention A, ADR-0015): epic/feature =
      noun phrase naming an outcome (e.g. „Saisonvorbereitung"); story = verb + object
-     (active goal, e.g. „Wettkampf absagen"). Avoid anglicisms (DE Fachsprache, ADR-0005). -->
+     (active goal, e.g. „Wettkampf absagen"). Title language: see ADR-0005 for this
+     wiki's ubiquitous-language decision. -->
 
 ## Story
 <!-- HEADING is stereotype-specific: for `stereotype: epic` rename it to

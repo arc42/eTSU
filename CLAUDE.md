@@ -30,9 +30,9 @@ recording an ADR. The thirteen types:
 | Type | Folder | Purpose |
 |------|--------|---------|
 | Glossary term | `wiki/glossary/` | Ubiquitous language. One canonical meaning per term, per bounded context. |
-| Goal | `wiki/goals/` | req42 Block 01 „Zielsetzung". One type, `stereotype: vision \| objective`; Vision = Dach-Narrativ, Objective = [[PAM]]-Teilziel mit `beneficiary`/`metric`/`baseline`/`target`/`horizon`; Hierarchie via `parent:`. ADR-0016. |
+| Goal | `wiki/goals/` | req42 Block 01 "Business Goals". One type, `stereotype: vision \| objective`; Vision = the overarching narrative, Objective = a [[PAM]] sub-goal with `beneficiary`/`metric`/`baseline`/`target`/`horizon`; hierarchy via `parent:`. ADR-0016. |
 | Stakeholder | `wiki/stakeholders/` | Simplified persona: goals, concerns, influence/interest. |
-| Context (scope) | `wiki/context/` | System boundary: context diagram (projected from edges, not stored — ADR-0013), in/out-of-scope (Abgrenzung), user roles ([[STK-...]]), external interfaces. req42 block 03; see ADR-0009. |
+| Context (scope) | `wiki/context/` | System boundary: context diagram (projected from edges, not stored — ADR-0013), in/out-of-scope (explicit non-goals), user roles ([[STK-...]]), external interfaces. req42 block 03; see ADR-0009. |
 | External interface | `wiki/external-interfaces/` | Real external **systems** only, one neighbour per node: `partner` + a `flows:` list (data/direction/format/trigger). Human-actor channels live as `provides:`/`receives:` on the [[STK-...]] stakeholder, not as EIF (ADR-0013). Referenced by the context node. |
 | Data model | `wiki/data-models/` | Entities, attributes, relationships, source-of-truth, bounded context. |
 | Activity model | `wiki/activity-models/` | Actor-driven process/workflow: trigger → steps → outcome. |
@@ -62,12 +62,13 @@ never block or silently rewrite. The human decides.
 
 ## Conventions
 
-- **Language**: Die Fachsprache für Aquarius ist **Deutsch** (ADR-0005). Every
-  requirement page — glossary, stakeholders, data/activity models, use cases,
-  stories, features, quality requirements, constraints, issues — is written in
-  German. You may converse and ask clarifying questions in English **or** German,
-  but all captured requirement content stays DE. `_system/` machinery and
-  `_system/anchors/` (method, not domain) may remain English.
+- **Language**: The ubiquitous language of this wiki is **English**
+  ([[0005-ubiquitous-language-english|ADR-0005]]). Every requirement page —
+  glossary, stakeholders, data/activity models, use cases, stories, features,
+  quality requirements, constraints, issues — is written in English. You may
+  converse and ask clarifying questions in **any language** the human prefers,
+  but all captured requirement content stays EN. `_system/` machinery and
+  `_system/anchors/` (method, not domain) are English too.
 - **Grill before ingest**: Every ingest is gated by a grilling pass. Before writing
   any page from a new source you **must** activate the `grill-requirements` skill
   to stress-test the material first. See `_system/workflows/ingest.md`.

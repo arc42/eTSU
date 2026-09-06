@@ -64,9 +64,10 @@ recreate them from `CLAUDE.md`'s schema), then write `CLAUDE.md` and `_system/`.
 
 ## Domain conventions
 
-- **Fachsprache is German** (ADR-0005). Write every requirement page in German;
-  converse/ask in English or German as suits the human, but capture content in DE.
-  `_system/anchors/` and machinery stay English.
+- **The ubiquitous language is English** ([[0005-ubiquitous-language-english|ADR-0005]]).
+  Write every requirement page in English; converse/ask in any language that suits
+  the human, but capture content in English. `_system/anchors/` and machinery stay
+  English too.
 - Glossary = DDD ubiquitous language; one canonical meaning per bounded context.
 - Quality requirements use ISO 25010 attributes + an ATAM scenario
   (source/stimulus/environment/response/**measure**). No measure ⇒ `testable: false`

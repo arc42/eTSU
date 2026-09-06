@@ -31,9 +31,10 @@ Ask the questions **one at a time**, waiting for feedback on each before continu
 If a question can be answered by exploring the wiki or the `raw/` sources, explore
 them instead of asking.
 
-**Language (ADR-0005):** Die Fachsprache ist Deutsch. You may grill and ask in
-English **or** German — whatever flows best with the human — but anything you write
-into the wiki (terms, requirements, Issues, ADRs) is captured **in German.**
+**Language ([[0005-ubiquitous-language-english|ADR-0005]]):** The ubiquitous
+language is English. You may grill and ask in **any language** — whatever flows
+best with the human — but anything you write into the wiki (terms, requirements,
+Issues, ADRs) is captured **in English.**
 
 ## Orient first
 

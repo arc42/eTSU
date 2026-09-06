@@ -12,8 +12,9 @@ gaps, and let decisions crystallise. Only once the grilling has settled the shar
 understanding do you proceed to the steps below. Do not skip this gate, even for
 sources that look obvious.
 
-**Language:** Die Fachsprache ist Deutsch (ADR-0005). You may grill and ask in
-English or German, but every page you write below is captured **in German.**
+**Language:** The ubiquitous language is English
+([[0005-ubiquitous-language-english|ADR-0005]]). You may grill and ask in any
+language, but every page you write below is captured **in English.**
 
 ## Steps
 

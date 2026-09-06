@@ -26,7 +26,9 @@ Nominalstil idiomatisch.
   Wettkampfanmeldung, Wettkampfdurchführung, Ergebnisauswertung, Systemadministration*).
 - **Story + Use-Case** → **Verb + Objekt** (aktives Ziel; z. B. *Wettkampf absagen,
   Versuch bewerten*).
-- **Anglizismen meiden** (Fachsprache DE, ADR-0005) — z. B. „Reporting" → „Ergebnisauswertung".
+- **Anglizismen meiden** (Domänensprache Deutsch, Stand ADR-0005 vom 2026-05-27;
+  seit dessen Neufassung am 2026-09-06 ist die Domänensprache Englisch, dieser
+  Punkt ist historisch) — z. B. „Reporting" → „Ergebnisauswertung".
 
 Durchsetzung bleibt **advisory** (wie alle Anchor-Standards): beim Ingest/Audit gegen die
 Namensregel prüfen, Abweichungen als `ISS-NNN` melden — nie blockieren oder still

@@ -20,7 +20,7 @@ the story implies. Phrase outcomes as **user-observable**, not implementation de
 
 ## Checklist (audit / grill)
 - [ ] Each criterion is observable and testable — no "works well" / "is fast" (that's a
-      [[quality-requirement|Qualitätsanforderung]] with a measure, not an AC).
+      [[quality-requirement|quality requirement]] with a measure, not an AC).
 - [ ] Happy path covered, plus at least the obvious alternate/error path.
 - [ ] Written from the outside (what the user/system observes), not how it's built.
 - [ ] Together they fully decide whether the story is satisfied.

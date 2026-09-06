@@ -17,4 +17,4 @@ ingested-pages: []      # [[...]] wiki pages this source touched
 
 <!-- Slim provenance record (ADR-0006): frontmatter + ONE summary line, in raw/sources/.
      No Summary/Key-takeaways/Provenance prose — narrative lives in _system/log.md. -->
-<One-line summary of what this source is. Narrative siehe `_system/log.md`.>
+<One-line summary of what this source is. Narrative lives in `_system/log.md`.>
