@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Vision & Ziele{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Vision & Ziele</nav>{% endblock %}
+{% block content %}
+
+<h1 class="page-h1">Vision & Ziele</h1>
+
+{% if diagram %}
+<figure class="goals-diagram">
+  <pre class="mermaid">{{ diagram }}</pre>
+</figure>
+{% endif %}
+
+<section id="{{ vision.id }}" class="goal-card goal-vision">
+  <header class="goal-card-head">
+    <code class="ml-id">{{ vision.id }}</code>
+    <h2>{{ vision.title }}</h2>
+    <span class="stereo stereo-vision">Vision</span>
+  </header>
+  <div class="goal-prose">{{ vision.html | safe }}</div>
+</section>
+
+{% for o in objectives %}
+<section id="{{ o.id }}" class="goal-card goal-objective">
+  <header class="goal-card-head">
+    <code class="ml-id">{{ o.id }}</code>
+    <h2>{{ o.title }}</h2>
+    <span class="stereo">Ziel</span>
+  </header>
+
+  <dl class="pam-fields">
+    <dt title="Angestrebtes Ergebnis (keine Aktivität) — was soll erreicht werden">Purpose</dt>
+    <dd{% if not o.purpose %} class="empty"{% endif %}>{{ o.purpose | safe or '—' }}</dd>
+    <dt title="Nutzen — für wen welcher konkrete Vorteil entsteht">Advantage</dt>
+    <dd{% if not o.advantage %} class="empty"{% endif %}>{{ o.advantage | safe or '—' }}</dd>
+    <dt title="Indikator (Metric) und Soll-Wert (Target) der Zielerreichung">Metric</dt>
+    <dd{% if not o.metric %} class="empty"{% endif %}>
+      {{ o.metric | safe or '—' }}{% if o.target %} <span class="pam-target">— Ziel: {{ o.target | safe }}</span>{% endif %}
+    </dd>
+    <dt title="Ist-Wert der Metric vor Beginn (Ausgangsbasis)">Baseline</dt>
+    <dd{% if not o.baseline %} class="empty"{% endif %}>{{ o.baseline | safe or '—' }}</dd>
+    <dt title="Wer hat den Vorteil — die adressierten Stakeholder">Beneficiary</dt>
+    <dd{% if not o.beneficiary %} class="empty"{% endif %}>
+      {% if o.beneficiary %}{{ o.beneficiary | join(' · ') }}{% else %}—{% endif %}
+    </dd>
+  </dl>
+
+  <div class="goal-drives">
+    <span class="goal-drives-label">treibt</span>
+    {% if o.epics %}
+      {% for fr in o.epics %}<a href="/functional-requirements/{{ fr.stem }}">{{ fr.id }} {{ fr.title }}</a>{% if not loop.last %} · {% endif %}{% endfor %}
+    {% else %}
+      <span class="goal-drives-empty">keine Epics verlinkt</span>
+    {% endif %}
+  </div>
+</section>
+{% endfor %}
+
+<section class="goal-matrix">
+  <h2>Goal-Coverage-Matrix</h2>
+  <p class="lead">Projektion aus dem <code>goal:</code>-Feld jeder FR (ADR-0018). Enabler (FR mit <code>goal: []</code>) als eigene Spaltengruppe rechts, gestrichelt abgesetzt.</p>
+  <div class="goal-matrix-card">
+    <table>
+      <thead>
+        <tr>
+          <th class="gm-corner">Goal</th>
+          {% for col in fr_cols %}
+          <th class="gm-th{% if col.enabler %} gm-enabler{% endif %}"
+              data-tooltip="{{ col.title }}{% if col.enabler %} (Enabler){% endif %}"
+              tabindex="0">{{ col.epic }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in matrix_rows %}
+        <tr>
+          <td class="gm-row-head"><code>{{ row.id }}</code>{{ row.title }}</td>
+          {% for cell in row.cells %}
+          <td{% if fr_cols[loop.index0].enabler %} class="gm-enabler"{% endif %}>
+            {% if cell %}<span class="gm-dot">●</span>{% else %}<span class="gm-empty">·</span>{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="goal-matrix-legend">● = FR adressiert dieses Ziel · gestrichelte Spalten = Enabler (Plattform-Schiene, nicht aus Vision motiviert).</p>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}
+{% endblock %}

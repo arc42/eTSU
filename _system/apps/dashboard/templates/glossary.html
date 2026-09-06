@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Glossar{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Glossar</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Glossar <span class="count-pill">{{ total }} Begriffe</span></h1>
+<p class="lead">Ubiquitäre Sprache der Kinderschwimmliga — eine kanonische Bedeutung je Begriff.</p>
+
+<div class="filterbar" role="tablist" id="glossary-sort">
+  <span class="fbar-label">Sortieren:</span>
+  <button class="fbtn active" data-sort="alpha">Alpha</button>
+  <button class="fbtn" data-sort="newest">Neueste</button>
+  <button class="fbtn" data-sort="oldest">Älteste</button>
+  <button class="fbtn" data-sort="relations">Vernetzung</button>
+</div>
+
+<div class="table-card">
+<table class="glossary">
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th class="c-term">Begriff</th>
+      <th class="c-def">Definition</th>
+      <th class="c-rel">Relationen</th>
+      <th class="c-status">Status</th>
+    </tr>
+  </thead>
+  <tbody id="glossary-body">
+    {% for r in rows %}
+    <tr data-title="{{ r.title|lower }}" data-created="{{ r.created }}" data-relations="{{ r.relations }}">
+      <td class="c-id"><code>{{ r.id }}</code></td>
+      <td class="c-term">
+        <a class="term term-link" href="/page/glossary/{{ r.stem }}">{{ r.title }}</a>
+        {% if r.assumption %}<span class="badge badge-assume" title="Definition ist eine unbestätigte Annahme">Annahme</span>{% endif %}
+        {% if r.aliases %}<span class="aliases">alias: {{ r.aliases | join(", ") }}</span>{% endif %}
+      </td>
+      <td class="c-def">{{ r.definition | safe }}</td>
+      <td class="c-rel"><span class="rel-pill">{{ r.relations }}</span></td>
+      <td class="c-status"><span class="status status-{{ r.status }}">{{ r.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<script>
+  const body = document.getElementById('glossary-body');
+  const sortButtons = document.querySelectorAll('#glossary-sort .fbtn');
+  const comparators = {
+    alpha:     (a, b) => a.dataset.title.localeCompare(b.dataset.title, 'de'),
+    newest:    (a, b) => b.dataset.created.localeCompare(a.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
+    oldest:    (a, b) => a.dataset.created.localeCompare(b.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
+    relations: (a, b) => (+b.dataset.relations) - (+a.dataset.relations) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
+  };
+  function sortBy(mode) {
+    Array.from(body.querySelectorAll('tr'))
+      .sort(comparators[mode])
+      .forEach(tr => body.appendChild(tr));
+  }
+  sortButtons.forEach(b => b.addEventListener('click', () => {
+    sortButtons.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    sortBy(b.dataset.sort);
+  }));
+</script>
+{% endblock %}

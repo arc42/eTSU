@@ -1,0 +1,20 @@
+services:
+  dashboard:
+    build: .
+    container_name: tsu-demo-dashboard
+    environment:
+      # timezone for the "last refreshed" footer
+      TZ: "${TZ:-Europe/Berlin}"
+    ports:
+      - "8080:8000"
+    volumes:
+      # The wiki layer, mounted read-only. WIKI_DIR is exported by dashboard.sh;
+      # the fallback resolves wiki/ relative to this compose file for direct use.
+      - "${WIKI_DIR:-../../../wiki}:/wiki:ro"
+      # ADRs live outside the wiki layer, in _system/adr/ — also read-only.
+      - "${ADR_DIR:-../../../_system/adr}:/adr:ro"
+    # No auto-restart: the dashboard is an on-demand viewer that stops itself
+    # (stop button or last-tab-closed) and must then stay down. A restart
+    # policy would fight the self-shutdown and bring the container back up.
+    # See ADR-0022.
+    restart: "no"

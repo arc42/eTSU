@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Product Backlog{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> Product Backlog</nav>{% endblock %}
+{% block content %}
+
+<h1 class="page-h1">Product Backlog</h1>
+<p class="lead">Ziele und die Epics, die zu ihnen beitragen (projiziert aus dem <code>goal:</code>-Feld jeder Anforderung, ADR-0018). Jedes Epic öffnet seine eigene Feature&nbsp;→&nbsp;Story-Aufschlüsselung.</p>
+
+{% if diagram %}
+<figure class="goals-diagram">
+  <pre class="mermaid">{{ diagram }}</pre>
+</figure>
+{% endif %}
+
+<div class="backlog-epics">
+  {% for e in backlog.epics %}
+  <a class="backlog-card backlog-card-link" href="/functional-requirements/{{ e.stem }}">
+    <header class="backlog-card-head">
+      <code class="ml-id">{{ e.id }}</code>
+      <h2>{{ e.title }}</h2>
+      <span class="stereo stereo-epic">Epic</span>
+      {% if e.priority %}<span class="badge badge-prio">{{ e.priority }}</span>{% endif %}
+      {% if e.release %}<span class="badge">{{ e.release }}</span>{% endif %}
+      {% if e.status %}<span class="badge">{{ e.status }}</span>{% endif %}
+      <span class="backlog-counter" title="S = Stories, F = Features (darunter)">{{ e.n_stories }}S · {{ e.n_features }}F</span>
+    </header>
+    {% if e.n_features or e.n_stories %}
+    <p class="backlog-card-sub">{{ e.n_features }} Features · {{ e.n_stories }} Stories — Aufschlüsselung ansehen →</p>
+    {% else %}
+    <p class="backlog-card-sub backlog-empty">noch nicht heruntergebrochen →</p>
+    {% endif %}
+  </a>
+  {% endfor %}
+</div>
+
+{% if backlog.orphans %}
+<section class="backlog-card backlog-orphans">
+  <header class="backlog-card-head"><h2>Verwaiste Anforderungen</h2></header>
+  <p class="lead">Feature/Story ohne auflösbaren <code>parent:</code> — vermutlich ein Tippfehler im Wikilink.</p>
+  <ul class="backlog-stories">
+    {% for o in backlog.orphans %}
+    <li>
+      <code class="ml-id">{{ o.id }}</code>
+      <a href="/functional-requirements/{{ o.stem }}">{{ o.title }}</a>
+      <span class="badge">{{ o.stereotype }}</span>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endblock %}
+{% block scripts %}{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}{% endblock %}

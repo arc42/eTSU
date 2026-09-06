@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block content %}
+<img class="hero-banner" src="{{ url_for('static', filename='aquarius-header-title.webp') }}"
+     alt="Aquarius – Anforderungen" width="1536" height="404">
+<p class="lead">Strukturierte Anforderungen der Kinderschwimmliga.</p>
+
+<section class="tiles">
+  {% for t in tiles %}
+  {% set inner %}
+    {% if t.key == 'vision' and t.active %}
+    <div class="tile-head">
+      <h2>{{ t.label }}</h2>
+    </div>
+    <p class="tile-vision-claim">{{ t.claim }}</p>
+    <div class="tile-head tile-head-second">
+      <h2>Ziele</h2>
+    </div>
+    <ul class="mini-list mini-list-vision">
+      {% for o in t.objective_rows %}
+      <li>
+        <span class="ml-title"><code class="ml-id">{{ o.id }}</code> {{ o.title }}</span>
+        <span class="ml-count" title="abdeckende Epics">→{{ o.epics }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% elif t.key == 'data-model' and t.active %}
+    <div class="tile-head">
+      <span class="tile-icon">{{ t.icon }}</span>
+      <h2>{{ t.label }}</h2>
+    </div>
+    <figure class="tile-mini-diagram">
+      <pre class="mermaid">{{ t.diagram }}</pre>
+    </figure>
+    {% if t.claim %}<p class="tile-dm-claim">{{ t.claim }}</p>{% endif %}
+    {% elif t.key == 'backlog' and t.active %}
+    <div class="tile-head">
+      <span class="tile-icon">{{ t.icon }}</span>
+      <h2>{{ t.label }}</h2>
+    </div>
+    <div class="tile-count">
+      <span class="num">{{ t.count }}</span>
+      <span class="unit">{{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</span>
+    </div>
+    <ul class="mini-list">
+      {% for e in t.epic_rows %}
+      <li>
+        <span class="ml-title"><code class="ml-id">{{ e.id }}</code> {{ e.title }}</span>
+        <span class="ml-count{% if e.n_features == 0 and e.n_stories == 0 %} ml-out{% endif %}" title="S = Stories, F = Features (darunter)">{{ e.n_stories }}S&nbsp;·&nbsp;{{ e.n_features }}F</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% elif t.logo %}
+    <img class="tile-logo" src="{{ url_for('static', filename=t.logo) }}" alt="{{ t.label }}">
+    <div class="tile-subcount">{{ t.count }} {{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</div>
+    {% else %}
+    <div class="tile-head">
+      <span class="tile-icon">{{ t.icon }}</span>
+      <h2>{{ t.label }}</h2>
+      {% if not t.active %}<span class="badge badge-demo">Demo</span>{% endif %}
+    </div>
+    <div class="tile-count">
+      <span class="num">{{ t.count }}</span>
+      <span class="unit">{{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</span>
+    </div>
+    {% endif %}
+    {% if t.rows %}
+    <ul class="mini-list">
+      {% for r in t.rows %}
+      <li>
+        {% if t.key == 'adrs' %}
+        <span class="ml-title"><code class="ml-id">{{ r.id }}</code> {{ r.title }}</span>
+        {% elif t.key == 'req42' %}
+        <span class="ml-title{% if r.scope == 'out' %} ml-out{% endif %}"><code class="ml-id">{{ r.num }}</code> {{ r.title }}</span>
+        <span class="ml-count" title="Einträge in diesem Block">{% if r.scope == 'out' %}<span class="ml-out">—</span>{% else %}{{ r.count }}{% endif %}</span>
+        {% else %}
+        <span class="ml-title">{{ r.title }}</span>
+        <span class="ml-count" title="verknüpfte Wiki-Seiten">{{ r.relations }}<span class="ml-rel">⤳</span></span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% elif not t.active %}
+    <p class="tile-empty">Noch nicht erfasst — folgt.</p>
+    {% endif %}
+    {% if t.links %}
+    <div class="tile-ctas">{% for l in t.links %}<a class="tile-cta" href="{{ l.href }}">{{ l.label }} →</a>{% endfor %}</div>
+    {% elif t.href %}<span class="tile-cta">Details ansehen →</span>{% endif %}
+  {% endset %}
+
+  {% if t.search %}
+    <div class="tile tile-search tile-{{ t.key }}">
+      <div class="tile-head">
+        <span class="tile-icon">{{ t.icon }}</span>
+        <h2>{{ t.label }}</h2>
+      </div>
+      <form class="tile-searchform" action="{{ t.href }}" method="get" role="search">
+        <input type="search" name="q" id="tile-search-input" class="search-input" placeholder="Alles durchsuchen…"
+               autocomplete="off" spellcheck="false" aria-label="Wiki durchsuchen">
+      </form>
+      <ul class="mini-list tile-search-preview" id="tile-search-preview" hidden></ul>
+      <a class="tile-cta" id="tile-search-all" href="{{ t.href }}">Alle Treffer ansehen →</a>
+    </div>
+  {% elif t.links %}
+    {# multiple CTAs → not a whole-tile anchor (no nested <a>); cf. search tile #}
+    <div class="tile tile-{{ t.key }}">{{ inner }}</div>
+  {% elif t.href %}
+    <a class="tile tile-link tile-{{ t.key }}" href="{{ t.href }}">{{ inner }}</a>
+  {% else %}
+    <div class="tile tile-muted tile-{{ t.key }}">{{ inner }}</div>
+  {% endif %}
+  {% endfor %}
+</section>
+
+<script id="search-index" type="application/json">{{ search_slim | tojson }}</script>
+<script>
+  // In-tile incremental preview: up to 5 title/id matches as the user types.
+  // (mermaid loader is injected via the scripts block below.)
+  // Vanilla substring filter — no lunr.js (full-text search lives on /search).
+  const DATA = JSON.parse(document.getElementById('search-index').textContent);
+  const input = document.getElementById('tile-search-input');
+  const preview = document.getElementById('tile-search-preview');
+  const allLink = document.getElementById('tile-search-all');
+  const PREVIEW_MAX = 5;
+
+  function esc(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    allLink.href = q ? '/search?q=' + encodeURIComponent(q) : '/search';
+    if (!q) { preview.hidden = true; preview.innerHTML = ''; return; }
+    const hits = DATA.filter(r => r.key.includes(q)).slice(0, PREVIEW_MAX);
+    if (!hits.length) {
+      preview.innerHTML = '<li class="ml-empty">Keine Treffer — Enter für Volltextsuche</li>';
+    } else {
+      preview.innerHTML = hits.map(r =>
+        '<li><a class="ml-hit" href="' + r.url + '">' +
+        '<code class="ml-id">' + esc(r.id) + '</code>' +
+        '<span class="ml-title">' + esc(r.title) + '</span>' +
+        '<span class="ml-type">' + esc(r.type) + '</span></a></li>'
+      ).join('');
+    }
+    preview.hidden = false;
+  });
+</script>
+{% endblock %}
+{% block scripts %}{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}{% endblock %}

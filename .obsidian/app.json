@@ -1,0 +1,13 @@
+{
+  "userIgnoreFilters": [
+    "_system/",
+    "_templates/",
+    "docs/",
+    "CLAUDE.md",
+    "README.md"
+  ],
+  "showUnsupportedFiles": false,
+  "spellcheck": false,
+  "defaultViewMode": "preview",
+  "livePreview": false
+}

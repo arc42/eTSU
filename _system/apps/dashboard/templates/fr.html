@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ fr.id }} · {{ fr.title }}{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42/backlog">Product Backlog</a>{% for a in ancestors %} <span>/</span> <a href="/functional-requirements/{{ a.stem }}">{{ a.id }}</a>{% endfor %} <span>/</span> {{ fr.id }}</nav>{% endblock %}
+{% block content %}
+
+<div class="detail-head">
+  <span class="stereo stereo-{{ fr.stereotype }}">{{ fr.stereotype|capitalize }}</span>
+  <code class="detail-id">{{ fr.id }}</code>
+  {% if fr.status %}<span class="status status-{{ fr.status }}">{{ fr.status }}</span>{% endif %}
+  {% if fr.priority %}<span class="badge badge-prio">{{ fr.priority }}</span>{% endif %}
+  {% if fr.release %}<span class="badge">{{ fr.release }}</span>{% endif %}
+  {% if fr.stereotype in ('epic', 'feature') and (fr.n_stories or fr.n_features) %}
+  <span class="backlog-counter" title="S = Stories, F = Features (darunter)">{{ fr.n_stories }}S{% if fr.stereotype == 'epic' %} · {{ fr.n_features }}F{% endif %}</span>
+  {% endif %}
+</div>
+<h1 class="page-h1">{{ fr.title }}</h1>
+
+{% if diagram %}
+<figure class="goals-diagram">
+  <pre class="mermaid">{{ diagram }}</pre>
+</figure>
+{% endif %}
+
+<article class="detail-pane">{{ body_html | safe }}</article>
+
+{% if fr.features or fr.direct_stories or fr.stories %}
+<section class="fr-breakdown">
+  <h2 class="fr-breakdown-head">Aufschlüsselung</h2>
+
+  {% if fr.features or fr.direct_stories %}
+  {# epic: feature blocks, each with its stories, plus any epic-direct stories #}
+  <div class="backlog-features">
+    {% for f in fr.features %}
+    <div class="backlog-feature">
+      <div class="backlog-feature-head">
+        <code class="ml-id">{{ f.id }}</code>
+        <a href="/functional-requirements/{{ f.stem }}">{{ f.title }}</a>
+        <span class="stereo stereo-feature">Feature</span>
+        {% if f.priority %}<span class="badge badge-prio">{{ f.priority }}</span>{% endif %}
+      </div>
+      {% if f.stories %}
+      <ul class="backlog-stories">
+        {% for s in f.stories %}
+        <li>
+          <code class="ml-id">{{ s.id }}</code>
+          <a href="/functional-requirements/{{ s.stem }}">{{ s.title }}</a>
+          {% if s.priority %}<span class="badge badge-prio">{{ s.priority }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="backlog-empty">noch keine Stories</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if fr.direct_stories %}
+    <div class="backlog-feature">
+      <div class="backlog-feature-head"><span class="stereo stereo-feature">direkt am Epic</span></div>
+      <ul class="backlog-stories">
+        {% for s in fr.direct_stories %}
+        <li>
+          <code class="ml-id">{{ s.id }}</code>
+          <a href="/functional-requirements/{{ s.stem }}">{{ s.title }}</a>
+          {% if s.priority %}<span class="badge badge-prio">{{ s.priority }}</span>{% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  {% elif fr.stories %}
+  {# feature: a flat list of its stories #}
+  <ul class="backlog-stories">
+    {% for s in fr.stories %}
+    <li>
+      <code class="ml-id">{{ s.id }}</code>
+      <a href="/functional-requirements/{{ s.stem }}">{{ s.title }}</a>
+      {% if s.priority %}<span class="badge badge-prio">{{ s.priority }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+
+{% endblock %}
+{% block scripts %}{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}{% endblock %}

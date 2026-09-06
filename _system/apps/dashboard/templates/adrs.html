@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}ADRs{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> ADRs</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Architektur&shy;entscheidungen <span class="count-pill">{{ total }}</span></h1>
+<p class="lead">Strukturelle Entscheidungen über die Anforderungs-Wiki (Nygard-ADRs, <code>_system/adr/</code>).</p>
+
+<div class="toolbar">
+  <input type="search" id="adr-search" class="search-input" placeholder="ADRs durchsuchen — Titel, ID, Volltext…"
+         autocomplete="off" spellcheck="false" aria-label="ADRs durchsuchen">
+  <div class="filterbar" role="tablist">
+    <button class="fbtn active" data-filter="all">Alle <span class="fnum">{{ total }}</span></button>
+    {% for b in buckets %}
+    <button class="fbtn" data-filter="{{ b.key }}">{{ b.label }} <span class="fnum">{{ b.count }}</span></button>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="table-card">
+<table class="data-table" id="adrs-table">
+  <thead>
+    <tr>
+      <th class="c-id">ID</th>
+      <th>Titel</th>
+      <th class="c-status">Datum</th>
+      <th class="c-status">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for a in items %}
+    <tr class="issue-row" data-id="{{ a.id }}" data-status="{{ a.status }}" tabindex="0">
+      <td class="c-id"><code>{{ a.id }}</code></td>
+      <td class="c-term"><span class="term">{{ a.title }}</span></td>
+      <td class="c-status">{{ a.date }}</td>
+      <td class="c-status"><span class="status status-{{ a.status }}" title="{{ a.status_raw }}">{{ a.status }}</span></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p class="empty-hint" id="empty-hint" hidden>Keine ADRs in dieser Ansicht.</p>
+</div>
+
+<section id="adr-detail" class="detail-pane" aria-live="polite">
+  <p class="detail-placeholder">Eine Entscheidung in der Liste anklicken, um den vollständigen ADR-Text hier zu sehen.</p>
+</section>
+
+{# hidden store of pre-rendered ADR bodies, pulled into the detail pane on click #}
+<div id="adr-store" hidden>
+  {% for a in items %}<div data-id="{{ a.id }}">{{ a.html | safe }}</div>{% endfor %}
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('.fbtn');
+  const rows = document.querySelectorAll('#adrs-table tbody tr');
+  const hint = document.getElementById('empty-hint');
+  const detail = document.getElementById('adr-detail');
+  const store = document.getElementById('adr-store');
+  const search = document.getElementById('adr-search');
+
+  const PRIMARY = ['accepted', 'rejected', 'deprecated'];
+  let activeFilter = 'all';
+  let query = '';
+
+  // Per-ADR searchable text: the visible row plus its rendered body from the
+  // hidden store, lower-cased once up front so input handling stays cheap.
+  const haystack = {};
+  rows.forEach(r => {
+    const body = store.querySelector('[data-id="' + r.dataset.id + '"]');
+    haystack[r.dataset.id] = (r.textContent + ' ' + (body ? body.textContent : '')).toLowerCase();
+  });
+
+  function matchesFilter(status) {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'other') return !PRIMARY.includes(status);
+    return status === activeFilter;
+  }
+
+  function apply() {
+    let shown = 0;
+    rows.forEach(r => {
+      const show = matchesFilter(r.dataset.status) &&
+                   (!query || haystack[r.dataset.id].includes(query));
+      r.hidden = !show;
+      if (show) shown++;
+    });
+    hint.hidden = shown !== 0;
+  }
+  buttons.forEach(b => b.addEventListener('click', () => {
+    buttons.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    activeFilter = b.dataset.filter;
+    apply();
+  }));
+  search.addEventListener('input', () => {
+    query = search.value.trim().toLowerCase();
+    apply();
+  });
+
+  function showDetail(row) {
+    rows.forEach(r => r.classList.remove('selected'));
+    row.classList.add('selected');
+    const src = store.querySelector('[data-id="' + row.dataset.id + '"]');
+    detail.innerHTML = src ? src.innerHTML : '';
+    detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  rows.forEach(r => {
+    r.addEventListener('click', () => showDetail(r));
+    r.addEventListener('keydown', e => { if (e.key === 'Enter') showDetail(r); });
+  });
+</script>
+{% endblock %}

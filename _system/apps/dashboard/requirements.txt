@@ -1,0 +1,5 @@
+Flask==3.0.3
+PyYAML==6.0.2
+Markdown==3.7
+gunicorn==23.0.0
+tzdata==2025.2

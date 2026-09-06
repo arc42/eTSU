@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Begriffsnetz{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/glossary">Glossar</a> <span>/</span> Begriffsnetz</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Begriffsnetz <span class="count-pill">{{ n_glo }} Begriffe</span></h1>
+<p class="lead">Die ubiquitäre Sprache als Netz — projiziert aus den <code>related:</code>-Kanten
+(ADR-0023). Standard: nur Glossarbegriffe. Blende benachbarte Typen schichtweise ein.
+Knoten frei ziehen — beim Loslassen rücken in <em>cola</em> nur die direkten Nachbarn zur
+Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes Antippen
+öffnet die Seite. <strong>Layout</strong> wählt die Anordnung (<em>cola</em> überlappungsfrei,
+<em>fcose</em> Feder); ein Klick auf das aktive Layout ordnet neu an.</p>
+
+<div class="graph-toolbar" id="graph-layers">
+  <span class="fbar-label">Erweitern:</span>
+  {% for L in named_layers %}
+  <button class="layer-btn layer-{{ L.key }}" data-layer="{{ L.key }}" aria-pressed="false">{{ L.label }} <span class="layer-n">{{ L.count }}</span></button>
+  {% endfor %}
+  {% if rest.count %}
+  <button class="layer-btn layer-REST" data-layer="{{ rest.types|join(',') }}" aria-pressed="false">Weitere <span class="layer-n">{{ rest.count }}</span></button>
+  {% endif %}
+  <button class="layer-btn layer-reset" id="graph-reset">Nur GLO</button>
+</div>
+
+<div class="graph-toolbar" id="graph-layout">
+  <span class="fbar-label">Layout:</span>
+  <button class="layer-btn lay-btn" data-lay="cola">cola</button>
+  <button class="layer-btn lay-btn" data-lay="fcose">fcose</button>
+</div>
+
+<div class="graph-legend">
+  <div class="lg-row"><span class="lg-label">Typ</span>
+    <span class="lg-item"><span class="lg-dot lg-GLO"></span>Begriff</span>
+    <span class="lg-item"><span class="lg-dot lg-DM"></span>Datenmodell</span>
+    <span class="lg-item"><span class="lg-dot lg-STK"></span>Stakeholder</span>
+    <span class="lg-item"><span class="lg-dot lg-EIF"></span>Schnittstelle</span>
+    <span class="lg-item"><span class="lg-dot lg-GOAL"></span>Ziel</span>
+    <span class="lg-item"><span class="lg-dot lg-REST"></span>Weitere</span>
+  </div>
+  <div class="lg-row"><span class="lg-label">Zustand (Begriffe)</span>
+    <span class="lg-item"><span class="lg-dot lg-state-agreed"></span>abgestimmt</span>
+    <span class="lg-item"><span class="lg-dot lg-state-draft"></span>Entwurf</span>
+    <span class="lg-item"><span class="lg-dot lg-state-deprecated"></span>veraltet</span>
+    <span class="lg-item"><span class="lg-dot lg-state-assume"></span>Annahme (gestrichelt)</span>
+  </div>
+</div>
+
+<div id="cy" class="graph-canvas" role="img" aria-label="Begriffsnetz des Glossars"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='vendor/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/layout-base.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cose-base.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cytoscape-fcose.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cola.min.js') }}"></script>
+<!-- WebCola's browser build exposes window.cola; cytoscape-cola's UMD reads
+     window.webcola at load time — bridge the name so the plugin gets the real
+     module and auto-registers the 'cola' layout cleanly. -->
+<script>window.webcola = window.webcola || window.cola;</script>
+<script src="{{ url_for('static', filename='vendor/cytoscape-cola.js') }}"></script>
+<script src="{{ url_for('static', filename='glossary-graph.js') }}"></script>
+<script id="graph-data" type="application/json">{{ graph | tojson }}</script>
+<script>
+(function () {
+  var data = JSON.parse(document.getElementById('graph-data').textContent);
+  if (!window.cytoscape) { console.error('cytoscape failed to load'); return; }
+  // Layout engines + STYLE come from the shared module (static/glossary-graph.js),
+  // so this full view and the per-term ego snippet share one source. Default engine:
+  // cola (non-overlap) → fcose (A/B) → builtin cose.
+  var reg = AQ_GLOSSARY_GRAPH.register(cytoscape);
+  var AVAIL = reg.avail, LAYOUT = reg.layout;
+
+  var cy = cytoscape({
+    container: document.getElementById('cy'),
+    elements: { nodes: data.nodes, edges: data.edges },
+    wheelSensitivity: 0.2,
+    style: AQ_GLOSSARY_GRAPH.STYLE,
+    layout: { name: 'preset' }
+  });
+
+  // randomize=true → fresh spread (initial); false → incremental relax from current
+  // positions (toggles). cola is FINITE: it settles and STOPS, so afterwards dragging a
+  // node moves only that node. Options live in the shared module (full-view params).
+  function layoutOpts(randomize) { return AQ_GLOSSARY_GRAPH.layoutOpts(LAYOUT, randomize); }
+  function fitVisible() {
+    cy.animate({ fit: { eles: cy.elements(':visible'), padding: 45 } }, { duration: 400 });
+  }
+  // One layout instance at a time; a new run stops the previous. cytoscape-cola attaches
+  // a drag handler ('grab'/'free'/'position') WHILE it runs and detaches it on its own
+  // tick loop — which can stop before detaching, leaking a handler that would reflow the
+  // whole graph on drag. So we strip those handlers both before each run and again once
+  // cola settles, leaving a plain single-node drag after the layout has stopped.
+  var running = null, tidying = false;
+  function runLayout(randomize) {
+    if (running) { try { running.stop(); } catch (e) {} }
+    cy.nodes().unlock(); tidying = false;   // drop any in-flight on-release tidy locks
+    cy.nodes().off('grab free position lock unlock');
+    running = cy.elements(':visible').layout(layoutOpts(randomize));
+    if (LAYOUT === 'cola') {
+      // cola has fit:false → frame once when it settles, and clear any lingering drag
+      // handler so post-settle dragging moves only the grabbed node.
+      running.one('layoutstop', function () {
+        cy.nodes().off('grab free position lock unlock');
+        fitVisible();
+      });
+    }
+    running.run();
+  }
+  function applyInitial() {
+    cy.batch(function () {
+      cy.nodes().filter(function (n) { return n.data('type') !== 'GLO'; }).addClass('hidden');
+      cy.edges().filter(function (e) { return !!e.data('cross'); }).addClass('hidden');
+    });
+  }
+
+  function showLayer(types) {
+    clearFocus(false);
+    // Seed each newly-revealed node next to a visible GLO neighbour (not at 0,0,
+    // where they would all stack and the layout could not pull them apart), then
+    // relax incrementally so the existing GLO layout stays put.
+    var seeded = 0;
+    types.forEach(function (t) {
+      cy.nodes('[type="' + t + '"]').filter('.hidden').forEach(function (n) {
+        var anchor = n.connectedEdges().connectedNodes('[type="GLO"]').filter(':visible').first();
+        if (anchor && anchor.nonempty()) {
+          var a = anchor.position(), ang = seeded * 0.7, r = 115;
+          n.position({ x: a.x + Math.cos(ang) * r, y: a.y + Math.sin(ang) * r });
+          seeded++;
+        }
+      });
+    });
+    cy.batch(function () {
+      types.forEach(function (t) {
+        cy.nodes('[type="' + t + '"]').removeClass('hidden');
+        cy.edges('[ntype="' + t + '"]').removeClass('hidden');
+      });
+    });
+    runLayout(false);
+  }
+  function hideLayer(types) {
+    clearFocus(false);
+    cy.batch(function () {
+      types.forEach(function (t) {
+        cy.nodes('[type="' + t + '"]').addClass('hidden');
+        cy.edges('[ntype="' + t + '"]').addClass('hidden');
+      });
+    });
+    runLayout(false);   // restart the sim on the reduced visible set (keeps positions)
+  }
+
+  document.querySelectorAll('#graph-layers .layer-btn[data-layer]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var on = btn.getAttribute('aria-pressed') !== 'true';
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      btn.classList.toggle('on', on);
+      (on ? showLayer : hideLayer)(btn.dataset.layer.split(','));
+    });
+  });
+  var reset = document.getElementById('graph-reset');
+  if (reset) reset.addEventListener('click', function () {
+    document.querySelectorAll('#graph-layers .layer-btn[data-layer]').forEach(function (b) {
+      b.setAttribute('aria-pressed', 'false'); b.classList.remove('on');
+    });
+    clearFocus(false); applyInitial(); runLayout(false);
+  });
+
+  // --- layout buttons (ADR-0023 amendment: cola vs fcose) --------------------
+  // Switching engines lays out fresh; clicking the ALREADY-active engine re-tidies from
+  // the current positions — the "neu anordnen" action that resolves overlaps you created
+  // by dragging, without reshuffling the whole net.
+  function setActiveLayoutBtn() {
+    document.querySelectorAll('#graph-layout .lay-btn').forEach(function (b) {
+      var on = b.dataset.lay === LAYOUT;
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.classList.toggle('on', on);
+    });
+  }
+  document.querySelectorAll('#graph-layout .lay-btn').forEach(function (b) {
+    if (!AVAIL[b.dataset.lay]) { b.disabled = true; b.title = b.dataset.lay + ' nicht geladen'; return; }
+    b.addEventListener('click', function () {
+      var same = (LAYOUT === b.dataset.lay);
+      LAYOUT = b.dataset.lay;
+      setActiveLayoutBtn();
+      clearFocus(false);
+      runLayout(!same);   // switch → fresh (randomize); re-click → tidy from current positions
+    });
+  });
+  setActiveLayoutBtn();
+
+  // --- focus interaction -----------------------------------------------------
+  // hover or tap highlights the node's neighbourhood and dims the rest; tapping the
+  // already-focused node opens its page. Highlight only — no node is ever moved, so the
+  // layout (auto or hand-arranged) stays exactly where it is.
+  var focusedId = null;
+  function highlight(node) {
+    cy.elements().addClass('faded');
+    var nb = node.closedNeighborhood().filter(':visible');
+    nb.removeClass('faded'); nb.edges().addClass('high');
+  }
+  function clearHighlight() { cy.elements().removeClass('faded'); cy.edges().removeClass('high'); }
+  function clearFocus() { focusedId = null; clearHighlight(); }
+  function focusNode(node) { focusedId = node.id(); highlight(node); }
+  cy.on('mouseover', 'node', function (e) { if (!focusedId) highlight(e.target); });
+  cy.on('mouseout', 'node', function () { if (!focusedId) clearHighlight(); });
+  cy.on('tap', 'node', function (e) {
+    var n = e.target;
+    if (focusedId === n.id()) { var u = n.data('url'); if (u) window.location = u; }
+    else { focusNode(n); }
+  });
+  cy.on('tap', function (e) { if (e.target === cy) clearFocus(true); });
+
+  // --- on-release tidy (cola only) -------------------------------------------
+  // Middle ground: a drag moves only the grabbed node; when you DROP it, just its direct
+  // neighbours — plus anything it now overlaps — shift to make room, while every other
+  // node stays frozen. So no stampede, but the local overlap a drop creates gets resolved.
+  // cola honours node.lock(): we lock everything except the movers, then a short cola pass
+  // nudges only them (the locked nodes still count for overlap, so movers avoid them too).
+  function tidyNeighbours(n) {
+    if (LAYOUT !== 'cola' || tidying) return;
+    var nbb = n.boundingBox();
+    var overlappers = cy.nodes(':visible').not(n).filter(function (m) {
+      var b = m.boundingBox();
+      return !(b.x2 < nbb.x1 || b.x1 > nbb.x2 || b.y2 < nbb.y1 || b.y1 > nbb.y2);
+    });
+    var movers = n.neighborhood('node').filter(':visible').not(n).union(overlappers);
+    if (movers.empty()) return;                     // nothing near it → leave as dropped
+    var frozen = cy.nodes(':visible').not(movers);  // dropped node + everything else stays
+    if (running) { try { running.stop(); } catch (e) {} }
+    tidying = true;
+    frozen.lock();
+    function done() {
+      if (!tidying) return;
+      frozen.unlock();
+      cy.nodes().off('grab free position lock unlock');
+      tidying = false;
+    }
+    running = cy.elements(':visible').layout({
+      name: 'cola', randomize: false, fit: false, infinite: false,
+      animate: true, animationDuration: 250, maxSimulationTime: 1500,
+      convergenceThreshold: 0.01, nodeDimensionsIncludeLabels: true,
+      avoidOverlap: true, handleDisconnected: false,
+      nodeSpacing: function () { return 16; }, edgeLength: 150
+    });
+    running.one('layoutstop', done);
+    running.run();
+    cy.nodes().off('grab free position lock unlock');   // tidy is automatic — no live drag-reflow
+    setTimeout(done, 2500);                             // safety: always release the locks
+  }
+  cy.on('dragfree', 'node', function (e) { tidyNeighbours(e.target); });
+
+  applyInitial();
+  runLayout(true);
+})();
+</script>
+{% endblock %}

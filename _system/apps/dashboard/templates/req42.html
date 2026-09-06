@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}req42{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> req42</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1 visually-hidden">req42</h1>
+<img class="req42-logo-head" src="{{ url_for('static', filename='req42-logo-white.png') }}"
+     alt="req42" width="142" height="75">
+<p class="lead">Die zwölf Bausteine des req42-Frameworks — der methodische Rahmen dieses Wikis.
+  Jeder Block zeigt seine ersten Einträge; <em>Alle ansehen</em> führt zur vollständigen Liste.</p>
+
+{% for b in blocks %}
+<section class="req42-block{% if b.scope == 'out' %} is-out{% endif %}">
+  <h2 class="req42-h1">
+    <span class="req42-num">{{ b.num }}</span>
+    <span class="req42-title">{{ b.title }}</span>
+    <span class="req42-en">{{ b.en }}</span>
+    {% if b.scope == 'out' %}
+      <span class="badge badge-demo">außerhalb Scope</span>
+    {% else %}
+      <span class="count-pill">{{ b.count }}</span>
+    {% endif %}
+  </h2>
+
+  {% if b.note %}<p class="req42-note">{{ b.note }}</p>{% endif %}
+
+  {% if b.diagram %}
+    {% if b.claim %}<p class="req42-claim">„{{ b.claim }}"</p>{% endif %}
+    <figure class="goals-diagram req42-diagram">
+      <pre class="mermaid">{{ b.diagram }}</pre>
+    </figure>
+    {% if b.href %}
+    <a class="req42-all" href="{{ b.href }}">Vision & Ziele im Detail →</a>
+    {% endif %}
+  {% elif b.scope == 'in' and b.count > 0 %}
+    <ul class="req42-sample">
+      {% for e in b.sample %}
+      <li>
+        <code class="ml-id">{{ e.id }}</code>
+        {% if e.href %}<a class="req42-entry" href="{{ e.href }}">{{ e.title }}</a>{% else %}<span class="req42-entry">{{ e.title }}</span>{% endif %}
+        <span class="req42-type">{{ e.type }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if b.href %}
+    <a class="req42-all" href="{{ b.href }}">Alle {{ b.count }} ansehen →</a>
+    {% endif %}
+  {% elif b.scope == 'in' and not b.note %}
+    <p class="req42-empty">Noch nicht erfasst — folgt.</p>
+  {% endif %}
+</section>
+{% endfor %}
+{% endblock %}
+
+{% block scripts %}
+{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}
+{% endblock %}

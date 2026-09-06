@@ -1,0 +1,18 @@
+<!-- mermaid.js, vendored for offline use (static/vendor/mermaid.min.js, ADR-0013/ISS-010).
+     The UMD build exposes globalThis.mermaid; classic <script> so no CDN at runtime. -->
+<script src="{{ url_for('static', filename='vendor/mermaid.min.js') }}"></script>
+<script>
+  (function () {
+    if (!window.mermaid) { console.error("mermaid failed to load"); return; }
+    mermaid.initialize({ startOnLoad: false, theme: "dark", flowchart: { useMaxWidth: true, curve: "basis" } });
+    // markdown renders ```mermaid as <pre><code class="language-mermaid">; lift it to a mermaid node
+    document.querySelectorAll("pre > code.language-mermaid").forEach(function (c) {
+      var pre = document.createElement("pre");
+      pre.className = "mermaid";
+      pre.textContent = c.textContent;
+      c.closest("pre").replaceWith(pre);
+    });
+    Promise.resolve(mermaid.run({ querySelector: ".mermaid" }))
+      .catch(function (e) { console.error("mermaid render failed", e); });
+  })();
+</script>

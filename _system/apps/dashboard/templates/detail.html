@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ id }} · {{ title }}{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="{{ crumb_href }}">{{ crumb }}</a> <span>/</span> {{ id }}</nav>{% endblock %}
+{% block content %}
+<div class="detail-head">
+  <span class="badge kind-badge">{{ kind }}</span>
+  <code class="detail-id">{{ id }}</code>
+  {% if status %}<span class="status status-{{ status }}">{{ status }}</span>{% endif %}
+</div>
+<h1 class="page-h1">{{ title }}</h1>
+<p class="detail-meta">
+  {% if created %}<span>angelegt {{ created }}</span>{% endif %}
+  {% if updated and updated != '—' %}<span>· aktualisiert {{ updated }}</span>{% endif %}
+  {% if tags %}<span>· {% for t in tags %}<span class="tag-chip">{{ t }}</span>{% endfor %}</span>{% endif %}
+</p>
+
+{% if context_diagram %}
+<figure class="ctx-diagram">
+  <figcaption>Systemkontext · live projiziert aus Schnittstellen &amp; Datenflüssen (ADR-0013)</figcaption>
+  <pre class="mermaid">{{ context_diagram }}</pre>
+</figure>
+{% endif %}
+
+{% if ego_graph %}
+<figure class="glo-ego">
+  <figcaption>
+    <span>Begriffsnetz · <strong>{{ title }}</strong> und direkte Nachbarn (ADR-0023)</span>
+    <a class="ego-full" href="/graph/glossary">ganzes Netz →</a>
+  </figcaption>
+  {% if ego_layers %}
+  <div class="graph-toolbar" id="ego-layers">
+    <span class="fbar-label">Erweitern:</span>
+    {% for L in ego_layers %}
+    <button class="layer-btn layer-{{ L.key }}" data-layer="{{ L.key }}" aria-pressed="false">{{ L.label }} <span class="layer-n">{{ L.count }}</span></button>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div id="ego-cy" class="ego-canvas" role="img" aria-label="Begriffsnetz rund um {{ title }}"></div>
+</figure>
+{% endif %}
+
+<article class="detail-pane">{{ body_html | safe }}</article>
+
+{% if relations and (relations.outbound or relations.inbound) %}
+<nav class="detail-relations" aria-label="Beziehungen">
+  {% if relations.outbound %}
+  <section class="rel-block">
+    <h2 class="rel-h">Verweist auf</h2>
+    {% for grp in relations.outbound %}
+    <div class="rel-group">
+      <span class="rel-type">{{ grp.label }}</span>
+      <ul>{% for it in grp.links %}<li><a class="wl" href="{{ it.url }}"><code>{{ it.id }}</code> {{ it.label }}</a></li>{% endfor %}</ul>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+  {% if relations.inbound %}
+  <section class="rel-block">
+    <h2 class="rel-h">Taucht auf in</h2>
+    {% for grp in relations.inbound %}
+    <div class="rel-group">
+      <span class="rel-type">{{ grp.label }}</span>
+      <ul>{% for it in grp.links %}<li><a class="wl" href="{{ it.url }}"><code>{{ it.id }}</code> {{ it.label }}</a></li>{% endfor %}</ul>
+    </div>
+    {% endfor %}
+  </section>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}
+{% if ego_graph %}
+<script src="{{ url_for('static', filename='vendor/cytoscape.min.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/layout-base.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cose-base.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cytoscape-fcose.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/cola.min.js') }}"></script>
+<script>window.webcola = window.webcola || window.cola;</script>
+<script src="{{ url_for('static', filename='vendor/cytoscape-cola.js') }}"></script>
+<script src="{{ url_for('static', filename='glossary-graph.js') }}"></script>
+<script id="ego-data" type="application/json">{{ ego_graph | tojson }}</script>
+<script>
+  (function () {
+    if (!window.AQ_GLOSSARY_GRAPH) return;
+    AQ_GLOSSARY_GRAPH.mountEgo({
+      container: document.getElementById('ego-cy'),
+      data: JSON.parse(document.getElementById('ego-data').textContent),
+      layersSelector: '#ego-layers'
+    });
+  })();
+</script>
+{% endif %}
+{% endblock %}

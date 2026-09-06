@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Suche{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Suche</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Suche <span class="count-pill">{{ total }}</span></h1>
+<p class="lead">Volltextsuche über alle Inhalte — Begriffe, Stakeholder, Issues, ADRs und mehr.</p>
+
+<div class="toolbar">
+  <input type="search" id="search-box" class="search-input" placeholder="Suchbegriff eingeben…"
+         autocomplete="off" spellcheck="false" autofocus aria-label="Wiki durchsuchen">
+  <div class="filterbar" role="tablist">
+    <button class="fbtn active" data-type="all">Alle <span class="fnum">{{ total }}</span></button>
+    {% for type, count in facets %}
+    <button class="fbtn" data-type="{{ type }}">{{ type }} <span class="fnum">{{ count }}</span></button>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="table-card">
+  <ul class="search-results" id="search-results">
+    {% for r in records %}
+    <li class="sresult" data-type="{{ r.type }}" data-id="{{ r.id|lower }}" data-title="{{ r.title|lower }}" data-text="{{ r.text }}" hidden>
+      <a class="sresult-link" href="{{ r.url }}">
+        <span class="badge kind-badge">{{ r.type }}</span>
+        <code class="sresult-id">{{ r.id }}</code>
+        <span class="sresult-title">{{ r.title }}</span>
+        {% if r.status %}<span class="status status-{{ r.status }}">{{ r.status }}</span>{% endif %}
+        <span class="sresult-score" title="Relevanz" hidden>
+          <span class="score-track"><span class="score-fill"></span></span>
+          <span class="score-pct"></span>
+        </span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  <p class="empty-hint" id="search-empty" hidden>Keine Treffer.</p>
+  <p class="search-hint" id="search-prompt">Tippen, um zu suchen — oder einen Typ-Filter wählen.</p>
+</div>
+
+<script>
+  const box = document.getElementById('search-box');
+  const list = document.getElementById('search-results');
+  const allResults = Array.from(list.querySelectorAll('.sresult'));  // original order
+  const buttons = document.querySelectorAll('.fbtn');
+  const empty = document.getElementById('search-empty');
+  const prompt = document.getElementById('search-prompt');
+  let activeType = 'all';
+  let query = '';
+
+  function countOcc(hay, needle) {
+    let n = 0, i = 0;
+    while ((i = hay.indexOf(needle, i)) !== -1) { n++; i += needle.length; }
+    return n;
+  }
+
+  // Relevance as a 0–100 percentage, decided by *where* the query matched: the
+  // strongest tier wins, so a title hit can never be out-scored by a body hit
+  // and the number means the same thing for every query (not a per-query
+  // normalisation). Body-only matches scale with term frequency. Every query
+  // word must appear (AND). No lunr — weighted substring matching, plenty here.
+  function relevance(el, tokens, q) {
+    const title = el.dataset.title, id = el.dataset.id;
+    const type = el.dataset.type.toLowerCase(), text = el.dataset.text;
+    if (!tokens.every(t => (text + ' ' + type).includes(t))) return 0;
+    if (title === q) return 100;                                 // exact title
+    if (title.startsWith(q)) return 92;                          // title prefix
+    if (title.includes(q)) return 85;                            // phrase in title
+    if (tokens.every(t => title.includes(t))) return 78;         // all words in title
+    if (tokens.some(t => title.includes(t))) return 68;          // some word in title
+    if (id.includes(q) || tokens.every(t => id.includes(t))) return 62;  // id match
+    if (type.includes(q)) return 55;                             // category match
+    const freq = tokens.reduce((a, t) => a + countOcc(text, t), 0);  // content only
+    return 32 + Math.min(freq, 11) * 2;                          // 34–54
+  }
+
+  function setScore(el, pct) {
+    const box = el.querySelector('.sresult-score');
+    box.querySelector('.score-fill').style.width = pct + '%';
+    box.querySelector('.score-pct').textContent = pct + '%';
+    box.dataset.band = pct >= 80 ? 'high' : pct >= 55 ? 'mid' : 'low';
+    box.hidden = false;
+  }
+
+  function apply() {
+    const browsing = query !== '' || activeType !== 'all';
+    let shown = 0;
+
+    if (query) {
+      const tokens = query.split(/\s+/).filter(Boolean);
+      const scored = [];
+      allResults.forEach(el => {
+        const typeOK = activeType === 'all' || el.dataset.type === activeType;
+        const r = typeOK ? relevance(el, tokens, query) : 0;
+        if (r > 0) {
+          const freq = tokens.reduce((a, t) => a + countOcc(el.dataset.text, t), 0);
+          scored.push([r, freq, el]);
+        } else { el.hidden = true; }
+      });
+      // rank by relevance, then by body frequency, then alphabetically
+      scored.sort((a, b) => b[0] - a[0] || b[1] - a[1]
+        || a[2].dataset.title.localeCompare(b[2].dataset.title, 'de'));
+      scored.forEach(([r, , el]) => { el.hidden = false; setScore(el, r); list.appendChild(el); shown++; });
+    } else if (browsing) {                               // facet browse, no query
+      allResults.forEach(el => {
+        const show = activeType === 'all' || el.dataset.type === activeType;
+        el.hidden = !show;
+        if (show) { el.querySelector('.sresult-score').hidden = true; list.appendChild(el); shown++; }
+      });
+    } else {
+      allResults.forEach(el => { el.hidden = true; });
+    }
+
+    prompt.hidden = browsing;
+    empty.hidden = !(browsing && shown === 0);
+  }
+
+  buttons.forEach(b => b.addEventListener('click', () => {
+    buttons.forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    activeType = b.dataset.type;
+    apply();
+  }));
+  box.addEventListener('input', () => { query = box.value.trim().toLowerCase(); apply(); });
+
+  // prefill from ?q= (when arriving from the home search tile)
+  const q = new URLSearchParams(location.search).get('q');
+  if (q) { box.value = q; query = q.trim().toLowerCase(); }
+  apply();
+</script>
+{% endblock %}

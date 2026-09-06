@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Datenmodell · req42{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> 05 Unterstützende Modelle <span>/</span> Datenmodell</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Datenmodell</h1>
+<p class="lead">Vollständige Projektion aller modellierten Entitäten als Klassendiagramm.
+  Kardinalitäten an den Enden, Pfeil zeigt zur „1"-Seite einer n:1-Beziehung;
+  bidirektionale Linien stehen für m:n. Quelle:
+  <code>wiki/data-models/</code> ({{ entities|length }} Entitäten).</p>
+
+<figure class="goals-diagram dm-diagram">
+  <pre class="mermaid">{{ diagram }}</pre>
+</figure>
+
+<p class="dm-note">Testphase: Beziehungen sind aktuell als Konstantenliste in
+  <code>app.py</code> gepflegt. Sobald die Beziehungs-Syntax in den DM-Bodies
+  stabil ist, ersetzt ein Live-Extraktor diese Liste.</p>
+
+<section class="dm-overview">
+  <h2>Entity-Typen im Überblick</h2>
+  <p class="lead">Schnellübersicht aller Entitäten mit ihren Attribut-Namen.
+    Sortierbar pro Spalte; ID und Name verlinken auf den Detailblock weiter unten.</p>
+
+  <nav class="dm-toc" aria-label="Sprungmarken zu Entitäten">
+    {% for e in entities %}
+    <a href="#{{ e.id }}"><code>{{ e.id }}</code> {{ e.title }}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="table-card dm-summary">
+  <table class="data-table dm-summary-table" id="dm-summary-table">
+    <thead>
+      <tr>
+        <th class="c-id sortable sort-asc" data-sort="text">ID</th>
+        <th class="dm-col-name sortable" data-sort="text">Entität</th>
+        <th class="dm-col-attrs sortable" data-sort="numeric" title="Anzahl der Attribute">Attribute</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in entities %}
+      <tr>
+        <td class="c-id" data-sort-value="{{ e.id }}"><a href="#{{ e.id }}" class="dm-jump"><code>{{ e.id }}</code></a></td>
+        <td class="dm-col-name" data-sort-value="{{ e.title|lower }}"><a href="#{{ e.id }}" class="dm-jump"><span class="term">{{ e.title }}</span></a>{% if e.stereotype %} <span class="dm-stereo-inline">{{ e.stereotype }}</span>{% endif %}</td>
+        <td class="dm-col-attrs" data-sort-value="{{ e.attributes|length }}">
+          {% if e.attributes %}
+            {% for a in e.attributes %}<code>{{ a }}</code>{% if not loop.last %}, {% endif %}{% endfor %}
+          {% else %}<span class="muted">—</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section class="dm-catalog">
+  <h2>Entitäten im Detail</h2>
+  <p class="lead">Pro Entität: Zweck, Identität, Attribute, Beziehungen, Invarianten
+    und vertagte Punkte — extrahiert aus den jeweiligen DM-Seiten.</p>
+
+  {% for e in entities %}
+  <article id="{{ e.id }}" class="dm-entity">
+    <header class="dm-entity-head">
+      <code class="ml-id">{{ e.id }}</code>
+      <h3>{{ e.title }}</h3>
+      {% if e.stereotype %}<span class="stereo">{{ e.stereotype }}</span>{% endif %}
+      {% if e.source_of_truth and 'aquarius' not in e.source_of_truth.lower() %}
+      <span class="dm-sot" title="Source of Truth">SoT: {{ e.source_of_truth }}</span>
+      {% endif %}
+    </header>
+
+    {% for label, html in e.sections %}
+    {% if html %}
+    <div class="dm-section">
+      <h4 class="dm-section-label">{{ label }}</h4>
+      <div class="dm-section-body">{{ html | safe }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    {% if e.notes %}
+    <div class="dm-notes">
+      {% for n in e.notes %}
+      <details class="dm-note-block">
+        <summary>{{ n.title }}</summary>
+        <div class="dm-section-body">{{ n.html | safe }}</div>
+      </details>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </article>
+  {% endfor %}
+</section>
+<script>
+  // sortable headers on the entity-overview table: click a th[data-sort]
+  // to sort ascending; click again to flip. data-sort="numeric" sorts by
+  // numeric value, default is locale-aware text sort. Per-cell sort key
+  // comes from data-sort-value if set, else the cell's textContent.
+  (function () {
+    const table = document.getElementById('dm-summary-table');
+    if (!table) return;
+    const ths = table.querySelectorAll('th.sortable');
+    ths.forEach(th => th.addEventListener('click', () => {
+      const tbody = table.tBodies[0];
+      const idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+      const numeric = th.dataset.sort === 'numeric';
+      const asc = !th.classList.contains('sort-asc');
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const key = td => (td.dataset.sortValue !== undefined ? td.dataset.sortValue : td.textContent).trim();
+      rows.sort((a, b) => {
+        const av = key(a.children[idx]); const bv = key(b.children[idx]);
+        if (numeric) return asc ? (Number(av) - Number(bv)) : (Number(bv) - Number(av));
+        return asc ? av.localeCompare(bv, 'de') : bv.localeCompare(av, 'de');
+      });
+      ths.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+      th.classList.add(asc ? 'sort-asc' : 'sort-desc');
+      rows.forEach(r => tbody.appendChild(r));
+    }));
+  })();
+</script>
+{% endblock %}
+{% block scripts %}{% if needs_mermaid %}{% include "_mermaid.html" %}{% endif %}{% endblock %}
