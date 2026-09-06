@@ -21,6 +21,7 @@ URL="http://localhost:8080"
 # Absolute paths to the mounted layers, consumed by compose.yaml.
 export WIKI_DIR="$ROOT/wiki"
 export ADR_DIR="$ROOT/_system/adr"
+export CONFIG_FILE="$ROOT/_system/wiki.yaml"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "✗ Docker ist nicht installiert oder nicht im PATH." >&2

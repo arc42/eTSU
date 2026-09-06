@@ -1,0 +1,5 @@
+# Project identity for this requirements wiki.
+# Filled in during bootstrap (_system/workflows/bootstrap.md). While blank the
+# dashboard shows neutral defaults.
+system_name: ""      # e.g. "Bookshelf" — the system whose requirements this vault holds
+tagline: ""          # one line shown under the hero, e.g. "Lending, tracked"

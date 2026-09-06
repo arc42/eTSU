@@ -5,6 +5,7 @@ services:
     environment:
       # timezone for the "last refreshed" footer
       TZ: "${TZ:-Europe/Berlin}"
+      WIKI_CONFIG: "/config/wiki.yaml"
     ports:
       - "8080:8000"
     volumes:
@@ -13,6 +14,8 @@ services:
       - "${WIKI_DIR:-../../../wiki}:/wiki:ro"
       # ADRs live outside the wiki layer, in _system/adr/ — also read-only.
       - "${ADR_DIR:-../../../_system/adr}:/adr:ro"
+      # Project identity (_system/wiki.yaml), read-only like the rest.
+      - "${CONFIG_FILE:-../../wiki.yaml}:/config/wiki.yaml:ro"
     # No auto-restart: the dashboard is an on-demand viewer that stops itself
     # (stop button or last-tab-closed) and must then stay down. A restart
     # policy would fight the self-shutdown and bring the container back up.

@@ -686,3 +686,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .lg-state-draft { background: #2f6fb3; border-color: #ffb454; }
 .lg-state-deprecated { background: #3a4a63; border-color: #6f81a3; border-style: dashed; opacity: .7; }
 .lg-state-assume { background: #2f6fb3; border-color: #9fb0cc; border-style: dashed; }
+
+/* text hero — replaces the artwork banner in the neutral starter */
+.hero { margin: .2rem 0 1.4rem; }
+.hero-title { font-size: 2.2rem; margin: 0 0 .3rem; letter-spacing: -0.01em; }

@@ -64,7 +64,7 @@
       <code class="ml-id">{{ e.id }}</code>
       <h3>{{ e.title }}</h3>
       {% if e.stereotype %}<span class="stereo">{{ e.stereotype }}</span>{% endif %}
-      {% if e.source_of_truth and 'aquarius' not in e.source_of_truth.lower() %}
+      {% if e.source_of_truth and system_name.lower() not in e.source_of_truth.lower() %}
       <span class="dm-sot" title="Source of Truth">SoT: {{ e.source_of_truth }}</span>
       {% endif %}
     </header>

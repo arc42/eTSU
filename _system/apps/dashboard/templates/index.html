@@ -1,8 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
-<img class="hero-banner" src="{{ url_for('static', filename='aquarius-header-title.webp') }}"
-     alt="Aquarius – Anforderungen" width="1536" height="404">
-<p class="lead">Strukturierte Anforderungen der Kinderschwimmliga.</p>
+<header class="hero">
+  <h1 class="hero-title">{{ system_name }}</h1>
+  {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
+  {% if not system_name_set %}
+  <p class="lead empty-hint">This vault has no name yet — run the bootstrap
+    workflow, or set <code>system_name</code> in <code>_system/wiki.yaml</code>.</p>
+  {% endif %}
+</header>
 
 <section class="tiles">
   {% for t in tiles %}

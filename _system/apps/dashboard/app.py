@@ -54,6 +54,45 @@ WIKI_DIR = Path(_env_wiki) if _env_wiki else Path(__file__).resolve().parents[3]
 _env_adr = os.environ.get("ADR_DIR")
 ADR_DIR = Path(_env_adr) if _env_adr else Path(__file__).resolve().parents[3] / "_system" / "adr"
 
+# Project identity. Everything the original demo vault hardcoded (page title,
+# footer, hero, goal-tree root, context-diagram centre) reads from here so a
+# fresh vault can be renamed in one place. Read per call, never cached: during
+# a workshop the group fills this in live and just refreshes the page.
+_env_cfg = os.environ.get("WIKI_CONFIG")
+CONFIG_PATH = Path(_env_cfg) if _env_cfg else Path(__file__).resolve().parents[2] / "wiki.yaml"
+
+DEFAULT_SYSTEM_NAME = "Requirements Wiki"
+
+
+def wiki_config() -> dict:
+    """Project identity from `_system/wiki.yaml`.
+
+    Returns `system_name` (never empty — falls back to DEFAULT_SYSTEM_NAME),
+    `system_name_set` (False while the vault is still unnamed, so views can
+    show a "name your system" hint) and `tagline`. A missing, empty or
+    malformed file yields the defaults rather than an error: an unnamed vault
+    is the normal state on day one.
+    """
+    try:
+        data = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        data = {}
+    if not isinstance(data, dict):
+        data = {}
+    name = str(data.get("system_name") or "").strip()
+    return {
+        "system_name": name or DEFAULT_SYSTEM_NAME,
+        "system_name_set": bool(name),
+        "tagline": str(data.get("tagline") or "").strip(),
+    }
+
+
+@app.context_processor
+def inject_identity():
+    """Make the project identity available to every template."""
+    return wiki_config()
+
+
 # [[target]] | [[target|alias]] | [[target#heading]] | [[path/target|alias]]
 WIKILINK_RE = re.compile(r"\[\[([^\]\|#]+)(?:#[^\]\|]+)?(?:\|([^\]]+))?\]\]")
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n?(.*)$", re.DOTALL)
@@ -460,11 +499,12 @@ def _clean_label(s: object) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
-def build_context_diagram(center: str = "AQUARIUS") -> str | None:
+def build_context_diagram(center: str | None = None) -> str | None:
     """Project a mermaid context diagram from EIF.flows + STK.provides/receives.
 
     Returns None when no edges exist yet. Pure and string-only, so the planned
     audit-loop (ISS-010) can reuse it outside the request cycle."""
+    center = center or _clean_label(wiki_config()["system_name"])
     core = "CORE"
     nodes: list[tuple[str, str, str]] = []   # (node_id, label, css_class)
     edges: list[str] = []
@@ -1433,7 +1473,8 @@ def _mermaid_goal_tree(vision: Page, objectives: list[Page]) -> str | None:
     desktop widths (≥1000 px) without horizontal scrolling."""
     if not vision or not objectives:
         return None
-    lines = ["graph TD", '  V["Vision Aquarius"]:::vision']
+    root = _clean_label(wiki_config()["system_name"])
+    lines = ["graph TD", f'  V["Vision {root}"]:::vision']
     for o in objectives:
         nid = _diagram_node_id(o.id)
         label = _clean_label(_short_title(o))
