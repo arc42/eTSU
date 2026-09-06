@@ -14,9 +14,9 @@ is compiled once and kept current as you add more. You browse it in Obsidian.
 
 ## One-time setup (~5 minutes)
 
-1. **Unzip** `requirements-wiki.zip`. You get one folder, `requirements-wiki/`, that
-   is *both* your knowledge base and the AI's workspace.
-2. **Open it in Obsidian** (Open folder as vault → pick `requirements-wiki`). No
+1. **Clone or download this repo.** You get one folder — the repo root — that is
+   *both* your knowledge base and the AI's workspace.
+2. **Open it in Obsidian** (Open folder as vault → pick the repo root). No
    plugins to install — you navigate with the built-in file list and **graph view**.
    The hidden `.claude/` folder won't show up in Obsidian.
 3. **Point your AI agent at the same folder.** Launched there, Claude Code reads
@@ -41,7 +41,9 @@ anything unclear. Watch it happen live in Obsidian's file list and graph view.
 
 ### 3. Review what it built
 Open `_system/index.md` for the catalog, or use the **graph view** to see how everything
-connects. Follow the links. If something's off, just tell the agent.
+connects. Follow the links. If something's off, just tell the agent. Prefer a browser
+to Obsidian? Run `./dashboard.sh` for a live, read-only view of the same wiki —
+handy for a quick check or for showing someone else without installing anything.
 
 ### 4. Check what's still unknown
 Ask **"Report open issues."** The AI reads the `wiki/issues/` folder and gives you
@@ -98,15 +100,19 @@ Ask for what you need, e.g.:
 ## Where things live
 
 ```
-requirements-wiki/         ← open this in both Obsidian and your AI agent
+.                        ← repo root = the vault; open this in both Obsidian and your AI agent
 ├── wiki/               ← the AI-maintained requirements (one folder per type)
 ├── raw/                ← you drop sources here (AI never edits these)
+│   └── examples/       ← optional worked examples to seed a workshop
 ├── _templates/         ← page structures the AI follows when filing
-├── _system/            ← workflows, ADRs, anchors, + index.md & log.md (bookkeeping)
+├── _system/            ← workflows, ADRs, anchors, index.md & log.md (bookkeeping)
+│   └── wiki.yaml       ← project identity (system name, tagline) read by the dashboard
 ├── docs/               ← this guide and other human documentation
 ├── .claude/skills/     ← the two AI skills (hidden in Obsidian)
 ├── CLAUDE.md           ← the AI's schema/rules (read first if curious)
-└── README.md           ← repo overview
+├── README.md           ← repo overview
+├── dashboard.sh        ← starts the live, browsable dashboard (Docker)
+└── reset.sh            ← restores index.md, log.md and wiki.yaml to their empty state
 ```
 
 Most of these are de-emphasized in Obsidian (see "Keeping the vault clean" below), so
