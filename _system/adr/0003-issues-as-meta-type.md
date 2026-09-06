@@ -1,7 +1,7 @@
 # ADR-0003: Issues as a first-class meta-type
 
 - **Status:** accepted
-- **Date:** {{date}}
+- **Date:** 2026-05-23
 
 ## Context
 Requirements work is mostly about resolving uncertainty: open questions,

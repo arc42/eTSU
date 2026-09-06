@@ -1,7 +1,7 @@
 # ADR-0004: Semantic anchors as shared methodological standards
 
 - **Status:** accepted
-- **Date:** {{date}}
+- **Date:** 2026-05-23
 
 ## Context
 We reuse methodological standards across the wiki — goal frames (SMART, PAM), the

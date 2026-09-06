@@ -1,7 +1,7 @@
 # ADR-0002: Content-type taxonomy
 
 - **Status:** accepted
-- **Date:** {{date}}
+- **Date:** 2026-05-23
 
 ## Context
 A requirements knowledge base needs a typed vocabulary so the agent files

@@ -1,7 +1,7 @@
 # ADR-0001: Record architecture decisions
 
 - **Status:** accepted
-- **Date:** {{date}}
+- **Date:** 2026-05-23
 
 ## Context
 The structure of this wiki (content types, ID scheme, workflows) will evolve as we
