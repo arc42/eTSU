@@ -4,3 +4,10 @@
   <em>“ingest the new file in raw/”</em>.
 </p>
 {% endmacro %}
+
+{% macro empty_bootstrap(what) %}
+<p class="empty-state">
+  No {{ what }} yet — ask the agent: <em>“run the bootstrap workflow”</em>,
+  or drop a source into <code>raw/</code> to start from material.
+</p>
+{% endmacro %}

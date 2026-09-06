@@ -87,10 +87,30 @@ def test_empty_views_offer_a_next_step():
             f"{route} empty state does not tell the reader to add a source"
 
 
+def test_vision_tile_is_an_empty_state_not_a_demo_placeholder():
+    """The Vision tile is the first tile on the projector on day one.
+
+    It used to render as `🎯 Vision [Demo] / — placeholder / "Not yet captured
+    — coming soon."` — inherited chrome from the vault this dashboard was
+    extracted from, where the Goal type did not exist yet. It read as "this
+    dashboard is a mock-up" and was the only empty tile with no next step.
+    The whole-page CTA check above cannot see it: the other tiles satisfy it.
+    """
+    body = app.app.test_client().get("/").get_data(as_text=True)
+    assert "badge-demo" not in body, "the Demo chip is back on the empty home page"
+    assert "coming soon" not in body, "the 'coming soon' placeholder line is back"
+    start = body.index("tile-vision")
+    tile = body[start:start + 900]
+    assert "empty-state" in tile, "the empty Vision tile has no empty state"
+    assert "bootstrap" in tile, "the empty Vision tile offers no next step"
+    assert "placeholder" not in tile, "the Vision tile still shows a placeholder counter"
+
+
 if __name__ == "__main__":
     test_all_get_routes_render_empty()
     test_missing_pages_are_404_not_500()
     test_ping_is_204()
     test_data_model_diagrams_are_none_when_no_entities()
     test_empty_views_offer_a_next_step()
+    test_vision_tile_is_an_empty_state_not_a_demo_placeholder()
     print(f"OK: {len(GET_ROUTES)} routes render on an empty vault")

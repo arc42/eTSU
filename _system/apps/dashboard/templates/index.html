@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_empty.html" import empty_state %}
+{% from "_empty.html" import empty_state, empty_bootstrap %}
 {% block content %}
 <header class="hero">
   <img class="hero-mark" src="{{ url_for('static', filename='etsu-logo.png') }}"
@@ -31,6 +31,14 @@
       </li>
       {% endfor %}
     </ul>
+    {% elif t.key == 'vision' %}
+    {# day one: no vision page yet. Same shape as every other empty tile —
+       heading + next step, no "Demo" chip, no placeholder counter. #}
+    <div class="tile-head">
+      <span class="tile-icon">{{ t.icon }}</span>
+      <h2>{{ t.label }}</h2>
+    </div>
+    {{ empty_bootstrap("vision") }}
     {% elif t.key == 'data-model' and t.active %}
     <div class="tile-head">
       <span class="tile-icon">{{ t.icon }}</span>
@@ -70,7 +78,6 @@
     <div class="tile-head">
       <span class="tile-icon">{{ t.icon }}</span>
       <h2>{{ t.label }}</h2>
-      {% if not t.active %}<span class="badge badge-demo">Demo</span>{% endif %}
     </div>
     <div class="tile-count">
       <span class="num">{{ t.count }}</span>
@@ -101,8 +108,6 @@
       {% elif t.key == 'backlog' %}{{ empty_state("backlog items") }}
       {% else %}{{ empty_state(t.label|lower) }}
       {% endif %}
-    {% elif not t.active %}
-    <p class="tile-empty">Not yet captured — coming soon.</p>
     {% endif %}
     {% if t.links %}
     <div class="tile-ctas">{% for l in t.links %}<a class="tile-cta" href="{{ l.href }}">{{ l.label }} →</a>{% endfor %}</div>

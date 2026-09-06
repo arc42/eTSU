@@ -876,10 +876,13 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
     objectives = data["objectives"]
     coverage = data["coverage"]
     if not vision:
+        # Day-one state, and the first tile on the projector: no counter, no
+        # "Demo" chip — a heading, a next step, and a link to /goals, like
+        # every other empty tile. Deliberately carries no `count`/`unit` so
+        # index.html renders the empty state rather than a placeholder dash.
         return {
-            "key": "vision", "label": "Vision", "href": None,
-            "count": "—", "unit": "placeholder", "icon": "🎯",
-            "rows": [], "active": False,
+            "key": "vision", "label": "Vision", "href": "/goals",
+            "icon": "🎯", "rows": [], "active": False,
         }
     claim = str(vision.meta.get("tile_claim") or "").strip()
     rows = [{
