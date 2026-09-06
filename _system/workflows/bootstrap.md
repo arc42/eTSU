@@ -26,6 +26,8 @@ Grilling resumes as normal from the first real `ingest.md` run onward.
    `stereotype: vision`, following the Geoffrey Moore frame: *for [target group]
    who [need], [system] is a [category] that [key benefit]*. This is the one
    goal page with no `parent:`; every objective captured later points at it.
+   Also fill `tile_claim:` — one short line the dashboard shows on its Vision
+   tile; leave it empty and the tile's claim line stays blank.
 4. **Capture the first glossary terms.** Ask the group: "what's a word you've
    already disagreed about?" Write a `GLO-NNN` page per term from
    `_templates/glossary-term.md`, even if `agreed: false` for now — a contested

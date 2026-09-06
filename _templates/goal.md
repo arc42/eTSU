@@ -15,6 +15,9 @@ metric:                 # a single indicator (PAM); empty for a vision
 baseline:               # current value, once measured/estimated — otherwise empty
 target:                 # target value (e.g. "≤ 50%", "< 15 min")
 horizon:                # time horizon (e.g. "from season 2027"); empty → still PAM, filled → [[SMART]]-ready
+tile_claim:             # vision only: ONE short line (≤ ~90 chars) for the dashboard's
+                        # Vision tile and the req42 block-01 sub-headline. The tile is small —
+                        # this is the pitch, not the full Moore paragraph below. Empty → no claim shown.
 ---
 
 # {{title}}
