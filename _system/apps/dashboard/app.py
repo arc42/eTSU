@@ -417,6 +417,7 @@ REQ42_BLOCKS = [
 
 # Human-readable type label per wiki folder, for the "Type" column.
 FOLDER_LABELS = {
+    "goals": "Goal",
     "context": "Context",
     "external-interfaces": "External interface",
     "functional-requirements": "Functional requirement",
