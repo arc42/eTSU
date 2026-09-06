@@ -63,9 +63,12 @@ it out loud. While a workflow runs:
 
 Things will go sideways at least once. Know these three moves cold:
 
-1. **`./reset.sh`** — wipes `wiki/`, the `raw/` inbox, and archived sources;
-   restores `_system/index.md`, `_system/log.md` and `_system/wiki.yaml` to
-   their shipped state — index and log empty, `system_name` back to `eTSU`.
+1. **`./reset.sh`** — wipes `wiki/` and everything a session added to `raw/`
+   (the inbox, `raw/sources/`, `raw/ingested/` and any files dropped into
+   `raw/assets/`), whatever the file extension; restores `_system/index.md`,
+   `_system/log.md` and `_system/wiki.yaml` to their shipped state — index and
+   log empty, `system_name` back to `eTSU`. The files the repo itself ships
+   (the eTSU brand artwork in `raw/assets/`, `raw/examples/`) stay.
    Use this between separate workshop runs, or to fully restart after
    a session that went off the rails. Run `./reset.sh --force` if you're
    confident and want to skip the prompt (e.g. scripted resets between
@@ -153,5 +156,6 @@ in this run — rehearse it separately before relying on it in the room.
   server stopped 17 seconds after start once the browser tab went away. If you
   close the projector tab to switch apps, the dashboard is gone — reopen with
   `./dashboard.sh`. Nothing is lost; it re-reads the vault on start.
-- `reset.sh` deletes every top-level file in `raw/`, not only `.md` ones. Do not
-  park anything there you want to keep between runs.
+- `reset.sh` deletes everything under `raw/` that is not committed to git —
+  every extension, `raw/assets/` included. Do not park anything there you want
+  to keep between runs; commit it, or keep it outside the vault.
