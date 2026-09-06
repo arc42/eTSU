@@ -374,58 +374,58 @@ def load_adrs() -> list[dict]:
 # The umbrella methodical reference (_system/anchors/req42.md). Each block maps
 # to zero or more wiki folders; an "entry" is one page in those folders. Blocks
 # 09–11 are deliberately out of scope (project-management concerns). "href" is
-# where the block's "Alle ansehen" link points: an existing rich view where one
+# where the block's "View all" link points: an existing rich view where one
 # exists (glossary/stakeholders/issues), otherwise a generic /req42/<slug> list.
 
 REQ42_BLOCKS = [
-    {"num": "01", "title": "Visionen & Ziele", "en": "Business Goals",
+    {"num": "01", "title": "Business Goals",
      "folders": ["goals"], "scope": "in", "href": "/goals", "slug": None,
      "note": ""},
-    {"num": "02", "title": "Stakeholder", "en": "Stakeholders",
+    {"num": "02", "title": "Stakeholders",
      "folders": ["stakeholders"], "scope": "in", "href": "/stakeholders", "slug": None, "note": ""},
-    {"num": "03", "title": "Scope & Abgrenzung", "en": "Scope",
+    {"num": "03", "title": "Scope",
      "folders": ["context", "external-interfaces"], "scope": "in",
      "href": "/req42/scope", "slug": "scope", "note": ""},
-    {"num": "04", "title": "Product Backlog", "en": "Product Backlog",
+    {"num": "04", "title": "Product Backlog",
      "folders": ["functional-requirements"], "scope": "in",
      "href": "/req42/backlog", "slug": "backlog",
-     "note": "Ein Typ, Stereotyp epic|feature|story; Hierarchie via parent: (ADR-0012)."},
-    {"num": "05", "title": "Unterstützende Modelle", "en": "Supporting Models",
+     "note": "One type, stereotype epic|feature|story; hierarchy via parent: (ADR-0012)."},
+    {"num": "05", "title": "Supporting Models",
      "folders": ["use-cases", "activity-models", "data-models"], "scope": "in",
      "href": "/req42/models", "slug": "models", "note": ""},
-    {"num": "06", "title": "Qualitätsanforderungen", "en": "Quality Requirements",
+    {"num": "06", "title": "Quality Requirements",
      "folders": ["quality-requirements"], "scope": "in",
      "href": "/req42/quality", "slug": "quality", "note": ""},
-    {"num": "07", "title": "Randbedingungen", "en": "Constraints",
+    {"num": "07", "title": "Constraints",
      "folders": ["constraints"], "scope": "in",
      "href": "/req42/constraints", "slug": "constraints", "note": ""},
-    {"num": "08", "title": "Domänenbegriffe", "en": "Domain Terminology",
+    {"num": "08", "title": "Domain Terminology",
      "folders": ["glossary"], "scope": "in", "href": "/glossary", "slug": None, "note": ""},
-    {"num": "09", "title": "Betriebsmittel & Personal", "en": "Assets",
+    {"num": "09", "title": "Assets",
      "folders": [], "scope": "out", "href": None, "slug": None,
-     "note": "Projekt-Ressourcen — bewusst nicht erfasst."},
-    {"num": "10", "title": "Teamstruktur", "en": "Teams",
+     "note": "Project resources — deliberately not captured."},
+    {"num": "10", "title": "Teams",
      "folders": [], "scope": "out", "href": None, "slug": None,
-     "note": "Organisations-/Team-Setup — bewusst nicht erfasst."},
-    {"num": "11", "title": "Roadmaps", "en": "Roadmaps",
+     "note": "Organisation / team setup — deliberately not captured."},
+    {"num": "11", "title": "Roadmaps",
      "folders": [], "scope": "out", "href": None, "slug": None,
-     "note": "Release-Planung — bewusst nicht erfasst."},
-    {"num": "12", "title": "Risiken & Annahmen", "en": "Risks & Assumptions",
+     "note": "Release planning — deliberately not captured."},
+    {"num": "12", "title": "Risks & Assumptions",
      "folders": ["issues"], "scope": "in", "href": "/issues", "slug": None,
-     "note": "Issues (insb. kind: risk) plus [!assumption]-Markierungen."},
+     "note": "Issues (especially kind: risk) plus [!assumption] markers."},
 ]
 
-# Human-readable DE type label per wiki folder, for the "Typ" column.
+# Human-readable type label per wiki folder, for the "Type" column.
 FOLDER_LABELS = {
-    "context": "Kontext",
-    "external-interfaces": "Externe Schnittstelle",
-    "functional-requirements": "Funktionale Anforderung",
-    "use-cases": "Use Case",
-    "activity-models": "Aktivitätsmodell",
-    "data-models": "Datenmodell",
-    "quality-requirements": "Qualitätsanforderung",
-    "constraints": "Randbedingung",
-    "glossary": "Begriff",
+    "context": "Context",
+    "external-interfaces": "External interface",
+    "functional-requirements": "Functional requirement",
+    "use-cases": "Use case",
+    "activity-models": "Activity model",
+    "data-models": "Data model",
+    "quality-requirements": "Quality requirement",
+    "constraints": "Constraint",
+    "glossary": "Glossary term",
     "stakeholders": "Stakeholder",
     "issues": "Issue",
 }
@@ -733,10 +733,10 @@ def build_glossary_ego_graph(stem: str) -> dict | None:
 
 # Group label per stem-type for the detail-page relations panel.
 _TYPE_LABEL = {
-    "GLO": "Begriffe", "STK": "Stakeholder", "DM": "Datenmodelle", "CTX": "Kontext",
-    "EIF": "Externe Schnittstellen", "GOAL": "Ziele", "FR": "Funktionale Anforderungen",
-    "UC": "Use Cases", "AM": "Aktivitätsmodelle", "QR": "Qualitätsanforderungen",
-    "CON": "Randbedingungen", "ISS": "Issues",
+    "GLO": "Glossary", "STK": "Stakeholders", "DM": "Data models", "CTX": "Context",
+    "EIF": "External interfaces", "GOAL": "Goals", "FR": "Functional requirements",
+    "UC": "Use cases", "AM": "Activity models", "QR": "Quality requirements",
+    "CON": "Constraints", "ISS": "Issues",
 }
 _REL_TYPE_ORDER = ["GLO", "STK", "DM", "CTX", "EIF", "GOAL", "FR", "UC", "AM", "QR", "CON", "ISS"]
 
@@ -744,8 +744,8 @@ _REL_TYPE_ORDER = ["GLO", "STK", "DM", "CTX", "EIF", "GOAL", "FR", "UC", "AM", "
 def build_relations_panel(stem: str) -> dict:
     """Outbound links (this page's `related:` + body wikilinks) and inbound
     backlinks (other pages that reference it), grouped by type, as link dicts.
-    A pure projection over the link graph (ADR-0018) — powers the 'Verweist auf'
-    / 'Taucht auf in' section on a detail page."""
+    A pure projection over the link graph (ADR-0018) — powers the outbound
+    / inbound relations section on a detail page."""
     titles = title_index()
     pages = load_all_pages()
     by_stem = {p.stem: p for p in pages}
@@ -784,12 +784,12 @@ def build_relations_panel(stem: str) -> dict:
 # --- goals (req42 block 01: vision + objectives) ---------------------------
 #
 # One content type `goal` with stereotype `vision | objective` (ADR-0016).
-# Vision = `GOAL-001`, Objectives = `GOAL-002..` in Wertkette order (Saisonplanung
-# → Anmeldung → Planung → Durchführung → Auswertung → Urkunde). The Goal↔Epic
-# edge is pinned at the Epic (`goal:` field on each FR, ADR-0018); coverage and
-# tile counters are pure projections from those edges.
+# Vision = `GOAL-001`, Objectives = `GOAL-002..` in value-chain order (season
+# planning → registration → planning → execution → evaluation → certificate).
+# The Goal↔Epic edge is pinned at the Epic (`goal:` field on each FR, ADR-0018);
+# coverage and tile counters are pure projections from those edges.
 
-# Wertkette-Reihenfolge der Objectives (siehe raw/vision-draft.md „Konsens & Spec").
+# Value-chain order of the Objectives (see raw/vision-draft.md "Consensus & Spec").
 GOAL_WERTKETTE = ["GOAL-002", "GOAL-003", "GOAL-004", "GOAL-005"]
 
 
@@ -833,7 +833,7 @@ def load_goals() -> dict:
 
     Shape:
       vision     — the GOAL-001 Page (stereotype: vision) or None
-      objectives — list of GOAL-002…005 Pages in Wertkette order
+      objectives — list of GOAL-002…005 Pages in value-chain order
       coverage   — { 'GOAL-NNN': [FR-Page, ...] } from FR.goal: backlinks
       enablers   — list of FR-Pages with goal: [] (explicit enablers, ADR-0018)
       frs        — all FR-Pages sorted by id (column order for the matrix)
@@ -1223,38 +1223,38 @@ def index():
         ],
     }
 
-    # Row 1: Vision, req42, Suche.  Row 2: Product Backlog, Glossar, Stakeholder.
-    # Row 3+: ADRs, Issues, Datenmodell.
+    # Row 1: Vision, req42, Search.  Row 2: Product Backlog, Glossary, Stakeholders.
+    # Row 3+: ADRs, Issues, Data model.
     tiles = [
         vision_tile,
         {
             "key": "req42", "label": "req42", "href": "/req42",
-            "count": req42_total, "unit": "Einträge", "logo": "req42-logo-white.png",
+            "count": req42_total, "unit": "entries", "logo": "req42-logo-white.png",
             "rows": req42_rows, "active": True,
-            "sub": f"{req42_in_scope} von 12 Blöcken",
+            "sub": f"{req42_in_scope} of 12 blocks",
         },
         {
-            "key": "search", "label": "Suche", "href": "/search", "icon": "🔎",
+            "key": "search", "label": "Search", "href": "/search", "icon": "🔎",
             "rows": [], "active": True, "search": True,
         },
         backlog_tile,
         {
-            "key": "glossary", "label": "Glossar",
-            "count": len(glossary), "unit": "Begriffe", "icon": "📖",
+            "key": "glossary", "label": "Glossary",
+            "count": len(glossary), "unit": "terms", "icon": "📖",
             "rows": by_relations(glossary), "active": True,
             "links": [
-                {"label": "Tabelle", "href": "/glossary"},
-                {"label": "Begriffsnetz", "href": "/graph/glossary"},
+                {"label": "Table", "href": "/glossary"},
+                {"label": "Term network", "href": "/graph/glossary"},
             ],
         },
         {
-            "key": "stakeholders", "label": "Stakeholder", "href": "/stakeholders",
-            "count": len(stakeholders), "unit": "Personas", "icon": "👥",
+            "key": "stakeholders", "label": "Stakeholders", "href": "/stakeholders",
+            "count": len(stakeholders), "unit": "personas", "icon": "👥",
             "rows": by_relations(stakeholders), "active": True,
         },
         {
             "key": "adrs", "label": "ADRs", "href": "/adrs",
-            "count": len(adrs), "unit": "Entscheidungen", "icon": "🏛️",
+            "count": len(adrs), "unit": "decisions", "icon": "🏛️",
             "rows": [{"id": a["id"], "title": a["title"], "status": a["status"]} for a in adrs],
             "active": True,
         },
@@ -1262,7 +1262,7 @@ def index():
             "key": "issues", "label": "Issues", "href": "/issues",
             "count": len(issues), "unit": "Issues", "icon": "⚠️",
             "rows": [], "active": True,
-            "sub": f"{len(open_issues)} offen",
+            "sub": f"{len(open_issues)} open",
         },
         {
             "key": "data-model", "label": "Data model", "href": "/data-model",
@@ -1307,8 +1307,8 @@ def glossary_graph_view():
     deterministic server projection; cytoscape.js lays it out client-side."""
     graph = build_glossary_graph()
     counts = graph["layer_counts"]
-    NAMED = [("DM", "Datenmodell"), ("STK", "Stakeholder"),
-             ("EIF", "Schnittstelle"), ("GOAL", "Ziele")]
+    NAMED = [("DM", "Data model"), ("STK", "Stakeholder"),
+             ("EIF", "Interface"), ("GOAL", "Goals")]
     named_keys = {k for k, _ in NAMED}
     named_layers = [{"key": k, "label": l, "count": counts[k]}
                     for k, l in NAMED if counts.get(k)]
@@ -1381,7 +1381,7 @@ def adrs_view():
     # rejected / deprecated (proposed, superseded, unknown, …) falls under "other".
     primary = ["accepted", "rejected", "deprecated"]
     labels = {"accepted": "Accepted", "rejected": "Rejected",
-              "deprecated": "Deprecated", "other": "Andere"}
+              "deprecated": "Deprecated", "other": "Other"}
     tally = {k: 0 for k in primary}
     other = 0
     for a in items:
@@ -1434,7 +1434,7 @@ def page_detail(folder, stem):
     if ego_graph:
         c = ego_graph["layer_counts"]
         ego_layers = [{"key": k, "label": l} for k, l in
-                      (("DM", "Datenmodell"), ("STK", "Stakeholder"), ("GOAL", "Ziele"))
+                      (("DM", "Data model"), ("STK", "Stakeholder"), ("GOAL", "Goals"))
                       if c.get(k)]
         for L in ego_layers:
             L["count"] = c[L["key"]]
@@ -1442,7 +1442,7 @@ def page_detail(folder, stem):
         "detail.html", kind=kind, id=page.id, title=page.title,
         status=page.status, created=str(page.meta.get("created", "")),
         updated=str(page.meta.get("updated", "")), tags=page.meta.get("tags") or [],
-        body_html=body_html, crumb="Suche", crumb_href="/search",
+        body_html=body_html, crumb="Search", crumb_href="/search",
         context_diagram=context_diagram, relations=build_relations_panel(stem),
         ego_graph=ego_graph, ego_layers=ego_layers,
         needs_mermaid=bool(context_diagram) or "language-mermaid" in body_html,
@@ -1595,9 +1595,9 @@ def data_model_entities() -> list[dict]:
 # activity-models/) into one row per *model type*. Each row links to its own
 # overview page; types with no content yet are skipped from the listing.
 SUPPORTING_MODEL_TYPES = [
-    {"folder": "data-models", "label": "Datenmodell", "code": "DM", "href": "/data-model"},
+    {"folder": "data-models", "label": "Data model", "code": "DM", "href": "/data-model"},
     {"folder": "use-cases", "label": "Use Cases", "code": "UC", "href": None},
-    {"folder": "activity-models", "label": "Aktivitätsmodelle", "code": "AM", "href": None},
+    {"folder": "activity-models", "label": "Activity models", "code": "AM", "href": None},
 ]
 
 
@@ -1613,7 +1613,7 @@ def _supporting_model_entries() -> list[dict]:
         out.append({
             "id": m["code"],
             "title": m["label"],
-            "type": f"{n} Einträge",
+            "type": f"{n} entries",
             "status": "",
             "relations": n,
             "href": m["href"],
@@ -1693,7 +1693,7 @@ def goals_view():
         objective_cards.append({
             "id": o.id,
             "title": o.title,
-            "stereotype": "Ziel",
+            "stereotype": "Goal",
             "purpose": extract_pam_bullet(o, "Purpose", titles, links),
             "advantage": extract_pam_bullet(o, "Advantage", titles, links),
             "metric": _inline(o.meta.get("metric")),
@@ -1704,7 +1704,7 @@ def goals_view():
                       for fr in coverage.get(o.id, [])],
         })
 
-    # matrix: rows = objectives in Wertkette order; columns = FR-001..N + enablers
+    # matrix: rows = objectives in value-chain order; columns = FR-001..N + enablers
     enabler_ids = {fr.id for fr in data["enablers"]}
     fr_cols = [{"id": fr.id, "title": fr.title, "epic": _epic_label(fr.id),
                 "stem": fr.stem, "enabler": fr.id in enabler_ids}
@@ -1731,10 +1731,10 @@ def goals_view():
 
 @app.route("/data-model")
 def data_model_view():
-    """req42 block 05 — Datenmodell: full class diagram of all DM entities
-    (projected from DM_EDGES; hardcoded test-stage) plus the per-entity
-    catalog below — every section + callout block from every DM page so the
-    full data-model documentation lives on one page."""
+    """req42 block 05 — Data model: the full class diagram of all DM entities
+    (not yet implemented — see build_data_model_full_diagram()) plus the
+    per-entity catalog below — every section + callout block from every DM
+    page, so the full data-model documentation lives on one page."""
     diagram = build_data_model_full_diagram()
     entities = data_model_entities()
     return render_template("data_model.html", diagram=diagram,
@@ -1773,7 +1773,7 @@ def fr_view(stem):
     Shows the FR's full text plus — for non-leaf FRs — its own Feature→Story
     breakdown (mermaid + cards). Every FR node in the backlog diagrams clicks
     here, so the whole hierarchy lives under one sprechenden path with a
-    'Product Backlog' breadcrumb (instead of the generic /page 'Suche' crumb).
+    'Product Backlog' breadcrumb (instead of the generic /page 'Search' crumb).
     404 if `stem` is not an FR page."""
     path = WIKI_DIR / "functional-requirements" / f"{stem}.md"
     page = _parse(path, "functional-requirements") if path.is_file() else None
@@ -1828,67 +1828,69 @@ def req42_block_view(slug):
 
 
 # ---------------------------------------------------------------------------
-# Server-Lebenszyklus: Selbstabschaltung, sobald kein Browser mehr zusieht.
-# KEIN Stop-Knopf — „Tab/Fenster schließen" ist das Beenden.
+# Server lifecycle: self-shutdown as soon as no browser is watching anymore.
+# NO stop button — "close tab/window" is how you quit.
 #
-# Jede offene Seite schickt einen leichten Heartbeat (`POST /ping`) alle paar
-# Sekunden. Solange Pings ankommen, läuft der Server; bleiben sie aus, fährt der
-# Watchdog nach einer Schonfrist herunter — ein geschlossenes Browserfenster
-# hinterlässt so keinen verwaisten Container. Zusätzlich meldet die Seite per
-# pagehide-Beacon `POST /leaving`, dass sie verschwindet: ist es nur Navigation,
-# hebt der /ping der Folgeseite das Signal sofort auf; ist der Tab wirklich zu,
-# stoppt der Server schon nach `_LEAVE_GRACE` (~5 s) statt erst nach der
-# Heartbeat-Schonfrist. So genügt das Schließen des Tabs zum Beenden.
+# Every open page sends a lightweight heartbeat (`POST /ping`) every few
+# seconds. As long as pings keep arriving, the server keeps running; once they
+# stop, the watchdog shuts it down after a grace period — a closed browser
+# window leaves no orphaned container behind. The page additionally reports
+# via a pagehide beacon `POST /leaving` that it is going away: if it was just
+# navigation, the next page's `/ping` immediately clears the signal; if the
+# tab is really closed, the server stops after `_LEAVE_GRACE` (~5 s) instead
+# of waiting out the full heartbeat grace period. So closing the tab alone is
+# enough to quit.
 #
-# Bewusst KEINE dauerhaft offene Verbindung (eine frühere Iteration nutzte einen
-# SSE-/events-Stream): die belegte je Tab einen Worker-Thread für ihre gesamte
-# Lebensdauer, und beim Klicken durch Unterseiten stauten sich diese, bis der
-# Threadpool erschöpft war und sogar /stop nicht mehr bedient wurde. Ein /ping
-# ist dagegen ein Sofort-Request, der keinen Thread hält — das Problem entfällt
-# damit ganz. Die Schonfrist ist großzügig, damit ein im Hintergrund gedrosselter
-# Tab (Browser drosseln Timer auf ~1×/min) am Leben bleibt; nur ein wirklich
-# geschlossener Tab pingt gar nicht mehr. Ein einziger Worker hält den Zustand
-# prozess-kohärent (Dockerfile: --workers 1). Siehe ADR-0022.
+# Deliberately NO long-lived open connection (an earlier iteration used an
+# SSE/events stream): that tied up a worker thread for a tab's entire
+# lifetime, and clicking through subpages piled these up until the thread
+# pool was exhausted and even /stop stopped being served. A /ping is instead
+# an immediate request that holds no thread — the problem disappears
+# entirely. The grace period is generous so a tab throttled in the background
+# (browsers throttle timers to ~1x/min) stays alive; only a genuinely closed
+# tab stops pinging altogether. A single worker keeps the state
+# process-coherent (Dockerfile: --workers 1). See ADR-0022.
 # ---------------------------------------------------------------------------
 
 
 def _grace(env_name: str, default: float) -> float:
-    """Schonfrist in Sekunden, per Env überschreibbar (für Tests/Tuning)."""
+    """Grace period in seconds, overridable via env var (for tests/tuning)."""
     try:
         return float(os.environ.get(env_name, default))
     except (TypeError, ValueError):
         return default
 
 
-# Ohne Heartbeat länger als dies → herunterfahren. Größer als das Browser-
-# Hintergrund-Throttling (~60 s), damit ein nur versteckter Tab nicht fälschlich
-# abschaltet; nur ein wirklich geschlossener Tab pingt gar nicht mehr.
+# Shut down once there has been no heartbeat for longer than this. Larger than
+# the browser's background-tab throttling (~60 s), so a merely hidden tab does
+# not falsely trigger a shutdown; only a genuinely closed tab stops pinging.
 _HEARTBEAT_GRACE = _grace("DASH_HEARTBEAT_GRACE", 90.0)
-# Schonfrist beim Start, bis der erste Heartbeat kommt (langsamer erster Build/
-# erstes Rendern). Kommt nie einer, fährt der Server danach herunter, statt als
-# Waise weiterzulaufen.
+# Grace period at startup, until the first heartbeat arrives (a slower first
+# build / first render). If one never comes, the server shuts down afterwards
+# instead of running on as an orphan.
 _STARTUP_GRACE = _grace("DASH_STARTUP_GRACE", 90.0)
-# Kurze Frist nach einem „Tab verlässt"-Signal (`/leaving`, per pagehide-Beacon),
-# bevor heruntergefahren wird. Beim Navigieren verbindet die nächste Seite sofort
-# wieder (`/ping` hebt das Signal auf); bleibt sie aus (Tab geschlossen), stoppt
-# der Server nach dieser Frist — viel schneller als die Heartbeat-Schonfrist.
+# Short grace period after a "tab is leaving" signal (`/leaving`, via a
+# pagehide beacon) before shutting down. On navigation the next page connects
+# right away (`/ping` clears the signal); if none arrives (tab closed), the
+# server stops after this grace period — much faster than the heartbeat grace
+# period.
 _LEAVE_GRACE = _grace("DASH_LEAVE_GRACE", 5.0)
 
 _lifecycle_lock = threading.Lock()
-_last_seen = None        # monotone Zeit des letzten /ping; None = noch keiner
-_leave_at = None         # monotone Zeit eines „Tab verlässt"-Signals; None = keins
+_last_seen = None        # monotonic time of the last /ping; None = none yet
+_leave_at = None         # monotonic time of a "tab is leaving" signal; None = none
 _shutting_down = False
 _watchdog_started = False
 
 
 def _shutdown(reason):
-    """Server sauber beenden. Unter gunicorn wird der Master (unser Parent)
-    per SIGTERM beendet, sodass alle Worker aussteigen und PID 1 des Containers
-    zurückkehrt — mit `restart: no` bleibt der Container dann unten. Unter dem
-    Dev-Server beenden wir nur uns selbst (NICHT den Parent — das ist die Shell)
-    per SIGTERM: ein aus einem Hintergrund-Thread an den eigenen Prozess
-    gesendetes SIGINT verschluckt der Werkzeug-Dev-Server (Werkzeug 3.x), SIGTERM
-    greift dagegen über die Default-Signal-Aktion zuverlässig."""
+    """Cleanly shut down the server. Under gunicorn, the master (our parent)
+    is terminated via SIGTERM, so all workers exit and the container's PID 1
+    returns — with `restart: no` the container then stays down. Under the dev
+    server we only terminate ourselves (NOT the parent — that is the shell)
+    via SIGTERM: a SIGINT sent from a background thread to our own process is
+    swallowed by the Werkzeug dev server (Werkzeug 3.x), whereas SIGTERM is
+    reliably handled via the default signal action."""
     global _shutting_down
     with _lifecycle_lock:
         if _shutting_down:
@@ -1897,12 +1899,12 @@ def _shutdown(reason):
     app.logger.info("dashboard shutdown: %s", reason)
 
     def _terminate():
-        time.sleep(0.4)  # HTTP-Antwort / Beacon erst flushen lassen
+        time.sleep(0.4)  # let the HTTP response / beacon flush first
         if app.config.get("DEV_SERVER"):
             os.kill(os.getpid(), signal.SIGTERM)
             return
         try:
-            os.kill(os.getppid(), signal.SIGTERM)  # gunicorn-Master
+            os.kill(os.getppid(), signal.SIGTERM)  # gunicorn master
         except (ProcessLookupError, PermissionError):
             pass
         os.kill(os.getpid(), signal.SIGTERM)
@@ -1920,18 +1922,18 @@ def _watchdog():
             last = _last_seen
             leave = _leave_at
         now = time.monotonic()
-        # Tab hat sich verabschiedet und keine neue Seite hat seither gepingt:
-        # nach kurzer Frist herunterfahren (schnelles Stop bei Tab-Schließen).
+        # The tab has said goodbye and no new page has pinged since: shut
+        # down after a short grace period (fast stop on tab close).
         if leave is not None and (last is None or last <= leave) and now - leave > _LEAVE_GRACE:
-            _shutdown("Tab geschlossen (kein Reconnect nach pagehide)")
+            _shutdown("tab closed (no reconnect after pagehide)")
             return
         if last is None:
-            # Es hat noch nie jemand gepingt → Start-Schonfrist.
+            # Nobody has ever pinged -> startup grace period.
             if now - started > _STARTUP_GRACE:
-                _shutdown("kein Browser-Heartbeat innerhalb der Start-Schonfrist")
+                _shutdown("no browser heartbeat within the startup grace period")
                 return
         elif now - last > _HEARTBEAT_GRACE:
-            _shutdown("kein Browser-Heartbeat mehr (Tab geschlossen)")
+            _shutdown("no more browser heartbeat (tab closed)")
             return
 
 
@@ -1946,9 +1948,9 @@ def _ensure_watchdog():
 
 @app.route("/ping", methods=["POST"])
 def heartbeat_ping():
-    """Leichtes Lebenszeichen jeder offenen Seite. Aktualisiert den `last seen`-
-    Zeitstempel, hebt ein offenes „Tab verlässt"-Signal auf (eine lebende Seite
-    pingt → kein Abschied) und kehrt sofort zurück — hält keinen Thread."""
+    """Lightweight sign of life from every open page. Updates the `last seen`
+    timestamp, clears any pending "tab is leaving" signal (a live page pinging
+    means no goodbye after all) and returns immediately — holds no thread."""
     global _last_seen, _leave_at
     _ensure_watchdog()
     with _lifecycle_lock:
@@ -1959,9 +1961,9 @@ def heartbeat_ping():
 
 @app.route("/leaving", methods=["POST"])
 def heartbeat_leaving():
-    """Beacon beim Verlassen der Seite (pagehide: Tab geschlossen ODER navigiert).
-    Setzt eine kurze Abschaltfrist; navigiert der Nutzer nur, hebt der sofortige
-    `/ping` der Folgeseite das Signal wieder auf, bevor die Frist abläuft."""
+    """Beacon sent when the page is left (pagehide: tab closed OR navigated).
+    Sets a short shutdown grace period; if the user was only navigating, the
+    next page's immediate `/ping` clears the signal again before it expires."""
     global _leave_at
     _ensure_watchdog()
     with _lifecycle_lock:
@@ -1969,8 +1971,8 @@ def heartbeat_leaving():
     return ("", 204)
 
 
-# Watchdog beim Import starten (im gunicorn-Worker bzw. Dev-Prozess), damit die
-# Start-Schonfrist auch greift, falls nie ein /ping eintrifft.
+# Start the watchdog on import (in the gunicorn worker or dev process), so the
+# startup grace period also applies if no /ping ever arrives.
 _ensure_watchdog()
 
 
