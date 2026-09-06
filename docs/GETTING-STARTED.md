@@ -112,7 +112,9 @@ Ask for what you need, e.g.:
 ├── CLAUDE.md           ← the AI's schema/rules (read first if curious)
 ├── README.md           ← repo overview
 ├── dashboard.sh        ← starts the live, browsable dashboard (Docker)
-└── reset.sh            ← restores index.md, log.md and wiki.yaml to their shipped state
+└── reset.sh            ← DESTRUCTIVE: deletes every page in wiki/ and every source in
+                        raw/, then restores index.md, log.md and wiki.yaml to their
+                        shipped state. See "Starting over" below.
 ```
 
 Most of these are de-emphasized in Obsidian (see "Keeping the vault clean" below), so
@@ -134,3 +136,22 @@ spotless tree, the community plugin *File Hider* will do it; otherwise the `_` p
 keeps the machinery sorted together and out of your way.
 
 To adjust what's excluded: Settings → Files and links → Excluded files.
+
+## Starting over
+
+`./reset.sh` returns the vault to the naked state it shipped in. It is
+**irreversible and it deletes content**:
+
+- every page in `wiki/`,
+- every source in `raw/` — the inbox, `raw/sources/`, `raw/ingested/` and any
+  participant files under `raw/assets/` (`raw/examples/` and the repo's own
+  committed assets survive),
+- and it restores `_system/index.md`, `_system/log.md` and `_system/wiki.yaml`
+  to their shipped state — index and log empty, `system_name` back to `eTSU`.
+
+None of that is in git yet unless you committed it, so there is nothing to
+recover afterwards. It asks for confirmation first; `./reset.sh --force` skips
+the prompt. Use it between separate engagements, not as an undo.
+
+For a *partial* undo — one bad page rather than the whole vault — use
+`git checkout -- <path>` instead.
