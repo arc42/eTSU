@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Requirements Dashboard{% endblock %} · {{ system_name }}</title>
+  <title>{% block title %}Dashboard{% endblock %} · {{ system_name }}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='etsu-favicon.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -15,6 +16,7 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="foot">
+    <img class="foot-mark" src="{{ url_for('static', filename='etsu-mark.png') }}" alt="">
     <div class="foot-title">Live view · {{ system_name }} requirements wiki</div>
     <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki pattern</div>
   </footer>

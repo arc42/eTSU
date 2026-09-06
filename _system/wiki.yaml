@@ -1,5 +1,8 @@
 # Project identity for this requirements wiki.
-# Filled in during bootstrap (_system/workflows/bootstrap.md). While blank the
-# dashboard shows neutral defaults.
-system_name: ""      # e.g. "Bookshelf" — the system whose requirements this vault holds
+#
+# Ships as "eTSU" — the name of this starter itself, so a fresh clone looks
+# branded rather than blank. A workshop group REPLACES this with the name of
+# the system whose requirements they are capturing; that is step 1 of
+# _system/workflows/bootstrap.md. The eTSU logo in the hero stays either way.
+system_name: "eTSU"  # the system whose requirements this vault holds
 tagline: ""          # one line shown under the hero, e.g. "Lending, tracked"

@@ -13,10 +13,12 @@ Grilling resumes as normal from the first real `ingest.md` run onward.
 
 ## Steps
 
-1. **Name the system.** Ask the group for a working name and a one-line tagline,
-   then write both into `_system/wiki.yaml` (`system_name:`, `tagline:`). The
-   dashboard reads this file live — the group sees the re-brand on its next
-   refresh, no restart needed.
+1. **Name the system.** The vault ships named `eTSU` — the starter's own name.
+   Ask the group for a working name for *their* system and a one-line tagline,
+   then **replace** `system_name:` and fill in `tagline:` in `_system/wiki.yaml`.
+   The dashboard reads this file live — the group sees the re-brand on its next
+   refresh, no restart needed. (The eTSU logo in the hero is a static asset and
+   stays; only the wordmark changes.)
 2. **Confirm the ubiquitous language.** Ask whether the group will work in
    English. If they want to capture requirements in their own domain language
    instead, write an ADR that supersedes
@@ -46,7 +48,8 @@ Grilling resumes as normal from the first real `ingest.md` run onward.
    the normal, grill-gated ingest workflow.
 
 ## Quality bar
-Bootstrap is complete when `_system/wiki.yaml` is filled in, `GOAL-001` exists
+Bootstrap is complete when `_system/wiki.yaml` names the group's own system
+(not the shipped `eTSU`), `GOAL-001` exists
 and reads as a vision (not yet as a SMART objective — that comes later),
 at least one glossary term and one stakeholder exist, and `_system/index.md` /
 `_system/log.md` reflect all of it. If any of those five are still empty, the

@@ -65,7 +65,8 @@ Things will go sideways at least once. Know these three moves cold:
 
 1. **`./reset.sh`** — wipes `wiki/`, the `raw/` inbox, and archived sources;
    restores `_system/index.md`, `_system/log.md` and `_system/wiki.yaml` to
-   blank. Use this between separate workshop runs, or to fully restart after
+   their shipped state — index and log empty, `system_name` back to `eTSU`.
+   Use this between separate workshop runs, or to fully restart after
    a session that went off the rails. Run `./reset.sh --force` if you're
    confident and want to skip the prompt (e.g. scripted resets between
    back-to-back sessions).

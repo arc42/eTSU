@@ -112,7 +112,7 @@ Ask for what you need, e.g.:
 ├── CLAUDE.md           ← the AI's schema/rules (read first if curious)
 ├── README.md           ← repo overview
 ├── dashboard.sh        ← starts the live, browsable dashboard (Docker)
-└── reset.sh            ← restores index.md, log.md and wiki.yaml to their empty state
+└── reset.sh            ← restores index.md, log.md and wiki.yaml to their shipped state
 ```
 
 Most of these are de-emphasized in Obsidian (see "Keeping the vault clean" below), so

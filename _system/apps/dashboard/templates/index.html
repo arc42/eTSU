@@ -2,6 +2,8 @@
 {% from "_empty.html" import empty_state %}
 {% block content %}
 <header class="hero">
+  <img class="hero-mark" src="{{ url_for('static', filename='etsu-logo.png') }}"
+       alt="{{ system_name }}">
   <h1 class="hero-title">{{ system_name }}</h1>
   {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
   {% if not system_name_set %}
