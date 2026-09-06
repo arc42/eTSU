@@ -785,13 +785,12 @@ def build_relations_panel(stem: str) -> dict:
 # --- goals (req42 block 01: vision + objectives) ---------------------------
 #
 # One content type `goal` with stereotype `vision | objective` (ADR-0016).
-# Vision = `GOAL-001`, Objectives = `GOAL-002..` in value-chain order (season
-# planning → registration → planning → execution → evaluation → certificate).
+# The vision is the goal page carrying `stereotype: vision` (bootstrap.md step 3
+# writes it as GOAL-001); every other goal page is an objective. Nothing is
+# keyed off an ID list — a vault may hold any number of objectives at any IDs,
+# and all of them must reach the screen.
 # The Goal↔Epic edge is pinned at the Epic (`goal:` field on each FR, ADR-0018);
 # coverage and tile counters are pure projections from those edges.
-
-# Value-chain order of the Objectives (see raw/vision-draft.md "Consensus & Spec").
-GOAL_VALUE_CHAIN = ["GOAL-002", "GOAL-003", "GOAL-004", "GOAL-005"]
 
 
 def _goal_id_from_ref(ref: object) -> str:
@@ -833,18 +832,30 @@ def load_goals() -> dict:
     """Return everything the tile and /goals page need.
 
     Shape:
-      vision     — the GOAL-001 Page (stereotype: vision) or None
-      objectives — list of GOAL-002…005 Pages in value-chain order
+      vision     — the goal Page with `stereotype: vision`, or None
+      objectives — every other goal Page, ordered by id (GOAL-002, -003, …)
       coverage   — { 'GOAL-NNN': [FR-Page, ...] } from FR.goal: backlinks
       enablers   — list of FR-Pages with goal: [] (explicit enablers, ADR-0018)
       frs        — all FR-Pages sorted by id (column order for the matrix)
+
+    Derived entirely from the vault, never from a fixed ID list: a group may
+    capture any number of objectives at any IDs and every one of them shows up.
+    Anything that is not *the* vision counts as an objective, so a goal page
+    with a missing or misspelt `stereotype:` is still rendered rather than
+    silently dropped. If two pages claim `stereotype: vision`, the
+    lowest-id one is the vision and the rest fall through to objectives.
     """
-    by_id: dict[str, Page] = {p.id: p for p in load_folder("goals")}
-    vision = by_id.get("GOAL-001")
-    objectives = [by_id[gid] for gid in GOAL_VALUE_CHAIN if gid in by_id]
+    goals = sorted(load_folder("goals"), key=lambda p: p.id)
+
+    def _stereotype(p: Page) -> str:
+        return str(p.meta.get("stereotype") or "").strip().lower()
+
+    visions = [p for p in goals if _stereotype(p) == "vision"]
+    vision = visions[0] if visions else None
+    objectives = [p for p in goals if p is not vision]
 
     frs = sorted(load_folder("functional-requirements"), key=lambda p: p.id)
-    coverage: dict[str, list[Page]] = {gid: [] for gid in GOAL_VALUE_CHAIN}
+    coverage: dict[str, list[Page]] = {o.id: [] for o in objectives}
     enablers: list[Page] = []
     for fr in frs:
         refs = fr.meta.get("goal") or []
@@ -1632,16 +1643,16 @@ def _epic_label(fr_id: str) -> str:
 
 @app.route("/goals")
 def goals_view():
-    """req42 Block 01 — Vision + Teilziele. Three sections top-down:
-    Mermaid tree, full-text cards (vision then objectives), Goal-Coverage-Matrix.
+    """req42 Block 01 — Vision + Objectives. Three sections top-down:
+    Mermaid tree, full-text cards (vision then objectives), goal-coverage matrix.
     Goal↔Epic edges are read from each FR's `goal:` field (ADR-0018)."""
     titles = title_index()
     links = link_index()       # vision/objective prose wikilinks become real links
     data = load_goals()
     vision, objectives = data["vision"], data["objectives"]
     if not vision:
-        # Empty vault: no GOAL-001 page yet. Render the empty state rather
-        # than a 404 — this route must work on workshop day one.
+        # Empty vault: no `stereotype: vision` page yet. Render the empty
+        # state rather than a 404 — this route must work on workshop day one.
         return render_template(
             "goals.html",
             diagram=None,
@@ -1678,7 +1689,7 @@ def goals_view():
         "maturity": None,
         "beneficiary": _wikilink_list(vision.meta.get("beneficiary")),
         # Vision card shows just the Moore-style narrative paragraph — the
-        # Teilziele list and Wirkung block from the wiki page are projected
+        # objectives list and impact block from the wiki page are projected
         # below as separate objective cards and the coverage matrix.
         "html": f"<p>{vision_narrative}</p>" if vision_narrative else "",
     }
@@ -1705,7 +1716,7 @@ def goals_view():
                       for fr in coverage.get(o.id, [])],
         })
 
-    # matrix: rows = objectives in value-chain order; columns = FR-001..N + enablers
+    # matrix: rows = objectives ordered by id; columns = FR-001..N + enablers
     enabler_ids = {fr.id for fr in data["enablers"]}
     fr_cols = [{"id": fr.id, "title": fr.title, "epic": _epic_label(fr.id),
                 "stem": fr.stem, "enabler": fr.id in enabler_ids}
