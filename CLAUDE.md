@@ -92,6 +92,14 @@ never block or silently rewrite. The human decides.
   other type; there is no standing dashboard — ask for an open-issues report when
   you want the current view.
 
+## Cold start
+
+If `_system/wiki.yaml` is still blank and the wiki is otherwise empty, run
+`_system/workflows/bootstrap.md` first — the first-30-minutes procedure that
+names the system, seeds a vision, and captures the first terms and
+stakeholder. It is deliberately **not** grill-gated (see that file). Once
+bootstrap hands off, proceed with `ingest.md` as normal.
+
 ## Files you maintain
 
 - **`_system/index.md`** — content catalog, grouped by type, one line each. Update
