@@ -1,3 +1,9 @@
+# Explicit project name. Without it, Compose derives the project from this
+# file's directory (`dashboard`), which collides with any other vault that
+# keeps its dashboard at the same path — bringing this one up would then
+# recreate (and thereby destroy) the other vault's container.
+name: tsu-demo
+
 services:
   dashboard:
     build: .
