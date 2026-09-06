@@ -3,7 +3,7 @@
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> {{ block.num }} {{ block.title }}</nav>{% endblock %}
 {% block content %}
 <h1 class="page-h1"><span class="req42-num">{{ block.num }}</span> {{ block.title }} <span class="count-pill">{{ total }}</span></h1>
-<p class="lead">{{ block.en }} — req42-Baustein {{ block.num }}.{% if block.note %} {{ block.note }}{% endif %}</p>
+<p class="lead">{{ block.title }} — req42-Baustein {{ block.num }}.{% if block.note %} {{ block.note }}{% endif %}</p>
 
 {% if context_diagram %}
 <figure class="ctx-diagram">

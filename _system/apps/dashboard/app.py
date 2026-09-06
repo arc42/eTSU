@@ -790,7 +790,7 @@ def build_relations_panel(stem: str) -> dict:
 # coverage and tile counters are pure projections from those edges.
 
 # Value-chain order of the Objectives (see raw/vision-draft.md "Consensus & Spec").
-GOAL_WERTKETTE = ["GOAL-002", "GOAL-003", "GOAL-004", "GOAL-005"]
+GOAL_VALUE_CHAIN = ["GOAL-002", "GOAL-003", "GOAL-004", "GOAL-005"]
 
 
 def _goal_id_from_ref(ref: object) -> str:
@@ -840,10 +840,10 @@ def load_goals() -> dict:
     """
     by_id: dict[str, Page] = {p.id: p for p in load_folder("goals")}
     vision = by_id.get("GOAL-001")
-    objectives = [by_id[gid] for gid in GOAL_WERTKETTE if gid in by_id]
+    objectives = [by_id[gid] for gid in GOAL_VALUE_CHAIN if gid in by_id]
 
     frs = sorted(load_folder("functional-requirements"), key=lambda p: p.id)
-    coverage: dict[str, list[Page]] = {gid: [] for gid in GOAL_WERTKETTE}
+    coverage: dict[str, list[Page]] = {gid: [] for gid in GOAL_VALUE_CHAIN}
     enablers: list[Page] = []
     for fr in frs:
         refs = fr.meta.get("goal") or []
