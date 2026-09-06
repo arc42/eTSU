@@ -9,6 +9,11 @@
   {% if not system_name_set %}
   <p class="lead empty-hint">This vault has no name yet — run the bootstrap
     workflow, or set <code>system_name</code> in <code>_system/wiki.yaml</code>.</p>
+  {% elif system_name_is_shipped %}
+  {# still the starter's own name: bootstrap step 1 has not been done yet #}
+  <p class="lead empty-hint">This vault still carries the starter's name — run
+    the bootstrap workflow to name it after <em>your</em> system, or set
+    <code>system_name</code> in <code>_system/wiki.yaml</code>.</p>
   {% endif %}
 </header>
 
@@ -48,7 +53,7 @@
     <figure class="tile-mini-diagram">
       <pre class="mermaid">{{ t.diagram }}</pre>
     </figure>
-    {% elif t.claim and t.claim.startswith('No entities') %}
+    {% elif not t.entities %}
     {{ empty_state("data-model entities") }}
     {% endif %}
     {% if t.claim %}<p class="tile-dm-claim">{{ t.claim }}</p>{% endif %}

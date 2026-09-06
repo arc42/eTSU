@@ -51,10 +51,10 @@
   const body = document.getElementById('glossary-body');
   const sortButtons = document.querySelectorAll('#glossary-sort .fbtn');
   const comparators = {
-    alpha:     (a, b) => a.dataset.title.localeCompare(b.dataset.title, 'de'),
-    newest:    (a, b) => b.dataset.created.localeCompare(a.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
-    oldest:    (a, b) => a.dataset.created.localeCompare(b.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
-    relations: (a, b) => (+b.dataset.relations) - (+a.dataset.relations) || a.dataset.title.localeCompare(b.dataset.title, 'de'),
+    alpha:     (a, b) => a.dataset.title.localeCompare(b.dataset.title, 'en'),
+    newest:    (a, b) => b.dataset.created.localeCompare(a.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'en'),
+    oldest:    (a, b) => a.dataset.created.localeCompare(b.dataset.created) || a.dataset.title.localeCompare(b.dataset.title, 'en'),
+    relations: (a, b) => (+b.dataset.relations) - (+a.dataset.relations) || a.dataset.title.localeCompare(b.dataset.title, 'en'),
   };
   function sortBy(mode) {
     Array.from(body.querySelectorAll('tr'))

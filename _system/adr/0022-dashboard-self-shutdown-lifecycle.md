@@ -1,10 +1,7 @@
 # ADR-0022: The dashboard shuts itself down once the browser tab is closed
 
-Date: 2026-06-22
-
-## Status
-
-Accepted
+- **Status:** accepted
+- **Date:** 2026-06-22
 
 ## Context
 

@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Stakeholder{% endblock %}
-{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Stakeholder</nav>{% endblock %}
+{% block title %}Stakeholders{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Stakeholders</nav>{% endblock %}
 {% set lvl = {'high': 'high', 'medium': 'medium', 'low': 'low'} %}
 {% from "_empty.html" import empty_state %}
 {% block content %}
-<h1 class="page-h1">Stakeholder <span class="count-pill">{{ total }} personas</span></h1>
+<h1 class="page-h1">Stakeholders <span class="count-pill">{{ total }} personas</span></h1>
 <p class="lead">Simplified personas: goals, concerns, influence, and interest.</p>
 
 {% if rows %}

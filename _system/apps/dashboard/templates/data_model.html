@@ -117,7 +117,7 @@
       rows.sort((a, b) => {
         const av = key(a.children[idx]); const bv = key(b.children[idx]);
         if (numeric) return asc ? (Number(av) - Number(bv)) : (Number(bv) - Number(av));
-        return asc ? av.localeCompare(bv, 'de') : bv.localeCompare(av, 'de');
+        return asc ? av.localeCompare(bv, 'en') : bv.localeCompare(av, 'en');
       });
       ths.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
       th.classList.add(asc ? 'sort-asc' : 'sort-desc');

@@ -58,6 +58,24 @@ def test_config_is_read_live_not_cached():
         "config must be re-read per call so the workshop can rename live"
 
 
+def test_shipped_default_name_is_flagged_so_the_home_page_can_prompt():
+    """The vault ships named `eTSU`; bootstrap.md step 1 is to replace it.
+    `system_name_set` alone cannot see that state — it is True the moment the
+    file is non-empty — so the home page lost its "run bootstrap" affordance
+    when the starter gained a shipped name."""
+    CONFIG.write_text(f'system_name: "{app.SHIPPED_SYSTEM_NAME}"\n', encoding="utf-8")
+    cfg = app.wiki_config()
+    assert cfg["system_name_set"] is True, cfg
+    assert cfg["system_name_is_shipped"] is True, cfg
+
+    CONFIG.write_text('system_name: "Their Own System"\n', encoding="utf-8")
+    cfg = app.wiki_config()
+    assert cfg["system_name_is_shipped"] is False, cfg
+
+    CONFIG.unlink()
+    assert app.wiki_config()["system_name_is_shipped"] is False, "unnamed is not shipped-default"
+
+
 def test_malformed_config_does_not_crash():
     CONFIG.write_text("system_name: [unclosed\n", encoding="utf-8")
     cfg = app.wiki_config()
@@ -69,5 +87,6 @@ if __name__ == "__main__":
     test_blank_config_falls_back()
     test_filled_config_is_used()
     test_config_is_read_live_not_cached()
+    test_shipped_default_name_is_flagged_so_the_home_page_can_prompt()
     test_malformed_config_does_not_crash()
     print("OK: wiki_config()")

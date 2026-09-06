@@ -1,10 +1,7 @@
 # ADR-0017: Functional-Requirement `lane:` field for story-map lanes
 
-Date: 2026-05-28
-
-## Status
-
-Accepted
+- **Status:** accepted
+- **Date:** 2026-05-28
 
 ## Context
 

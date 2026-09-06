@@ -4,7 +4,7 @@
 <script>
   (function () {
     if (!window.mermaid) { console.error("mermaid failed to load"); return; }
-    mermaid.initialize({ startOnLoad: false, theme: "dark", flowchart: { useMaxWidth: true, curve: "basis" } });
+
     // markdown renders ```mermaid as <pre><code class="language-mermaid">; lift it to a mermaid node
     document.querySelectorAll("pre > code.language-mermaid").forEach(function (c) {
       var pre = document.createElement("pre");
@@ -12,7 +12,31 @@
       pre.textContent = c.textContent;
       c.closest("pre").replaceWith(pre);
     });
-    Promise.resolve(mermaid.run({ querySelector: ".mermaid" }))
-      .catch(function (e) { console.error("mermaid render failed", e); });
+
+    // Keep every diagram's source. mermaid.run() replaces a node's text with the
+    // rendered SVG, and the palette is baked into that SVG rather than read from
+    // CSS — so re-rendering under the other theme needs the original text back.
+    var nodes = Array.prototype.slice.call(document.querySelectorAll("pre.mermaid"));
+    nodes.forEach(function (n) { n.dataset.mermaidSrc = n.textContent; });
+
+    function render(theme) {
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: theme === "light" ? "default" : "dark",
+        flowchart: { useMaxWidth: true, curve: "basis" }
+      });
+      nodes.forEach(function (n) {
+        n.textContent = n.dataset.mermaidSrc;
+        n.removeAttribute("data-processed");   // mermaid skips nodes still marked done
+      });
+      return Promise.resolve(mermaid.run({ nodes: nodes }))
+        .catch(function (e) { console.error("mermaid render failed", e); });
+    }
+
+    // Published for the footer theme switch in base.html; absent on pages that
+    // include no diagram, which is why that caller checks before calling.
+    window.ETSU_RERENDER_MERMAID = render;
+
+    render(document.documentElement.getAttribute("data-theme"));
   })();
 </script>

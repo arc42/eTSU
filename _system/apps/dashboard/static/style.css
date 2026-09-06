@@ -55,7 +55,8 @@
   --line: #d2ddec;
   --ink: #14213c;
   --ink-soft: #4c5c7a;
-  --ink-dim: #74849f;
+  --ink-dim: #5c6c87;         /* darker than the dark theme's dim ink: on a near-white
+                                  ground the original failed AA for footer text */
   --accent: #1667c4;           /* darkened from the dark theme's #3ea6ff: the
                                   bright blue fails contrast on white */
   --accent-2: #0f7f66;

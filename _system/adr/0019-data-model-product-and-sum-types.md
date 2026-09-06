@@ -1,10 +1,7 @@
 # ADR-0019: Data-Model stereotypes — product types and sum types
 
-Date: 2026-05-28
-
-## Status
-
-Accepted
+- **Status:** accepted
+- **Date:** 2026-05-28
 
 ## Context
 

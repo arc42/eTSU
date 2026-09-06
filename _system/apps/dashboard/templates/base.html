@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Dashboard{% endblock %} · {{ system_name }}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='etsu-favicon.png') }}">
+  <script>
+  // Theme, stamped before the stylesheet paints. Inline and in <head> on
+  // purpose: an external file is a second round-trip, and the flash of dark
+  // chrome before a light page settles is exactly what this prevents.
+  // Dark is the default — the dashboard is made to be projected.
+  (function () {
+    try {
+      var t = localStorage.getItem("etsu-theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}   // private mode or blocked storage: fall through to dark
+  })();
+  </script>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -19,6 +31,10 @@
     <img class="foot-mark" src="{{ url_for('static', filename='etsu-mark.png') }}" alt="">
     <div class="foot-title">Live view · {{ system_name }} requirements wiki</div>
     <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki pattern</div>
+    <button type="button" class="theme-toggle" id="theme-toggle">
+      <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
+      <span class="theme-toggle-label">Light theme</span>
+    </button>
   </footer>
   {% block scripts %}{% endblock %}
   <script>
@@ -41,6 +57,38 @@
     window.addEventListener("pagehide", function () {
       if (navigator.sendBeacon) { navigator.sendBeacon("/leaving"); }
     });
+  })();
+
+  // Theme switch. The palette itself is pure CSS custom properties, so the
+  // swap is one attribute on <html>; the only thing that does not follow is
+  // mermaid, which bakes its colours into the SVG when it renders. _mermaid.html
+  // publishes a re-render hook for that, and is absent on pages with no diagram.
+  (function () {
+    var root = document.documentElement;
+    var btn = document.getElementById("theme-toggle");
+    if (!btn) { return; }
+    var icon = btn.querySelector(".theme-toggle-icon");
+    var label = btn.querySelector(".theme-toggle-label");
+
+    function current() { return root.getAttribute("data-theme") === "light" ? "light" : "dark"; }
+
+    // The button always advertises where a click goes, not where you are.
+    function paint() {
+      var next = current() === "light" ? "dark" : "light";
+      icon.innerHTML = next === "light" ? "&#9728;" : "&#9790;";   // sun / moon
+      label.textContent = next === "light" ? "Light theme" : "Dark theme";
+      btn.setAttribute("title", "Switch to the " + next + " theme");
+    }
+
+    btn.addEventListener("click", function () {
+      var next = current() === "light" ? "dark" : "light";
+      root.setAttribute("data-theme", next);
+      try { localStorage.setItem("etsu-theme", next); } catch (e) {}
+      paint();
+      if (window.ETSU_RERENDER_MERMAID) { window.ETSU_RERENDER_MERMAID(next); }
+    });
+
+    paint();
   })();
   </script>
 </body>

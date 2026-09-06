@@ -98,7 +98,7 @@
       });
       // rank by relevance, then by body frequency, then alphabetically
       scored.sort((a, b) => b[0] - a[0] || b[1] - a[1]
-        || a[2].dataset.title.localeCompare(b[2].dataset.title, 'de'));
+        || a[2].dataset.title.localeCompare(b[2].dataset.title, 'en'));
       scored.forEach(([r, , el]) => { el.hidden = false; setScore(el, r); list.appendChild(el); shown++; });
     } else if (browsing) {                               // facet browse, no query
       allResults.forEach(el => {

@@ -29,7 +29,7 @@ mimetypes.add_type("image/webp", ".webp")
 app = Flask(__name__)
 
 # Timezone for the "last refreshed" footer; honours the container's TZ env.
-DISPLAY_TZ = os.environ.get("TZ", "Europe/Berlin")
+DISPLAY_TZ = os.environ.get("TZ", "UTC")
 
 
 @app.context_processor
@@ -40,7 +40,8 @@ def inject_refresh_time():
         tz = ZoneInfo(DISPLAY_TZ)
     except (ZoneInfoNotFoundError, ValueError):
         tz = None
-    return {"refreshed_at": datetime.now(tz).strftime("%d.%m.%Y, %H:%M:%S %Z").strip()}
+    # ISO-ish and locale-free: "06.09.2026" reads as 9 June to half the room.
+    return {"refreshed_at": datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z").strip()}
 
 # Root of the wiki layer. In Docker this is a read-only bind mount at /wiki;
 # for local runs it falls back to the repo's wiki/ folder (4 levels up from
@@ -63,15 +64,22 @@ CONFIG_PATH = Path(_env_cfg) if _env_cfg else Path(__file__).resolve().parents[2
 
 DEFAULT_SYSTEM_NAME = "Requirements Wiki"
 
+# The name `_system/wiki.yaml` ships with. bootstrap.md step 1 tells the group
+# to REPLACE it with their own system's name, so while it is still in place the
+# vault is named but not yet bootstrapped — the home page says so.
+SHIPPED_SYSTEM_NAME = "eTSU"
+
 
 def wiki_config() -> dict:
     """Project identity from `_system/wiki.yaml`.
 
     Returns `system_name` (never empty — falls back to DEFAULT_SYSTEM_NAME),
-    `system_name_set` (False while the vault is still unnamed, so views can
-    show a "name your system" hint) and `tagline`. A missing, empty or
-    malformed file yields the defaults rather than an error: an unnamed vault
-    is the normal state on day one.
+    `system_name_set` (False while the vault is still unnamed),
+    `system_name_is_shipped` (True while it still reads `eTSU`, the starter's
+    own name — bootstrap.md step 1 is to replace it) and `tagline`. The two
+    flags let the home page prompt for the right next step in all three
+    states. A missing, empty or malformed file yields the defaults rather than
+    an error: an unnamed vault is the normal state on day one.
     """
     try:
         data = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
@@ -83,6 +91,7 @@ def wiki_config() -> dict:
     return {
         "system_name": name or DEFAULT_SYSTEM_NAME,
         "system_name_set": bool(name),
+        "system_name_is_shipped": name == SHIPPED_SYSTEM_NAME,
         "tagline": str(data.get("tagline") or "").strip(),
     }
 
@@ -326,6 +335,17 @@ ADR_STATUS_RE = re.compile(r"\*\*Status:\*\*\s*(.+?)\s*$", re.MULTILINE)
 ADR_DATE_RE = re.compile(r"\*\*Date:\*\*\s*(.+?)\s*$", re.MULTILINE)
 
 
+_INLINE_MD_RE = re.compile(r"\*\*(?P<b>[^*]+)\*\*|`(?P<c>[^`]+)`|\*(?P<i>[^*]+)\*")
+
+
+def _strip_inline_markdown(text: str) -> str:
+    """ADR headings are read as raw text, not rendered, so `**bold**` and
+    `` `code` `` reached the /adrs list and the home tile with their asterisks
+    and backticks on screen. Titles are plain text there."""
+    return _INLINE_MD_RE.sub(lambda m: m.group("b") or m.group("c") or m.group("i"),
+                             text).strip()
+
+
 def _normalize_adr_status(raw: str) -> str:
     """Collapse 'superseded by ADR-0007' etc. to a single filterable keyword."""
     s = raw.strip().lower()
@@ -349,7 +369,7 @@ def load_adrs() -> list[dict]:
         hm = ADR_HEADING_RE.search(text)
         if not hm or "NNNN" in hm.group(1):
             continue
-        adr_id, title = hm.group(1), hm.group(2)
+        adr_id, title = hm.group(1), _strip_inline_markdown(hm.group(2))
         sm, dm = ADR_STATUS_RE.search(text), ADR_DATE_RE.search(text)
         status_raw = sm.group(1).strip() if sm else ""
         date = dm.group(1).strip() if dm else ""
@@ -1246,7 +1266,7 @@ def index():
             "key": "req42", "label": "req42", "href": "/req42",
             "count": req42_total, "unit": "entries", "logo": "req42-logo-white.png",
             "rows": req42_rows, "active": True,
-            "sub": f"{req42_in_scope} of 12 blocks",
+            "sub": f"{req42_in_scope} of 12 blocks in scope",
         },
         {
             "key": "search", "label": "Search", "href": "/search", "icon": "🔎",
@@ -1283,8 +1303,11 @@ def index():
             "key": "data-model", "label": "Data model", "href": "/data-model",
             "icon": "🧩", "active": True,
             "diagram": build_data_model_kind_diagram(),
-            "claim": (f"{n_entities} entities" if n_entities else
-                      "No entities yet — model them as DM- pages"),
+            # Empty -> no claim at all: index.html renders the shared empty
+            # state, and a second "No entities yet" line under it read as two
+            # contradictory messages stacked on one tile.
+            "claim": (f"{n_entities} entities" if n_entities else ""),
+            "entities": n_entities,
         },
     ]
     needs_mermaid = any(t.get("diagram") for t in tiles)
@@ -1528,7 +1551,7 @@ def build_data_model_kind_diagram() -> str | None:
 # Section/callout extractors for the /data-model catalog: each DM page is
 # rendered as bold-led sections (**Purpose.**, **Attributes.**, **Relationships.**,
 # **Invariants / rules.** …) plus 0..n `> [!note] X` callouts (Open points,
-# Bewusst weggelassen). Order from the file is preserved so the on-page detail
+# deliberately omitted). Order from the file is preserved so the on-page detail
 # reads the same as the markdown source.
 
 _DM_SECTION_RE = re.compile(

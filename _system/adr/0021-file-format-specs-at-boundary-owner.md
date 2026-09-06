@@ -1,10 +1,7 @@
 # ADR-0021: File-format specifications live at the boundary owner of the data flow
 
-Date: 2026-06-01
-
-## Status
-
-Accepted
+- **Status:** accepted
+- **Date:** 2026-06-01
 
 Amended 2026-06-04: every format spec carries a fictive inline example (Decision 5).
 
