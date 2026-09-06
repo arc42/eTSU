@@ -34,7 +34,7 @@ them in English throughout, per its ubiquitous-language decision (ADR-0005).
 
 | # | req42 block | Home in this vault |
 |---|-------------|--------------------|
-| 01 | Business Goals | Stakeholder goals ([[STK-...]]) + feature rationale; framed via [[PAM]] (req42's primary notation) or [[SMART]] |
+| 01 | Business Goals | `wiki/goals/` — one type, `stereotype: vision\|objective`; the vision is the roof, objectives hang under it via `parent:`; framed via [[PAM]] (req42's primary notation), promoted to [[SMART]] once a horizon is set (ADR-0016) |
 | 02 | Stakeholders | `wiki/stakeholders/` |
 | 03 | Scope | `wiki/context/` (boundary, in/out-of-scope) + `wiki/external-interfaces/` (neighbours); ADR-0009 |
 | 04 | Product Backlog | `wiki/functional-requirements/` — one type, `stereotype: epic\|feature\|story`; **Epic → Feature → Story** via `parent:` links, projected as a [[story-mapping\|story map]]; [[user-story-format]], [[acceptance-criteria]], [[INVEST]], [[MoSCoW]] (ADR-0012) |

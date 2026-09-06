@@ -29,7 +29,10 @@ source-of-truth: <system/owner of this data>
 **Identity.** <Key attribute(s); omit for value-object and sum-type.>
 
 **Attributes.**
-- <name> : <type> <mandatory?> — <note>
+<!-- The attribute NAME must be in `backticks` — the dashboard reads the names
+     from this list to fill the "Attributes" column on /data-model. A bullet
+     without backticks is still readable prose, but it is invisible there. -->
+- `<name>` : <type> <mandatory?> — <note>
 
 **Relationships.**
 - <verb> → [[DM-...]] · <cardinality> · <association | aggregation | composition | inheritance> · <mandatory?>

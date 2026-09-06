@@ -9,14 +9,13 @@ sources: []
 related: []          # [[EIF-...]] interfaces, [[STK-...]] roles
 tags: [context]
 kind: business       # business | technical
-diagram: generated   # projected on-the-fly from EIF.flows + STK.provides/receives; not stored (ADR-0013, ISS-010)
+diagram: generated   # projected on-the-fly from EIF.flows + STK.provides/receives; not stored (ADR-0013)
 ---
 
 # {{title}}
 
 **Diagram.** _Projected_ — generated from the external interfaces (`EIF.flows`) and the
-user roles' `provides:`/`receives:` edges (ADR-0013, [[ISS-010-context-diagram-projection-audit-loop]]);
-not hand-maintained here.
+user roles' `provides:`/`receives:` edges (ADR-0013); not hand-maintained here.
 
 **In scope.** <One paragraph: what the system IS responsible for delivering.>
 

@@ -1,3 +1,14 @@
+/* ---- palette ----
+   Two full token sets. Dark is the default because the dashboard is built to
+   be projected in a dimmed room; light is an explicit opt-in via the footer
+   switch, which stamps data-theme="light" on <html>.
+
+   The rule that keeps this working: no selector below may hardcode a
+   *structural* colour. A hardcoded value survives the switch unchanged and
+   goes invisible in the other theme — pale mint label text on white, a navy
+   pane on a light page. Translucent accent washes (rgba(62,166,255,.1) and
+   friends) are the deliberate exception: they tint whatever surface they sit
+   on and read correctly against both grounds. */
 :root {
   --bg: #0e1726;
   --bg-soft: #14203a;
@@ -14,12 +25,72 @@
   --violet: #8b7cff;
   --radius: 16px;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --glow: #1a2b44;              /* body's top-right ambient wash */
+  --topbar-bg: rgba(14,23,38,.7);
+  --scroll-track: rgba(0,0,0,.28);
+  --graph-bg: #0c1424;         /* cytoscape / mermaid canvas ground */
+  --graph-glow: #16223d;
+  --plate: #e8eef9;            /* backing behind the eTSU mark (see .hero-mark) */
+  --hairline: rgba(255,255,255,.02);
+  --chip-bg: rgba(255,255,255,.08);
+  --on-accent: #06101f;        /* text on an --accent fill */
+  --tint-ink: #cfe2ff;         /* text on blue-tinted surfaces */
+  --vision-1: #2f4f7a;         /* the vision card's gradient */
+  --vision-2: #2a4267;
+  --vision-3: #243a5c;
+  --vision-edge: rgba(127,192,255,.55);
+  --bz-glo: #8fb6e8;
+  --bz-dm: #8fd8c4;
+  --layer-dm-ink: #8fd8c4;     /* graph legend labels, off-state */
+  --layer-stk-ink: #e6b667;
+  --layer-eif-ink: #b39ad6;
+  --layer-goal-ink: #e0c068;
+  --layer-rest-ink: #aab4c9;
+}
+:root[data-theme="light"] {
+  --bg: #f5f8fd;
+  --bg-soft: #eaf1fa;
+  --card: #ffffff;
+  --card-2: #edf3fb;
+  --line: #d2ddec;
+  --ink: #14213c;
+  --ink-soft: #4c5c7a;
+  --ink-dim: #74849f;
+  --accent: #1667c4;           /* darkened from the dark theme's #3ea6ff: the
+                                  bright blue fails contrast on white */
+  --accent-2: #0f7f66;
+  --warn: #9a6206;
+  --danger: #c22c46;
+  --violet: #6250d0;
+  --shadow: 0 10px 30px rgba(20,33,60,.12);
+  --glow: #dde9f8;
+  --topbar-bg: rgba(245,248,253,.78);
+  --scroll-track: rgba(20,33,60,.08);
+  --graph-bg: #f0f5fc;
+  --graph-glow: #dfeaf8;
+  --plate: #ffffff;            /* the mark is navy-on-white artwork: on a light
+                                  page it needs no plate, just a flush ground */
+  --hairline: rgba(20,33,60,.03);
+  --chip-bg: rgba(20,33,60,.06);
+  --on-accent: #ffffff;        /* --accent is dark here, so this flips */
+  --tint-ink: #17457f;
+  --vision-1: #dcebfb;
+  --vision-2: #cfe3f8;
+  --vision-3: #c6dcf5;
+  --vision-edge: rgba(22,103,196,.45);
+  --bz-glo: #2f6fb3;
+  --bz-dm: #1c7a66;
+  --layer-dm-ink: #14705c;
+  --layer-stk-ink: #8a5c10;
+  --layer-eif-ink: #59418c;
+  --layer-goal-ink: #7a6014;
+  --layer-rest-ink: #4d5a72;
 }
 * { box-sizing: border-box; }
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: radial-gradient(1200px 600px at 80% -10%, #1a2b44 0%, transparent 60%), var(--bg);
+  background: radial-gradient(1200px 600px at 80% -10%, var(--glow) 0%, transparent 60%), var(--bg);
   background-color: var(--bg);
   color: var(--ink);
   line-height: 1.55;
@@ -27,9 +98,9 @@ body {
 code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .85em; }
 
 /* ---- scrollbars: visible channel + contrasting thumb ---- */
-* { scrollbar-width: thin; scrollbar-color: var(--ink-dim) rgba(0,0,0,.28); }
+* { scrollbar-width: thin; scrollbar-color: var(--ink-dim) var(--scroll-track); }
 ::-webkit-scrollbar { width: 11px; height: 11px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,.28); border-radius: 999px; }
+::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 999px; }
 ::-webkit-scrollbar-thumb { background: var(--ink-dim); border-radius: 999px;
   border: 2px solid transparent; background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-soft); }
@@ -37,7 +108,7 @@ code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-si
 .topbar {
   display: flex; align-items: center; gap: 1.5rem;
   padding: 1rem 2rem; border-bottom: 1px solid var(--line);
-  background: rgba(14,23,38,.7); backdrop-filter: blur(8px);
+  background: var(--topbar-bg); backdrop-filter: blur(8px);
   position: sticky; top: 0; z-index: 10;
 }
 .crumbs { color: var(--ink-soft); font-size: .92rem; }
@@ -222,8 +293,8 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
   white-space: nowrap; max-width: 18ch; overflow: hidden; text-overflow: ellipsis;
 }
 .bz:hover { border-color: var(--accent); color: var(--ink); }
-.bz-GLO { color: #8fb6e8; border-color: rgba(47,111,179,.55); }
-.bz-DM  { color: #8fd8c4; border-color: rgba(58,143,125,.55); }
+.bz-GLO { color: var(--bz-glo); border-color: rgba(47,111,179,.55); }
+.bz-DM  { color: var(--bz-dm); border-color: rgba(58,143,125,.55); }
 .bz-more { color: var(--ink-dim); }
 
 /* ---- search + filter toolbar ---- */
@@ -241,7 +312,7 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
   background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: .4rem .9rem;
   display: inline-flex; align-items: center; gap: .4rem; transition: all .12s ease; }
 .fbtn:hover { border-color: var(--accent); color: var(--ink); }
-.fbtn.active { background: var(--accent); border-color: var(--accent); color: #06101f; font-weight: 600; }
+.fbtn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 .fnum { font-variant-numeric: tabular-nums; opacity: .8; }
 .fbtn.active .fnum { opacity: 1; }
 .empty-hint { color: var(--ink-dim); font-style: italic; padding: 1.2rem 1rem; margin: 0; }
@@ -332,8 +403,8 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
    blue gradient with stronger border + glow so it reads as the "anchor"
    above the four objective cards below */
 .goal-card.goal-vision { background: linear-gradient(135deg,
-    #2f4f7a 0%, #2a4267 55%, #243a5c 100%);
-  border-color: rgba(127,192,255,.55);
+    var(--vision-1) 0%, var(--vision-2) 55%, var(--vision-3) 100%);
+  border-color: var(--vision-edge);
   box-shadow: 0 14px 36px rgba(62,166,255,.22), var(--shadow);
   margin-bottom: 1.6rem; overflow: hidden; }
 .goal-card.goal-vision::before { content: ""; position: absolute; inset: 0 0 auto 0;
@@ -342,7 +413,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .goal-card.goal-vision .goal-card-head h2 { font-size: 1.55rem; letter-spacing: -.02em; }
 .goal-card.goal-vision .goal-prose p { color: var(--ink); font-size: 1.02rem;
   line-height: 1.6; margin: .4rem 0 .2rem; }
-.goal-card.goal-vision .goal-prose strong { color: #cfe2ff; }
+.goal-card.goal-vision .goal-prose strong { color: var(--tint-ink); }
 .goal-card-head { display: flex; align-items: baseline; gap: .55rem; flex-wrap: wrap;
   margin: .1rem 0 .6rem; }
 .goal-card-head h2 { font-size: 1.2rem; margin: 0; color: var(--ink); letter-spacing: -.01em; }
@@ -350,7 +421,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .goal-card-head .stereo { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
   padding: .15rem .55rem; border-radius: 999px; border: 1px solid var(--line);
   background: var(--card-2); color: var(--ink-soft); }
-.goal-card-head .stereo-vision { color: #cfe2ff; border-color: rgba(62,166,255,.45);
+.goal-card-head .stereo-vision { color: var(--tint-ink); border-color: rgba(62,166,255,.45);
   background: rgba(62,166,255,.1); }
 .goal-card-head .maturity { margin-left: auto; font-size: .72rem; text-transform: uppercase;
   letter-spacing: .05em; padding: .15rem .55rem; border-radius: 999px;
@@ -406,7 +477,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
   position: sticky; left: 0; background: var(--card); z-index: 1; }
 .goal-matrix-card tbody td.gm-row-head code { color: var(--accent); margin-right: .3rem; }
 .goal-matrix-card tbody td.gm-enabler { border-left: 1px dashed var(--line);
-  background: rgba(255,255,255,.02); }
+  background: var(--hairline); }
 .goal-matrix-card .gm-dot { color: var(--accent-2); font-size: 1.1rem; line-height: 1; }
 .goal-matrix-card .gm-empty { color: var(--ink-dim); opacity: .35; }
 .goal-matrix-card tbody tr:last-child td { border-bottom: 0; }
@@ -599,7 +670,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
    story read the same everywhere they appear. */
 .detail-head .stereo { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em;
   padding: .12rem .5rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-soft); }
-.stereo-epic { color: #cfe2ff; border-color: rgba(62,166,255,.45); }
+.stereo-epic { color: var(--tint-ink); border-color: rgba(62,166,255,.45); }
 .stereo-feature { color: var(--accent-2); border-color: rgba(70,211,176,.4); }
 
 .badge-prio { color: var(--accent); border-color: rgba(62,166,255,.35); }
@@ -607,7 +678,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 /* --- glossary term-network force-graph (ADR-0023) --- */
 .graph-canvas {
   height: 72vh; min-height: 480px; width: 100%;
-  background: radial-gradient(900px 480px at 70% -10%, #16223d 0%, transparent 60%), #0c1424;
+  background: radial-gradient(900px 480px at 70% -10%, var(--graph-glow) 0%, transparent 60%), var(--graph-bg);
   border: 1px solid var(--line); border-radius: 12px;
 }
 .graph-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: 0 0 1rem; }
@@ -619,15 +690,15 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 }
 .layer-btn:hover { color: var(--ink); }
 .layer-btn .layer-n {
-  font-size: .72rem; background: rgba(255,255,255,.08); color: var(--ink-soft);
+  font-size: .72rem; background: var(--chip-bg); color: var(--ink-soft);
   border-radius: 999px; padding: 0 .4rem;
 }
 /* each layer button carries its type colour (button = legend, ADR-0023) */
-.layer-DM   { border-color: #3a8f7d; color: #8fd8c4; }
-.layer-STK  { border-color: #c98a2b; color: #e6b667; }
-.layer-EIF  { border-color: #7a5ea8; color: #b39ad6; }
-.layer-GOAL { border-color: #b8932f; color: #e0c068; }
-.layer-REST { border-color: #7e8aa3; color: #aab4c9; }
+.layer-DM   { border-color: #3a8f7d; color: var(--layer-dm-ink); }
+.layer-STK  { border-color: #c98a2b; color: var(--layer-stk-ink); }
+.layer-EIF  { border-color: #7a5ea8; color: var(--layer-eif-ink); }
+.layer-GOAL { border-color: #b8932f; color: var(--layer-goal-ink); }
+.layer-REST { border-color: #7e8aa3; color: var(--layer-rest-ink); }
 .layer-btn.on { color: #08152b; }
 .layer-DM.on   { background: #3a8f7d; border-color: #6fc2ad; }
 .layer-STK.on  { background: #c98a2b; border-color: #e6b667; }
@@ -648,7 +719,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .glo-ego .graph-toolbar { margin-bottom: .55rem; }
 .ego-canvas {
   height: 320px; width: 100%;
-  background: radial-gradient(700px 360px at 70% -10%, #16223d 0%, transparent 60%), #0c1424;
+  background: radial-gradient(700px 360px at 70% -10%, var(--graph-glow) 0%, transparent 60%), var(--graph-bg);
   border: 1px solid var(--line); border-radius: 12px;
 }
 
@@ -690,17 +761,35 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .hero { margin: .2rem 0 1.4rem; }
 .hero-title { font-size: 2.2rem; margin: 0 0 .3rem; letter-spacing: -0.01em; }
 /* eTSU mark. The artwork is drawn for light grounds and its linework is a navy
-   close to --bg, so it gets a light plate rather than sitting on the raw
-   background. Sized in rem so it scales with a projector's zoom. */
+   close to the dark theme's --bg, so it sits on a --plate backing rather than
+   on the raw background. In the light theme --plate is white, which makes the
+   backing effectively disappear against the page — which is the point: there
+   the artwork already has the ground it was drawn for.
+   Sized in rem so it scales with a projector's zoom. */
 .hero-mark {
   display: block; width: auto; height: 5.2rem; margin: 0 0 .9rem;
   padding: .55rem .8rem; border-radius: var(--radius);
-  background: var(--ink); box-shadow: var(--shadow);
+  background: var(--plate); box-shadow: var(--shadow);
 }
 .foot-mark {
   display: block; width: auto; height: 2.1rem; margin: 0 auto .55rem;
-  padding: .3rem .45rem; border-radius: 10px; background: var(--ink); opacity: .9;
+  padding: .3rem .45rem; border-radius: 10px; background: var(--plate); opacity: .9;
 }
+
+/* Theme switch. It lives in the footer because the topbar carries breadcrumbs
+   only and is absent entirely on the home page — there is no header nav to
+   hang it off. base.html stamps the choice on <html> before first paint. */
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: .45rem;
+  margin: .9rem 0 0; padding: .35rem .85rem;
+  font: inherit; font-size: .8rem; color: var(--ink-soft);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 999px; cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+.theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
+.theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.theme-toggle-icon { font-size: .95rem; line-height: 1; }
 @media (max-width: 640px) { .hero-mark { height: 3.8rem; } }
 
 /* empty states — the first thing a workshop audience sees */

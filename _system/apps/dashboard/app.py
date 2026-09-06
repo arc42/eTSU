@@ -596,7 +596,7 @@ _TYPE_FOLDER = {
     "GLO": "glossary", "DM": "data-models", "STK": "stakeholders",
     "EIF": "external-interfaces", "GOAL": "goals", "CTX": "context",
     "FR": "functional-requirements", "CON": "constraints", "ISS": "issues",
-    "UC": "use-cases", "AM": "activity-models", "QR": "quality-requirements",
+    "UC": "use-cases", "ACT": "activity-models", "QR": "quality-requirements",
 }
 
 
@@ -736,10 +736,10 @@ def build_glossary_ego_graph(stem: str) -> dict | None:
 _TYPE_LABEL = {
     "GLO": "Glossary", "STK": "Stakeholders", "DM": "Data models", "CTX": "Context",
     "EIF": "External interfaces", "GOAL": "Goals", "FR": "Functional requirements",
-    "UC": "Use cases", "AM": "Activity models", "QR": "Quality requirements",
+    "UC": "Use cases", "ACT": "Activity models", "QR": "Quality requirements",
     "CON": "Constraints", "ISS": "Issues",
 }
-_REL_TYPE_ORDER = ["GLO", "STK", "DM", "CTX", "EIF", "GOAL", "FR", "UC", "AM", "QR", "CON", "ISS"]
+_REL_TYPE_ORDER = ["GLO", "STK", "DM", "CTX", "EIF", "GOAL", "FR", "UC", "ACT", "QR", "CON", "ISS"]
 
 
 def build_relations_panel(stem: str) -> dict:
@@ -1612,7 +1612,7 @@ def data_model_entities() -> list[dict]:
 SUPPORTING_MODEL_TYPES = [
     {"folder": "data-models", "label": "Data model", "code": "DM", "href": "/data-model"},
     {"folder": "use-cases", "label": "Use Cases", "code": "UC", "href": None},
-    {"folder": "activity-models", "label": "Activity models", "code": "AM", "href": None},
+    {"folder": "activity-models", "label": "Activity models", "code": "ACT", "href": None},
 ]
 
 
