@@ -1,27 +1,28 @@
-# ADR-0010: Feld `aliases` im Stakeholder-Template
+# ADR-0010: `aliases` field on the stakeholder template
 
 - **Status:** accepted
 - **Date:** 2026-05-25
 
 ## Context
-Quellen benennen dieselbe Rolle unterschiedlich. Die Story (SRC-004) spricht vom
-*Backoffice* — gemeint ist die fachliche Organisator-Rolle, die wir als
-[[STK-004-wettkampforganisator|Wettkampforganisator]] führen. Solche
-User-Kategorie-/Synonymnamen sollen auffindbar sein, ohne den kanonischen Titel zu
-ändern oder Stakeholder zu duplizieren. Das Glossar-Template hat dafür bereits
-`aliases`; das Stakeholder-Template nicht.
+Sources name the same role differently. The story (SRC-004) speaks of the
+*Backoffice* — meaning the operational role we track as
+[[STK-004-role-b|Role B]]. Such user-category / synonym names should be
+findable without changing the canonical title or duplicating stakeholders.
+The glossary template already has `aliases` for this; the stakeholder
+template does not.
 
 ## Decision
-Das Stakeholder-Template erhält ein optionales Feld **`aliases: []`** (alternative
-Namen / User-Kategorie-Labels). Obsidian löst `[[Backoffice]]` damit auf den
-kanonischen Stakeholder auf. Rolle und Person bleiben getrennt: eine Mehrpersonen-
-**Rolle** (z. B. Wettkampforganisator, alias *Backoffice*) kann mehrere **Instanzen**
-haben (Personen-Stakeholder wie [[STK-006-ligapraesident|Fritz Flosse]] plus
-Freiwillige), verlinkt über `related`.
+The stakeholder template gets an optional field **`aliases: []`** (alternative
+names / user-category labels). Obsidian then resolves `[[Backoffice]]` to the
+canonical stakeholder. Role and person stay separate: a multi-person **role**
+(e.g. Role B, alias *Backoffice*) can have several **instances** (person
+stakeholders such as [[STK-006-role-c|Role C]] plus volunteers), linked
+via `related`.
 
 ## Consequences
-Synonyme/Kategorienamen sind auffindbar, ohne Duplikate oder Titeländerungen. Kosten:
-ein weiteres optionales Frontmatter-Feld; Bestandsseiten müssen es nicht nachtragen
-(leer = kein Alias). Gruppen über *mehrere* Rollen (z. B. „Offizielle“, „Kinder &
-Eltern“) sind **keine** Aliase eines einzelnen Stakeholders — sie werden als
-User-Gruppen im Kontextknoten ([[CTX-001-systemkontext]]) geführt.
+Synonyms/category names become findable without duplicates or title changes.
+Cost: one more optional frontmatter field; existing pages don't need to
+backfill it (empty = no alias). Groups spanning *several* roles (e.g.
+"operators", "end users") are **not** aliases of a single stakeholder — they
+are tracked as user groups on the context node
+([[CTX-001-system-context]]).

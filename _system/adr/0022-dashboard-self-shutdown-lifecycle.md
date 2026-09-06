@@ -1,4 +1,4 @@
-# 22. Dashboard beendet sich selbst, sobald der Browser-Tab geschlossen wird
+# 22. The dashboard shuts itself down once the browser tab is closed
 
 Date: 2026-06-22
 
@@ -8,117 +8,122 @@ Accepted
 
 ## Context
 
-Das Requirements-Dashboard (`_system/apps/dashboard/`) ist eine schreibend-lose
-Flask-App, die bisher unter gunicorn (2 Worker) in einem Docker-Container im
-Hintergrund lief: `dashboard.sh up` → `docker compose up -d`, Restart-Policy
-`unless-stopped`, danach öffnet das Skript den Browser.
+The requirements dashboard (`_system/apps/dashboard/`) is a read-only Flask
+app that used to run under gunicorn (2 workers) in a Docker container in the
+background: `dashboard.sh up` → `docker compose up -d`, restart policy
+`unless-stopped`, after which the script opens the browser.
 
-Daraus folgten zwei Probleme:
+That created two problems:
 
-- **Kein sauberer Stop aus der Oberfläche.** Beenden ging nur über
-  `./dashboard.sh down` bzw. `docker stop` — nichts in der laufenden Web-UI.
-- **Browser zu ≠ Server zu.** Schließt man Fenster/Tab, läuft der Container
-  unbemerkt weiter (kein WebSocket/SSE/Heartbeat, der das Schließen erkennt),
-  belegt Port 8080 und überlebt wegen `unless-stopped` sogar Reboots — eine
-  vergessene Waise. Datenverlust droht nicht (read-only), aber der Container
-  bleibt als Zombie hängen.
+- **No clean stop from the UI.** Shutting it down only worked via
+  `./dashboard.sh down` or `docker stop` — nothing in the running web UI.
+- **Browser closed ≠ server closed.** Closing the window/tab left the
+  container running unnoticed (no WebSocket/SSE/heartbeat detects the
+  closing), occupying port 8080, and — thanks to `unless-stopped` — even
+  surviving reboots: a forgotten orphan. No data loss threatens (read-only),
+  but the container hangs around as a zombie.
 
-Ein naiver `/stop`-Endpunkt allein löst das nicht: Der gunicorn-Master (PID 1
-im Container) startet beendete Worker neu, und `restart: unless-stopped` bringt
-den Container nach einem Selbst-Stop sofort wieder hoch — die Restart-Policy
-bekämpft aktiv jede Selbstabschaltung von innen.
+A naive `/stop` endpoint alone doesn't solve this: the gunicorn master
+(PID 1 in the container) restarts terminated workers, and
+`restart: unless-stopped` brings the container straight back up after a
+self-stop — the restart policy actively fights any self-shutdown from
+inside.
 
-Außerdem zerfällt In-Memory-Zustand (wer sieht gerade zu?) bei mehreren Workern
-in mehrere Prozesse.
+On top of that, in-memory state (who is currently watching?) fragments across
+several processes once there is more than one worker.
 
-Eine **erste Iteration** koppelte Presence an einen dauerhaft offenen
-SSE-Stream (`/events`) je Tab — gewählt, weil Hintergrund-Tabs `setInterval`
-drosseln/einfrieren und ein naives JS-Heartbeat-Polling deshalb Fehlsignale
-liefern kann (Server fährt herunter, obwohl der Tab nur unsichtbar ist). Das
-erwies sich als Fehlentscheidung: **jeder offene Stream belegt einen
-Worker-Thread für seine gesamte Lebensdauer.** Beim Klicken durch Unterseiten
-sammelten sich kurzlebige „Zombie"-Verbindungen (die alte Seite trennt, der
-Server merkt es erst beim nächsten Keepalive), bis der Threadpool erschöpft war
-— dann ließ sich **nicht einmal mehr `/stop` bedienen** (das Overlay erschien,
-der Server starb aber nie). Eine Obergrenze + Thread-Reserve linderte nur das
-Symptom. Die eigentliche Frage — *warum überhaupt Verbindungen halten?* —
-führte zur Vereinfachung unten.
+A **first iteration** tied presence to a permanently open SSE stream
+(`/events`) per tab — chosen because background tabs throttle/freeze
+`setInterval`, so naive JS heartbeat polling can produce false signals (the
+server shuts down even though the tab is merely hidden). That turned out to
+be the wrong call: **every open stream occupies a worker thread for its
+entire lifetime.** Clicking through subpages accumulated short-lived
+"zombie" connections (the old page disconnects, but the server only notices
+at the next keepalive) until the thread pool was exhausted — at which point
+**not even `/stop` could be served any more** (the overlay appeared, but the
+server never died). A cap plus a thread reserve only eased the symptom. The
+real question — *why hold connections open at all?* — led to the
+simplification below.
 
-Auch ein **„Server stoppen"-Knopf** in der UI erwies sich als Sackgasse: Eine
-Webseite kann ihren eigenen Tab per Browser-Sicherheitsregel **nicht** schließen
-(`window.close()` greift nur bei per Script geöffneten Fenstern). Der Knopf
-konnte den Server zwar beenden, ließ aber den toten Tab offen — schlechter, als
-einfach den Tab zu schließen. Der Knopf wurde daher wieder entfernt; **das
-Schließen des Tabs ist die Beenden-Geste.**
+A **"stop server" button** in the UI also turned out to be a dead end: a web
+page **cannot** close its own tab under browser security rules
+(`window.close()` only works on windows that were opened by script). The
+button could terminate the server, but left the dead tab open — worse than
+simply closing the tab. The button was therefore removed again; **closing
+the tab is the shutdown gesture.**
 
 ## Decision
 
-Wir behandeln das Dashboard als **kurzlebigen On-Demand-Viewer** (Jupyter-Muster)
-und koppeln den Server-Lebenszyklus an „sieht ein Browser zu?".
+We treat the dashboard as a **short-lived, on-demand viewer** (the Jupyter
+pattern) and tie the server's lifecycle to "is a browser watching?".
 
-1. **Presence über leichten Heartbeat — keine gehaltenen Verbindungen.** Jede
-   offene Seite schickt alle 20 s ein `POST /ping`; das aktualisiert serverseitig
-   nur einen `last seen`-Zeitstempel und kehrt sofort zurück. **Ein /ping hält
-   keinen Worker-Thread** — die Threadpool-Erschöpfung der SSE-Variante entfällt
-   damit vollständig; wenige Threads genügen. Das Throttling-Problem (der
-   ursprüngliche Grund für SSE) wird über eine großzügige Schonfrist gelöst, die
-   das Hintergrund-Throttling überdauert (Punkt 2), statt über eine offene
-   Verbindung.
-2. **Watchdog mit zwei Schonfristen.** Ein Hintergrund-Thread fährt herunter,
-   wenn länger als `_HEARTBEAT_GRACE` (90 s) kein `/ping` mehr eintrifft. Die
-   Frist ist **bewusst größer als das Browser-Hintergrund-Throttling (~60 s)**:
-   ein nur versteckter Tab pingt gedrosselt weiter (~1×/min) und bleibt damit am
-   Leben; nur ein wirklich geschlossener Tab pingt gar nicht mehr und löst nach
-   der Frist die Abschaltung aus. Sie überbrückt zugleich locker die kurze
-   Lücke seiteninterner Navigation. Kommt beim Start nie ein Ping, greift nach
-   `_STARTUP_GRACE` (90 s) ebenfalls die Abschaltung, damit ein fehlgeschlagener
-   Browser-Start keine Waise hinterlässt. Beide Fristen sind per Env
-   (`DASH_HEARTBEAT_GRACE`, `DASH_STARTUP_GRACE`) überschreibbar.
-3. **Beenden = Tab schließen, kein Knopf.** Beim Verlassen der Seite feuert ein
-   `pagehide`-Beacon `POST /leaving`. Ist es nur **Navigation** zwischen Seiten,
-   pingt die Folgeseite sofort wieder und hebt das Signal auf (ein „settle"-Ping
-   nach 2,5 s deckt ein spät eintreffendes `/leaving` der Vorseite ab). Ist der
-   **Tab/das Fenster wirklich zu**, kommt kein Ping mehr und der Watchdog fährt
-   nach `_LEAVE_GRACE` (~5 s) herunter — deutlich schneller als die reine
-   Heartbeat-Frist. So genügt die ohnehin gewohnte Geste (Tab schließen) zum
-   Beenden; eine Webseite muss ihren eigenen Tab **nicht** schließen (was die
-   Browser verbieten). Das Lebenszyklus-Script (Heartbeat + `pagehide`-Beacon)
-   liegt in `base.html` und läuft auf jeder Seite. `dashboard.sh` öffnet schlicht
-   einen Tab im Standardbrowser (kein App-Modus, kein `--app`).
-4. **Sauberes Beenden = SIGTERM an den Master.** `_shutdown()` signalisiert den
-   gunicorn-Master (`os.getppid()`); alle Worker steigen aus, PID 1 kehrt
-   zurück, der Container endet. Im Dev-Server (`python app.py`) beendet sich der
-   Prozess per SIGTERM an sich selbst (NICHT den Parent — das ist die Shell):
-   ein aus einem Hintergrund-Thread gesendetes SIGINT verschluckt der
-   Werkzeug-Dev-Server (Werkzeug 3.x), SIGTERM greift über die Default-Aktion.
-5. **Restart-Policy → `no`.** Nur so bleibt der Container nach Selbst-Stop unten.
-   Resilienz über Reboots wird bewusst aufgegeben — ein lokaler Viewer ist kein
-   Dienst, der einen Neustart überleben muss.
-6. **Ein Worker, kleiner Threadpool** (`gunicorn --worker-class gthread
-   --workers 1 --threads 4`). Ein einziger Prozess hält `last seen` und Watchdog
-   kohärent. Da **kein Request mehr offen gehalten wird** (der Heartbeat ersetzt
-   den SSE-Stream), genügen wenige Threads und der Pool kann nicht mehr erschöpft
-   werden — ein paar reichen für einen Seitenaufbau plus den gelegentlichen
-   `/ping` nebenher. Das war der Kern des Bugs und ist mit dem Wegfall der
-   gehaltenen Verbindung strukturell behoben.
+1. **Presence via a lightweight heartbeat — no held connections.** Every open
+   page sends a `POST /ping` every 20 s; server-side this only updates a
+   `last seen` timestamp and returns immediately. **A `/ping` holds no
+   worker thread** — this fully eliminates the thread-pool exhaustion of the
+   SSE approach; a handful of threads is enough. The throttling problem (the
+   original reason for SSE) is solved via a generous grace period that
+   outlasts background throttling (point 2), rather than via an open
+   connection.
+2. **A watchdog with two grace periods.** A background thread shuts things
+   down once no `/ping` has arrived for longer than `_HEARTBEAT_GRACE`
+   (90 s). The period is **deliberately larger than the browser's background
+   throttling (~60 s)**: a merely hidden tab keeps pinging at a throttled
+   rate (~1×/min) and so stays alive; only a genuinely closed tab stops
+   pinging entirely and triggers shutdown once the period elapses. It also
+   comfortably bridges the brief gap of in-page navigation. If no ping ever
+   arrives at startup, shutdown likewise kicks in after `_STARTUP_GRACE`
+   (90 s), so a failed browser launch doesn't leave an orphan behind. Both
+   periods can be overridden via environment variables
+   (`DASH_HEARTBEAT_GRACE`, `DASH_STARTUP_GRACE`).
+3. **Shutdown = close the tab, no button.** On leaving the page, a
+   `pagehide` beacon fires `POST /leaving`. If it is only **navigation**
+   between pages, the following page immediately pings again and cancels the
+   signal (a "settle" ping after 2.5 s covers a late-arriving `/leaving` from
+   the previous page). If the **tab/window is genuinely closed**, no further
+   ping arrives and the watchdog shuts down after `_LEAVE_GRACE` (~5 s) —
+   noticeably faster than the plain heartbeat period. That way the gesture
+   users already know (close the tab) is enough to shut down; a web page
+   never has to close its own tab (which browsers forbid). The lifecycle
+   script (heartbeat + `pagehide` beacon) lives in `base.html` and runs on
+   every page. `dashboard.sh` simply opens a tab in the default browser (no
+   app mode, no `--app`).
+4. **A clean shutdown = SIGTERM to the master.** `_shutdown()` signals the
+   gunicorn master (`os.getppid()`); all workers exit, PID 1 returns, the
+   container ends. In the dev server (`python app.py`) the process
+   terminates itself via SIGTERM to itself (NOT the parent — that's the
+   shell): a SIGINT sent from a background thread is swallowed by the
+   Werkzeug dev server (Werkzeug 3.x), whereas SIGTERM goes through the
+   default action.
+5. **Restart policy → `no`.** This is the only way the container stays down
+   after a self-stop. Resilience across reboots is deliberately given up — a
+   local viewer is not a service that needs to survive a restart.
+6. **One worker, a small thread pool** (`gunicorn --worker-class gthread
+   --workers 1 --threads 4`). A single process keeps `last seen` and the
+   watchdog coherent. Since **no request is held open any more** (the
+   heartbeat replaces the SSE stream), a handful of threads is enough and
+   the pool can no longer be exhausted — a few threads suffice for a page
+   load plus the occasional `/ping` alongside it. That was the core of the
+   bug, and is now structurally fixed by removing the held connection.
 
 ## Consequences
 
-- Tab/Fenster schließen beendet den Server (~5 s über das `pagehide`-Beacon,
-  spätestens nach der Heartbeat-Frist): kein verwaister Container, kein dauerhaft
-  belegter Port mehr. Das war die Kernsorge.
-- Keine UI-Bedienelemente, kein blockierbarer Pool, keine browser-spezifischen
-  Fenster-Tricks — die Beenden-Geste ist „Tab zu", die jeder Browser beherrscht.
-- **Trade-off:** Navigiert man zwischen Seiten, hängt die Liveness am sofortigen
-  Reconnect-Ping; bliebe der aus (z. B. JS deaktiviert), stoppte der Server nach
-  `_LEAVE_GRACE`. Für den normalen Betrieb unkritisch.
-- **Trade-off:** Schließt man den Tab nur kurz, ist der Server beim Wiederkommen
-  evtl. weg und muss per `./dashboard.sh up` neu gestartet werden. Bewusst
-  akzeptiert.
-- **Trade-off:** Schläft der Rechner länger als die Schonfrist, enden die
-  Heartbeats und der Server fährt herunter — derselbe Neustartpfad. Für einen
-  lokalen Viewer vertretbar.
-- `dashboard.sh down`/`up` bleiben als manueller Fallback gültig; `down` räumt
-  einen bereits gestoppten Container ab.
-- Reversal hieße: Restart-Policy zurück auf `unless-stopped`, `/ping`+`/leaving`
-  +Watchdog entfernt — daher dieser Record.
+- Closing the tab/window shuts down the server (~5 s via the `pagehide`
+  beacon, at the latest after the heartbeat period elapses): no more orphaned
+  container, no more port held indefinitely. That was the core concern.
+- No UI controls, no pool that can be blocked, no browser-specific window
+  tricks — the shutdown gesture is "close the tab," which every browser
+  supports.
+- **Trade-off:** navigating between pages relies on the immediate reconnect
+  ping for liveness; if that fails to happen (e.g. JS disabled), the server
+  stops after `_LEAVE_GRACE`. Not an issue for normal operation.
+- **Trade-off:** if the tab is closed only briefly, the server may be gone
+  when you come back and needs restarting via `./dashboard.sh up`.
+  Deliberately accepted.
+- **Trade-off:** if the machine sleeps longer than the grace period,
+  heartbeats stop and the server shuts down — the same restart path applies.
+  Acceptable for a local viewer.
+- `dashboard.sh down`/`up` remain valid as a manual fallback; `down` cleans
+  up an already-stopped container.
+- Reversal would mean: restart policy back to `unless-stopped`,
+  `/ping`+`/leaving`+watchdog removed — hence this record.

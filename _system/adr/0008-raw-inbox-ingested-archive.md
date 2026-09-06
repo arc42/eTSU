@@ -1,33 +1,35 @@
-# ADR-0008: `raw/` als Inbox, ingestierte Originale nach `raw/ingested/`
+# ADR-0008: `raw/` as inbox, ingested originals move to `raw/ingested/`
 
 - **Status:** accepted
 - **Date:** 2026-05-24
 
 ## Context
-Nach ADR-0006 lagen die menschlichen Quelldateien flach in `raw/`, vermischt mit
-bereits verarbeiteten und noch unverarbeiteten Quellen. Mit wachsender Quellenzahl
-verliert man so den Überblick, *was noch zu ingestieren ist*. Die eigentlichen
-Dateien dürfen nicht gelöscht werden (Drift-Erkennung via sha256, Re-Derivation,
-Provenance), aber sie müssen die „Eingangsablage“ nicht dauerhaft belegen.
+After ADR-0006, human source files sat flat in `raw/`, mixed with sources
+already processed and sources not yet processed. As the number of sources
+grows, this makes it hard to see *what still needs to be ingested*. The
+original files themselves must not be deleted (drift detection via sha256,
+re-derivation, provenance), but they do not need to permanently occupy the
+"inbox".
 
 ## Decision
-`raw/`'s **oberste Ebene ist die Inbox**: nur *neue, noch nicht ingestierte* Quellen.
-Sobald eine Quelle ingestiert ist, wird ihr Original nach **`raw/ingested/`**
-verschoben, und das zugehörige `SRC-NNN` `origin:` wird auf den neuen Pfad gesetzt.
+The **top level of `raw/` is the inbox**: only *new, not-yet-ingested*
+sources. Once a source is ingested, its original is moved to
+**`raw/ingested/`**, and the corresponding `SRC-NNN` `origin:` is updated to
+the new path.
 
-Damit ergibt sich unter `raw/`:
-- **oberste Ebene** — Inbox (neue, unverarbeitete Quellen)
-- **`raw/ingested/`** — archivierte Originale nach dem Ingest (menschlich, immutabel)
-- **`raw/sources/`** — agent-erzeugte Provenance-Records `SRC-NNN` (ADR-0006)
+That gives `raw/` the following shape:
+- **top level** — inbox (new, unprocessed sources)
+- **`raw/ingested/`** — archived originals after ingest (human, immutable)
+- **`raw/sources/`** — agent-generated provenance records `SRC-NNN` (ADR-0006)
 
-Der Ingest-Workflow erhält dafür einen Abschlussschritt (Schritt 8); der
-Audit-Workflow rechnet die sha256-Drift gegen die Datei am `origin:`-Pfad.
+The ingest workflow gets a closing step for this (step 8); the audit workflow
+checks sha256 drift against the file at the `origin:` path.
 
 ## Consequences
-Die Inbox zeigt auf einen Blick die offene Ingest-Arbeit; verarbeitete Originale
-bleiben erhalten und prüfbar. Da nur verschoben (nicht verändert) wird, bleiben alle
-sha256-Baselines gültig. Kosten: ein zusätzlicher Move-Schritt pro Ingest und die
-Pflege des `origin:`-Pfads. Trade-off der gewählten **flachen** Variante: `sources/`
-(Records) und `ingested/` (Dateien) sind Geschwister mit ähnlichem Klang — bewusst
-in Kauf genommen, um menschliche Originale aus dem agent-eigenen `raw/sources/`
-herauszuhalten (klare Eigentümerschaft).
+The inbox shows outstanding ingest work at a glance; processed originals
+remain preserved and checkable. Because files are only moved (not modified),
+all sha256 baselines stay valid. Cost: one extra move step per ingest and
+upkeep of the `origin:` path. Trade-off of the chosen **flat** layout:
+`sources/` (records) and `ingested/` (files) are similarly named siblings —
+accepted deliberately, to keep human originals out of the agent-owned
+`raw/sources/` (clear ownership).

@@ -15,12 +15,12 @@ diagram: generated   # projected on-the-fly from EIF.flows + STK.provides/receiv
 # {{title}}
 
 **Diagram.** _Projected_ — generated from the external interfaces (`EIF.flows`) and the
-user roles' `provides:`/`receives:` edges (ADR-0013, [[ISS-010-kontextdiagramm-projektion-audit-loop]]);
+user roles' `provides:`/`receives:` edges (ADR-0013, [[ISS-010-context-diagram-projection-audit-loop]]);
 not hand-maintained here.
 
 **In scope.** <One paragraph: what the system IS responsible for delivering.>
 
-**Out of scope (Abgrenzung).** <What the system is explicitly NOT supposed to do or
+**Out of scope.** <What the system is explicitly NOT supposed to do or
 deliver. State each non-goal plainly; this is the delimitation, not a wish list.>
 - <non-goal>
 

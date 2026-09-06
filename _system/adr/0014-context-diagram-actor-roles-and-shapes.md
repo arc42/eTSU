@@ -1,54 +1,58 @@
-# ADR-0014: Kontextdiagramm — Akteur-Rollen-Projektion und Mensch/Organisation-Form
+# ADR-0014: Context diagram — actor-role projection and person/organization shape
 
 - **Status:** accepted
 - **Date:** 2026-05-27
 
 ## Context
-ADR-0013 projiziert das Kontextdiagramm aus den Kanten (`EIF.flows` +
-`STK.provides`/`receives`): ein Knoten je Stakeholder mit Flüssen, **alle als gleiche
-Rechtecke**. Im Review fielen zwei Mängel auf:
+ADR-0013 projects the context diagram from the edges (`EIF.flows` +
+`STK.provides`/`receives`): one node per stakeholder with its flows, **all as
+identical rectangles**. Review turned up two shortcomings:
 
-- **Form.** Menschliche Akteure (Kind, Eltern, …) sind optisch nicht von Systemen/
-  Organisationen (DRSL, Verein) zu unterscheiden — alles sind weiße Rechtecke.
-- **Redundanz.** Sieben Stakeholder-Knoten, davon mehrere auf **Kontextebene** fachlich
-  deckungsgleich: *Ligapräsident* und *Wettkampforganisator* sind beide planende Rollen
-  (ISS-011), *Kind* und *Eltern* teilen sich den Anmelde-/Ergebnis-Kanal. Der
-  *Offizielle* gehört zur Durchführung, nicht in die Außensicht des Systemkontexts.
+- **Shape.** Human actors (Role A, Role D, …) are visually indistinguishable
+  from systems/organizations (System X, Role E) — everything is a white
+  rectangle.
+- **Redundancy.** Seven stakeholder nodes, several of which overlap at the
+  **context level**: *Role C* and *Role B* are both planning roles (ISS-011),
+  and *Role A* and *Role D* share the request/result channel. *Role F*
+  belongs to execution, not to the outside view of the system context.
 
-Die **Stakeholder-Personas** sind aber bewusst getrennt (eigene Influence/Interest,
-Ziele, Concerns). Ein echtes Zusammenlegen der `STK`-Seiten würde diese Information
-zerstören. Gesucht ist eine **rein projektionsseitige** Vergröberung.
+The **stakeholder personas** are deliberately kept separate, though (their
+own influence/interest, goals, concerns). Actually merging the `STK` pages
+would destroy that information. What's needed is a **projection-only**
+coarsening.
 
 ## Decision
-Die Stakeholder-Seiten bleiben unverändert reichhaltig; das **Kontextdiagramm**
-aggregiert sie zu gröberen Akteur-Rollen. Dazu zwei deklarative Frontmatter-Felder am
-Stakeholder, die die Projektionsfunktion auswertet:
+The stakeholder pages stay unchanged and detailed; the **context diagram**
+aggregates them into coarser actor roles. Two declarative frontmatter fields
+on the stakeholder drive this, evaluated by the projection function:
 
-1. **`nature: person | organization`** (Default `person`). Steuert die Knotenform:
-   - `person` → **Akteur-Symbol** (👤 + Stadion-Form, helle Füllung).
-   - `organization` → graues Rechteck (wie ein System).
-   - `EIF` sind immer Systeme → graues Rechteck.
+1. **`nature: person | organization`** (default `person`). Controls the node
+   shape:
+   - `person` → **actor symbol** (a stick figure + stadium shape, light fill).
+   - `organization` → grey rectangle (like a system).
+   - `EIF` nodes are always systems → grey rectangle.
 
-2. **`context_role:`** — Label und **Merge-Schlüssel** im Kontextdiagramm.
-   - Fehlt das Feld (oder leer) → der Stakeholder-Titel ist das Label (Default,
-     rückwärtskompatibel).
-   - Gleicher `context_role`-Wert bei mehreren Stakeholdern → **ein** Knoten; ihre
-     `provides`/`receives` werden vereinigt (dedupliziert, Reihenfolge stabil).
-   - Wert **`none`** → der Stakeholder erscheint **nicht** im Diagramm; seine
-     `provides`/`receives` bleiben auf der Seite erhalten (kein Datenverlust).
+2. **`context_role:`** — label and **merge key** in the context diagram.
+   - Missing (or empty) → the stakeholder's title is the label (default,
+     backward-compatible).
+   - The same `context_role` value on several stakeholders → **one** node;
+     their `provides`/`receives` are merged (deduplicated, stable order).
+   - Value **`none`** → the stakeholder does **not** appear in the diagram;
+     its `provides`/`receives` remain on the page (no data loss).
 
-Konkrete Projektion für Aquarius:
-- *Kind* (STK-001) + *Eltern* (STK-007) → **„Kind und Eltern"**.
-- *Wettkampforganisator* (STK-004) + *Ligapräsident* (STK-006) → **„Organisator:in"**.
-- *Offizieller* (STK-009) → `none` (ausgeblendet; Durchführungsrolle).
-- *Verein* (STK-008) → `nature: organization` (graues Rechteck).
+Concrete projection for this system:
+- *Role A* (STK-001) + *Role D* (STK-007) → **"Role A and Role D"**.
+- *Role B* (STK-004) + *Role C* (STK-006) → **"Organizer"**.
+- *Role F* (STK-009) → `none` (hidden; an execution-time role).
+- *Role E* (STK-008) → `nature: organization` (grey rectangle).
 
 ## Consequences
-Die Personas bleiben getrennt und vollständig; nur die Außensicht ist entrümpelt und
-lesbar (Mensch vs. System/Organisation auf einen Blick). Verfeinert ADR-0013 (dessen
-„ein Knoten je Stakeholder mit Flüssen" wird zu „ein Knoten je `context_role`").
-Template `stakeholder` und die Projektionsfunktion `build_context_diagram()` werden
-angepasst; der vom Audit-Loop (ISS-010) genutzte Code bleibt rein/string-basiert.
-Offen: Der einzelne **Punktrichter**-Knoten (Fluss „vorläufige Punkte" während der
-Durchführung) — gehört dieser Durchführungs-Datenfluss überhaupt in den *Systemkontext*
-oder ebenfalls ausgeblendet? Bis zur Klärung bleibt er sichtbar.
+Personas stay separate and complete; only the outside view is decluttered and
+readable (person vs. system/organization at a glance). Refines ADR-0013
+(whose "one node per stakeholder with flows" becomes "one node per
+`context_role`"). The `stakeholder` template and the projection function
+`build_context_diagram()` are updated; the code used by the audit loop
+(ISS-010) stays pure/string-based. Open question: the standalone **Role G**
+node (flow "provisional score" during execution) — does this execution-time
+data flow even belong in the *system context*, or should it also be hidden?
+It stays visible until that is resolved.

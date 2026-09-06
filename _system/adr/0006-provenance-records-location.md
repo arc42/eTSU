@@ -1,41 +1,42 @@
-# ADR-0006: Schlanke Provenance-Records in `raw/sources/`
+# ADR-0006: Slim provenance records in `raw/sources/`
 
 - **Status:** accepted
 - **Date:** 2026-05-24
 
 ## Context
-Quell-/Provenance-Records (`SRC-NNN`) wurden flach in `raw/` angelegt — als
-Geschwister der eigentlichen, vom Menschen kuratierten Quelldateien (z. B.
-`glossary.md`). Zudem trugen sie ausführliche Prosa (`Summary`, `Key takeaways`,
-`Provenance`). Das hatte zwei Nachteile:
+Source/provenance records (`SRC-NNN`) were created flat in `raw/` — as siblings
+of the actual, human-curated source files (e.g. `glossary.md`). They also
+carried extensive prose (`Summary`, `Key takeaways`, `Provenance`). That had
+two drawbacks:
 
-1. **Vermischte Eigentümerschaft.** Agent-erzeugte Metadaten lagen neben den
-   immutablen menschlichen Quellen — verwirrend, „warum liegen diese Dateien hier?“.
-2. **Doppelung mit dem Log.** Die Prosa wiederholte die chronologische Erzählung,
-   die bereits in `_system/log.md` steht.
+1. **Mixed ownership.** Agent-generated metadata sat next to the immutable
+   human sources — confusing, "why are these files here?".
+2. **Duplication with the log.** The prose repeated the chronological
+   narrative that already lives in `_system/log.md`.
 
-Dabei sagte die Content-Type-Tabelle in `CLAUDE.md` ohnehin schon „frontmatter only“;
-die Praxis war davon abgedriftet. Ein SRC-Record ist aber **kein** Log-Eintrag,
-sondern ein Knoten im Graphen: Ziel der `sources:`-Wikilinks, Träger des `sha256`
-für Drift-Erkennung und Rückwärts-Manifest (`ingested-pages` / Backlinks). Diese
-Funktionen lassen sich nicht durch Log-Zeilen ersetzen.
+The content-type table in `CLAUDE.md` already said "frontmatter only" anyway;
+practice had drifted from that. But an SRC record is **not** a log entry — it
+is a node in the graph: the target of `sources:` wikilinks, the carrier of the
+`sha256` used for drift detection, and the reverse manifest (`ingested-pages` /
+backlinks). Those functions cannot be replaced by log lines.
 
 ## Decision
-Provenance-Records bleiben **ein Knoten pro Quelle**, werden aber **schlank**
-gehalten (Frontmatter + höchstens ein einzeiliger Summary) und liegen in einem
-eigenen Ordner **`raw/sources/`**, getrennt von den menschlichen Quelldateien auf
-der obersten `raw/`-Ebene.
+Provenance records remain **one node per source**, but are kept **slim**
+(frontmatter plus at most a one-line summary) and live in their own folder,
+**`raw/sources/`**, separate from the human source files at the top level of
+`raw/`.
 
-- **Narrative** (Was-wann-Operationen) gehört ausschließlich in `_system/log.md`.
-- **Provenance/Traceability** (Quelle, Hash, betroffene Seiten) in den SRC-Record.
-- `_system/index.md` erhält einen Abschnitt **`## Sources`** als Registry aller
-  ingestierten Quellen (analog zu allen anderen Content-Typen).
+- **Narrative** (what happened, when) belongs exclusively in `_system/log.md`.
+- **Provenance/traceability** (source, hash, affected pages) belongs in the
+  SRC record.
+- `_system/index.md` gets a **`## Sources`** section as the registry of all
+  ingested sources (matching every other content type).
 
 ## Consequences
-Klare Trennung: menschliche Rohquellen (`raw/`, immutabel) ↔ agent-erzeugte
-Provenance (`raw/sources/`). Leichtgewichtige Records, eine eindeutige Stelle für
-die Registry (Index) und eine für die Narrative (Log). Kosten: bestehende
-`sources:`-Links wurden auf `raw/sources/…` umgestellt; `CLAUDE.md`, das
-Source-Template und der Ingest-Workflow angepasst. Offene Verfeinerung: Voll-Pfad-
-Links brechen bei einem erneuten Verschieben — Basename-Links (`[[SRC-001-…]]`)
-wären verschiebe-robuster und könnten später eingeführt werden.
+Clean separation: human raw sources (`raw/`, immutable) versus agent-generated
+provenance (`raw/sources/`). Lightweight records, one clear place for the
+registry (index) and one for the narrative (log). Cost: existing `sources:`
+links were repointed to `raw/sources/…`; `CLAUDE.md`, the source template, and
+the ingest workflow were updated. Open refinement: full-path links break on a
+future move — basename links (`[[SRC-001-…]]`) would be more move-resilient
+and could be introduced later.

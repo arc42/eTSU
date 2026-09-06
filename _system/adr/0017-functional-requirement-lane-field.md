@@ -10,15 +10,15 @@ Accepted
 
 We model the [req42](../anchors/req42.md) Product Backlog as one
 `functional-requirement` type with `stereotype: epic | feature | story` (ADR-0012),
-projected into a story map ([[story-mapping]]). The Aquarius epic set, after the
-grilling on 2026-05-28 ([[ISS-009-worklist-stub-strategie]]), is **not flat**: it
+projected into a story map ([[story-mapping]]). The epic set, after the
+grilling on 2026-05-28 ([[ISS-009-worklist-stub-strategy]]), is **not flat**: it
 spans three distinct surfaces.
 
 | Lane | Examples | Property |
 |---|---|---|
-| **Backbone** (chronological user activities) | FR-001 Saisonplanung → FR-002 Wettkampfanmeldung → … → FR-005 Ergebnisauswertung | left-to-right narrative; `order:` = sequence |
-| **Plattform-Schiene** (operational, always-on) | FR-006 Systemadministration · FR-008 Stammdatenpflege | parallel to backbone; supports operations |
-| **Anzeige-Schicht** (consumer-facing, always-on) | FR-007 Wettkampfschaukasten | parallel to backbone; reads from multiple backbone steps |
+| **Backbone** (chronological user activities) | FR-001 Season Preparation → FR-002 Entity Registration → … → FR-005 Result Evaluation | left-to-right narrative; `order:` = sequence |
+| **Platform lane** (operational, always-on) | FR-006 System Administration · FR-008 Master Data Maintenance | parallel to backbone; supports operations |
+| **Display layer** (consumer-facing, always-on) | FR-007 Public Status Board | parallel to backbone; reads from multiple backbone steps |
 
 The `order:` field alone cannot express this — it confuses *narrative position
 within the backbone* with *lane membership*. We used a provisional convention
@@ -35,7 +35,7 @@ enumerated values:
 - `platform` — operational/technical capability that runs parallel to the backbone
   (e.g. user/permission admin, master-data maintenance, monitoring).
 - `display` — consumer-facing read layer that consumes from backbone artifacts
-  (e.g. public results board, parent/child view).
+  (e.g. a public status board, a personal dashboard view).
 
 Semantics:
 
@@ -57,11 +57,11 @@ Semantics:
   a one-line comment about the three values and default.
 - Migration of existing FRs (one-time, no behavioral change):
   - FR-001..FR-005: `lane: backbone`, `order:` unchanged (1..5).
-  - FR-008 Stammdatenpflege: `lane: platform`, `order: 1` (was 100 — adjusted to
-    in-lane numbering).
-  - FR-007 Wettkampfschaukasten: `lane: display`, `order: 1` (was 200 — adjusted).
-  - FR-006 Systemadministration (new): `lane: platform`, `order: 2`.
-- Existing prose hints („Plattform-Schiene", „Anzeige-Schicht") that referenced
+  - FR-008 Master Data Maintenance: `lane: platform`, `order: 1` (was 100 —
+    adjusted to in-lane numbering).
+  - FR-007 Public Status Board: `lane: display`, `order: 1` (was 200 — adjusted).
+  - FR-006 System Administration (new): `lane: platform`, `order: 2`.
+- Existing prose hints ("platform lane", "display layer") that referenced
   the order-range convention are kept as comments but the authoritative signal is
   now `lane:`.
 - The story-map projection later (analogous to context-diagram projection in
@@ -87,5 +87,5 @@ Semantics:
 - ADR-0013 — Data flows as edges; context diagram as projection (same pattern:
   derive the visualization from structured fields).
 - [[story-mapping]] — anchor; projection consumer of `lane:` + `order:`.
-- [[ISS-009-worklist-stub-strategie]] — grilling outcome that introduced the
+- [[ISS-009-worklist-stub-strategy]] — grilling outcome that introduced the
   three-lane decomposition.

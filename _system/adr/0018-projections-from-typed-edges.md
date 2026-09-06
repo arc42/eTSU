@@ -1,125 +1,128 @@
-# ADR-0018: Diagramme und Matrizen als Projektion typisierter Kanten
+# ADR-0018: Diagrams and matrices as projections of typed edges
 
 - **Status:** accepted
 - **Date:** 2026-05-28
 
 ## Context
-Querschnittsdarstellungen — Diagramme (Kontext, Datenmodell, Use-Case),
-Coverage-Matrizen (Goals × Backlog, Stakeholder × Wert), Bäume (Story Map,
-Vision-Goal) — verdichten Informationen aus mehreren Inhaltstypen zu einer
-zweidimensionalen Sicht. Sie sind im Wiki bislang **ad hoc** behandelt worden:
+Cross-cutting views — diagrams (context, data model, use case), coverage
+matrices (goals × backlog, stakeholder × value), trees (story map,
+vision-goal) — condense information from several content types into a
+two-dimensional view. So far the wiki has handled them **ad hoc**:
 
-- [[ADR-0012]] (2026-05-25) löst das für die **Story Map** — Projektion aus dem
-  `FR.parent:`-Baum + `order` / `release` / `priority`.
-- [[ADR-0013]] (2026-05-26) löst das für das **Kontextdiagramm** — Projektion aus
-  `STK.provides:` / `receives:` + `EIF.flows`.
+- [[ADR-0012]] (2026-05-25) solves this for the **story map** — projected from
+  the `FR.parent:` tree plus `order` / `release` / `priority`.
+- [[ADR-0013]] (2026-05-26) solves this for the **context diagram** —
+  projected from `STK.provides:` / `receives:` plus `EIF.flows`.
 
-Beide Male wurde dasselbe Muster gewählt, ohne es zu verallgemeinern. Mit dem
-neuen Inhaltstyp `goal` ([[ADR-0016]]) entsteht eine weitere Querschnittssicht
-(Goal-Coverage-Matrix), und weitere sind absehbar (Datenmodell, Use-Case-Diagramm,
-Vision-Goal-Baum, Quality-Tree, Traceability …). Vor dem nächsten Spezialfall
-soll das Meta-Prinzip festgeschrieben werden, damit es nicht jedes Mal von Null
-hergeleitet werden muss.
+Both times the same pattern was chosen without generalizing it. The new
+`goal` content type ([[ADR-0016]]) creates another cross-cutting view (a
+goal-coverage matrix), and more are foreseeable (data model, use-case
+diagram, vision-goal tree, quality tree, traceability …). Before the next
+special case comes up, the meta-principle should be written down so it does
+not have to be re-derived from scratch every time.
 
-Drei Pfade standen prinzipiell zur Wahl:
+Three paths were on the table in principle:
 
-- **A** — Jede Sicht als **eigener Inhaltstyp** (eine `coverage`-Datei pro Matrix,
-  eine `diagram`-Datei pro Diagramm). Doppelte Datenhaltung, geht zwangsläufig
-  stale, kein Mehrwert gegenüber einer Tabelle in Markdown.
-- **B** — Sichten als **handgepflegte Markdown-Tabellen** in Übersichtsseiten.
-  Skaliert nicht (jede neue Instanz verlangt Tabellen-Edit), driftet vom
-  Quell-Inhalt weg, Audit-Aufwand wächst quadratisch.
-- **C** — Sichten als **Projektion** aus den ohnehin schon getragenen,
-  **typisierten Kanten** (Frontmatter-Felder, Wikilinks). Single Source of Truth
-  bleibt der Inhaltstyp; die Sicht ist ein Generator-Output.
+- **A** — Every view as its **own content type** (one `coverage` file per
+  matrix, one `diagram` file per diagram). Duplicated data storage,
+  inevitably goes stale, no advantage over a table in Markdown.
+- **B** — Views as **hand-maintained Markdown tables** on overview pages.
+  Doesn't scale (every new instance requires a table edit), drifts away from
+  the source content, audit effort grows quadratically.
+- **C** — Views as a **projection** from the already-carried, **typed edges**
+  (frontmatter fields, wikilinks). The content type stays the single source of
+  truth; the view is generator output.
 
-C ist zweimal angewandt worden (ADR-0012, ADR-0013) und funktioniert.
+C has already been applied twice (ADR-0012, ADR-0013) and works.
 
 ## Decision
-**Querschnittsdarstellungen sind Projektionen aus typisierten Kanten — keine
-gespeicherten Artefakte.** Single Source of Truth sind die Frontmatter-Felder
-und Wikilinks der Inhaltstypen. Sichten werden bei Bedarf generiert:
-Obsidian-Graph, Dashboard-Routen, LLM-Audits. **Keine eingebetteten
-Mermaid-Blöcke** in Wiki-Seiten, **keine handgepflegten Übersichtstabellen**,
-**keine bidirektionale Kantenpflege**.
+**Cross-cutting views are projections from typed edges — never stored
+artifacts.** The single source of truth is the frontmatter fields and
+wikilinks of the content types. Views are generated on demand: the Obsidian
+graph, dashboard routes, LLM audits. **No embedded mermaid blocks** in wiki
+pages, **no hand-maintained overview tables**, **no bidirectional edge
+maintenance**.
 
-### Aktive und geplante Projektionen
+### Active and planned projections
 
-| Projektion | Quell-Kanten (single source of truth) | Verankerung | Status |
+| Projection | Source edges (single source of truth) | Anchored in | Status |
 |---|---|---|---|
-| Story Map | `FR.parent:` + `order` / `release` / `priority` / `lane:` | [[ADR-0012]], [[ADR-0017]] | aktiv (Anchor [[story-mapping]]) |
-| Kontextdiagramm | `STK.provides:` / `receives:` + `EIF.flows` | [[ADR-0013]], [[ADR-0014]] | aktiv (Dashboard-Render) |
-| **Goal-Coverage-Matrix** | `FR.goal: [[GOAL-...]]` (mehrwertig) | **dies ADR** + [[ADR-0016]] | aktiv (Backlinks); Dashboard-Render geplant |
-| Vision-Goal-Baum | `GOAL.parent:` (Objective → Vision) | [[ADR-0016]] | geplant (mit erstem Goal-Ingest) |
-| Datenmodell-Diagramm | `data-model.entities` + Relationship-Felder | offen | geplant (mit erstem Datenmodell-Ingest) |
-| Use-Case-Diagramm | `UC.actor:` ([[STK-...]]) + `UC.parent:` ([[FR-...]]) | offen | geplant (sobald UCs entstehen — top-down aus Epics, [[ISS-009-worklist-stub-strategie]]) |
-| Stakeholder-Wert-Matrix | `STK` × `GOAL.beneficiary:` (+ `FR.goal:` Indirektion) | offen | geplant |
-| Quality-Tree (Utility Tree) | `QR.applies-to:` ([[FR-...]]) + `attribute:` | offen | geplant |
-| Traceability-Matrix | Goal × FR × UC × QR — Komposition aus allen Kanten | offen | optional / on demand |
-| Issue-Heatmap | `ISS.affects:` × Inhaltstyp / Status | offen | optional |
+| Story map | `FR.parent:` + `order` / `release` / `priority` / `lane:` | [[ADR-0012]], [[ADR-0017]] | active (anchor [[story-mapping]]) |
+| Context diagram | `STK.provides:` / `receives:` + `EIF.flows` | [[ADR-0013]], [[ADR-0014]] | active (dashboard render) |
+| **Goal-coverage matrix** | `FR.goal: [[GOAL-...]]` (multi-valued) | **this ADR** + [[ADR-0016]] | active (backlinks); dashboard render planned |
+| Vision-goal tree | `GOAL.parent:` (objective → vision) | [[ADR-0016]] | planned (with the first goal ingest) |
+| Data-model diagram | `data-model.entities` + relationship fields | open | planned (with the first data-model ingest) |
+| Use-case diagram | `UC.actor:` ([[STK-...]]) + `UC.parent:` ([[FR-...]]) | open | planned (once UCs exist — top-down from epics, [[ISS-009-worklist-stub-strategy]]) |
+| Stakeholder-value matrix | `STK` × `GOAL.beneficiary:` (+ `FR.goal:` indirection) | open | planned |
+| Quality tree (utility tree) | `QR.applies-to:` ([[FR-...]]) + `attribute:` | open | planned |
+| Traceability matrix | Goal × FR × UC × QR — composed from all edges | open | optional / on demand |
+| Issue heatmap | `ISS.affects:` × content type / status | open | optional |
 
-Die Liste ist **offen** — neue Sichten folgen demselben Muster: erst die Kante
-typisieren, dann projizieren.
+The list is **open** — new views follow the same pattern: type the edge
+first, then project.
 
-### Konventionen für jede Projektion
+### Conventions for every projection
 
-1. **Kanten leben einmal**, auf der **spezifischeren Seite** (Instanz → Kontext).
-   Beispiel: `FR.goal:` (FR → Goal), **nicht** zusätzlich `GOAL.realized_by:`
-   (Goal → FR). Obsidian-Backlinks liefern die Gegenrichtung automatisch.
-2. **Richtung „nach oben"** ist der Normalfall: feiner → gröber, Instanz →
-   abstrakter Kontext. Konsistent mit Story Map (`story → epic`),
-   Goal-Coverage (`FR → goal`), Vision-Goal-Baum (`objective → vision`).
-3. **Leere Werte sind reale Aussagen**, kein „fehlt noch".
-   `FR.goal: []` heißt **bewusst Enabler** (z. B. Plattform-Schiene); `[[ISS-...]]`
-   bei tatsächlicher Lücke. Genauso `parent: []` = Wurzelknoten, nicht
-   „Hierarchie unklar".
-4. **Rendering ist Generator-Sache**, nicht Inhalt der Wiki-Seite.
-   Mermaid-Blöcke, eingebettete Bilder oder Markdown-Coverage-Tabellen direkt
-   in Wiki-Seiten sind verboten — sie driften. Erlaubt: Generierte Artefakte
-   in `_system/apps/dashboard/` oder als LLM-Audit-Output.
-5. **Drift wird sichtbar.** Beim Audit (grill-Skill) prüft jede Projektion
-   ihre Invarianten (siehe unten); Verletzungen werden als `ISS-NNN` geflaggt,
-   nicht stillschweigend repariert.
+1. **Edges live once**, on the **more specific side** (instance → context).
+   Example: `FR.goal:` (FR → goal), **not** additionally `GOAL.realized_by:`
+   (goal → FR). Obsidian backlinks supply the reverse direction automatically.
+2. **"Upward" is the normal direction**: finer → coarser, instance → more
+   abstract context. Consistent with the story map (`story → epic`), goal
+   coverage (`FR → goal`), and the vision-goal tree (`objective → vision`).
+3. **Empty values are real statements**, not "not filled in yet."
+   `FR.goal: []` deliberately means an enabler (e.g. the platform lane);
+   `[[ISS-...]]` marks an actual gap. Likewise `parent: []` means a root node,
+   not "hierarchy unclear."
+4. **Rendering is the generator's job**, not wiki-page content. Mermaid
+   blocks, embedded images, or Markdown coverage tables directly in wiki
+   pages are forbidden — they drift. Allowed: generated artifacts in
+   `_system/apps/dashboard/` or as LLM audit output.
+5. **Drift becomes visible.** During audit (the grill skill), each projection
+   checks its invariants (see below); violations are flagged as `ISS-NNN`,
+   never silently repaired.
 
-### Audit-Invarianten je Projektion (advisory)
+### Audit invariants per projection (advisory)
 
-- **Story Map** — jedes Backlog-Item trägt `parent:` (außer Epics) und sitzt in
-  einer Lane; Backbone-Reihenfolge per `order` lückenlos.
-- **Kontextdiagramm** — jeder externe Akteur hat mindestens eine Kante
-  (`provides`/`receives` oder `EIF.flows`); jede Kante hat `data`/`direction`.
-- **Goal-Coverage** — jedes Backlog-Item setzt `goal:` (≥ 1 GOAL) **oder** ist
-  explizit `goal: []` mit `lane: platform`/`display`. Jedes Goal wird von ≥ 1
-  FR bedient (sonst ⇒ `[[ISS-...]]` „Goal ohne Träger").
-- **Vision-Goal-Baum** — genau eine GOAL-Wurzel pro System (`stereotype:
-  vision`, `parent: []`); jedes Objective hat `parent:` auf die Vision.
-- **Datenmodell, Use-Case, Quality-Tree** — Invarianten werden mit dem jeweils
-  ersten Ingest festgelegt.
+- **Story map** — every backlog item carries `parent:` (except epics) and
+  sits in a lane; backbone order via `order` has no gaps.
+- **Context diagram** — every external actor has at least one edge
+  (`provides`/`receives` or `EIF.flows`); every edge has `data`/`direction`.
+- **Goal coverage** — every backlog item sets `goal:` (≥ 1 GOAL) **or** is
+  explicitly `goal: []` with `lane: platform`/`display`. Every goal is served
+  by ≥ 1 FR (otherwise ⇒ `[[ISS-...]]` "goal with no carrier").
+- **Vision-goal tree** — exactly one GOAL root per system (`stereotype:
+  vision`, `parent: []`); every objective has `parent:` pointing to the
+  vision.
+- **Data model, use case, quality tree** — invariants are established at
+  each type's first ingest.
 
 ## Consequences
 
-**Sofort umgesetzt** (gemeinsam mit diesem ADR):
+**Implemented immediately** (together with this ADR):
 
-- `_templates/functional-requirement.md` — Feld `goal:` neu typisiert:
-  `[[GOAL-...]]` statt `[[STK-...]]`, mehrwertig, `[]` = Enabler.
-- `_templates/goal.md` — Abschnitt „Bedient durch" projiziert aus Backlinks
-  (explizit dokumentiert, nicht manuell zu pflegen).
-- `FR-001..008` — `goal:`-Backfill gegen die in Konversation festgezogene
-  Coverage-Matrix; alte Stakeholder-Pointer (Workaround vor Existenz von
-  `goal`) wandern implizit auf `related:` (dort bereits vorhanden).
-- `_system/anchors/story-mapping.md` — Checklisten-Punkt zur neuen Feld-Semantik
-  geschärft.
+- `_templates/functional-requirement.md` — the `goal:` field is retyped:
+  `[[GOAL-...]]` instead of `[[STK-...]]`, multi-valued, `[]` = enabler.
+- `_templates/goal.md` — a "Served by" section projected from backlinks
+  (explicitly documented, not to be maintained by hand).
+- `FR-001..008` — `goal:` backfilled against the coverage matrix agreed in
+  conversation; old stakeholder pointers (a workaround from before `goal`
+  existed) implicitly move to `related:` (already present there).
+- `_system/anchors/story-mapping.md` — the checklist item on the new field
+  semantics was sharpened.
 
-**Bewusst aufgeschoben:** Dashboard-Render-Route für die Goal-Coverage-Matrix
-(analog zur Kontext-Render-Route, [[ISS-010-kontextdiagramm-projektion-audit-loop]]);
-Goal-Ingest selbst (Inhalt von `raw/vision-draft.md` → `GOAL-001..005`); LLM-Audit-Loops
-je Projektion.
+**Deliberately deferred:** the dashboard render route for the goal-coverage
+matrix (analogous to the context render route,
+[[ISS-010-context-diagram-projection-audit-loop]]); the goal ingest itself
+(content of `raw/vision-draft.md` → `GOAL-001..005`); LLM audit loops per
+projection.
 
-**Risiko:** Die vorab vergebenen `GOAL-001..005`-Wikilinks in den FRs sind bis zum
-Goal-Ingest **unauflöst** (Obsidian-Dangling-Links). Vertretbar — die IDs sind
-festgelegt, der Ingest folgt; alternativ wäre der Backfill nach dem Ingest
-nachzuziehen gewesen. Wir akzeptieren das Vorgreifen, weil die Coverage-Matrix
-für die laufende Epic-Arbeit jetzt Wert stiftet.
+**Risk:** the `GOAL-001..005` wikilinks pre-assigned in the FRs stay
+**unresolved** (Obsidian dangling links) until the goal ingest happens.
+Acceptable — the IDs are fixed, the ingest will follow; the alternative would
+have been to defer the backfill until after the ingest. We accept getting
+ahead of it because the coverage matrix creates value for the ongoing epic
+work right now.
 
-**Bewusst nicht geändert:** Keine Konsolidierung von ADR-0012 / ADR-0013 in
-dieses Meta-ADR. Beide bleiben als Spezialfälle bestehen und werden hier nur
-zitiert — Rückwärts-Stabilität, kein „Refactor" von akzeptierten Entscheidungen.
+**Deliberately not changed:** no consolidation of ADR-0012 / ADR-0013 into
+this meta-ADR. Both remain in place as special cases and are only cited here
+— backward stability, not a "refactor" of accepted decisions.

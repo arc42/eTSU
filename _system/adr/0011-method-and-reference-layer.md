@@ -1,34 +1,37 @@
-# ADR-0011: Methoden- & Referenz-Schicht (raw/methods → anchors + docs)
+# ADR-0011: Method & reference layer (raw/methods → anchors + docs)
 
 - **Status:** accepted
 - **Date:** 2026-05-25
 
 ## Context
-Wir sammeln zunehmend RE-Methodenwissen an (Templates, Jeff Pattons Story-Mapping-
-Artikel, Dr. Hruschkas req42-Kapitel — alles unter `raw/methods/`). Bisher war
-unklar, wo solche *Methode/Referenz* dauerhaft lebt und wie sie sich von Domänen-
-Wissen unterscheidet. Zudem sind manche Quellen **urheberrechtlich geschützt** (Pattons
-Artikel, Hruschkas Buchkapitel) — anders als das req42-*Template* (CC BY-SA 4.0).
+We are accumulating more RE method knowledge (templates, Jeff Patton's
+story-mapping article, Dr. Hruschka's req42 chapters — all under
+`raw/methods/`). Until now it was unclear where such *method/reference*
+material lives permanently and how it differs from domain knowledge. Some
+sources are also **copyrighted** (Patton's article, Hruschka's book chapter) —
+unlike the req42 *template* (CC BY-SA 4.0).
 
 ## Decision
-Methodenwissen spiegelt die Domänen-Schichtung:
+Method knowledge mirrors the domain layering:
 
-- **`raw/methods/`** — Methoden-*Quellmaterial* (die Originale; insbesondere die
-  urheberrechtlich geschützten bleiben hier privat, werden **nicht** wörtlich
-  republiziert).
-- **`_system/anchors/`** — die *angewandten* Standards/Techniken, daraus destilliert,
-  zitierbar (`[[…]]`) und mit Checkliste (advisory enforcement). Neuer Anchor:
-  **[[story-mapping]]**.
-- **`docs/`** — *lesbare, destillierte* Referenzen **mit Attribution** (z. B.
-  `docs/methods/`, `docs/req42/`). `docs/` ist die bevorzugte Heimat für aufbewahrte
-  Referenzen (Bücher, Artikel) — destilliert + attribuiert, nicht wörtlich.
+- **`raw/methods/`** — method *source material* (the originals; the
+  copyrighted ones in particular stay private here and are **not** republished
+  verbatim).
+- **`_system/anchors/`** — the *applied* standards/techniques, distilled from
+  that material, citable (`[[…]]`), and carrying a checklist (advisory
+  enforcement). New anchor: **[[story-mapping]]**.
+- **`docs/`** — *readable, distilled* references **with attribution** (e.g.
+  `docs/methods/`, `docs/req42/`). `docs/` is the preferred home for
+  preserved references (books, articles) — distilled and attributed, not
+  verbatim.
 
-Lizenzlinie: Destillat + Attribution + Link in `docs/`; **kein** wörtlicher Abzug
-geschützter Werke. (Das req42-Template bleibt CC BY-SA 4.0; Pattons Artikel und
-Hruschkas Kapitel sind normales Urheberrecht.)
+License line: distillation + attribution + link in `docs/`; **no** verbatim
+copying of protected works. (The req42 template stays CC BY-SA 4.0; Patton's
+article and Hruschka's chapter are under ordinary copyright.)
 
 ## Consequences
-Klare Symmetrie Domäne ↔ Methode; Referenzen wohnen in `docs/` wie gewünscht;
-Urheberrecht gewahrt. Einen Anchor hinzuzufügen bleibt ADR-würdig (ADR-0004). Story
-Maps selbst werden **nicht** zum Inhaltstyp — sie sind eine Projektion/Report über die
-Product-Backlog-Hierarchie (siehe [[story-mapping]]).
+Clear symmetry between domain and method; references live in `docs/` as
+intended; copyright is respected. Adding an anchor remains ADR-worthy
+(ADR-0004). Story maps themselves do **not** become a content type — they are
+a projection/report over the product backlog hierarchy (see
+[[story-mapping]]).

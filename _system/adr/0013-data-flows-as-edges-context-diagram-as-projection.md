@@ -1,55 +1,64 @@
-# ADR-0013: Datenflüsse als strukturierte Kanten; Kontextdiagramm als Projektion
+# ADR-0013: Data flows as structured edges; context diagram as a projection
 
 - **Status:** accepted
 - **Date:** 2026-05-26
 
 ## Context
-ADR-0009 führte die Typen **Context** und **External Interface** ein, ließ aber offen,
-*wie* die Datenflüsse zu menschlichen Akteuren modelliert werden — als eigene
-`EIF`-Knoten pro Kanal oder an den Stakeholdern. Der Ingest von `raw/kontextdiagramm.md`
-beantwortet das mit Daten: von den sieben „Partnern" im Kontextdiagramm sind sechs
-bereits Stakeholder (Kind, Verein, Präsident, Offizielle, Punktrichter); nur **DRSL**
-ist ein echtes Nachbarsystem. Drei Optionen standen zur Wahl:
+ADR-0009 introduced the **Context** and **External Interface** types, but left
+open *how* data flows to human actors should be modelled — as their own `EIF`
+node per channel, or on the stakeholders. Ingesting `raw/context-diagram.md`
+answers this with data: of the seven "partners" in the context diagram, six
+are already stakeholders (Role A, Role E, Role C, Role F, Role G); only
+**System X** is a genuine neighbouring system. Three options were on the
+table:
 
-- **B1** — `EIF` nur für Systeme, Flüsse zu Menschen nirgends strukturiert → das
-  Diagramm ist nicht aus Daten projizierbar.
-- **B2** — ein `EIF`-Knoten pro Kante inkl. Mensch → ~9 Knoten, die Use Cases und
-  Stakeholder duplizieren und driften.
-- **B3** — `EIF` nur für Systeme; menschliche Flüsse als Felder am Stakeholder.
+- **B1** — `EIF` only for systems, flows to humans structured nowhere → the
+  diagram cannot be projected from data.
+- **B2** — one `EIF` node per edge, humans included → roughly 9 nodes that
+  duplicate use cases and stakeholders, and drift.
+- **B3** — `EIF` only for systems; human flows as fields on the stakeholder.
 
-Zudem zeigt der Quell-Knoten, dass eine einzelne `direction:` nicht reicht: *Kind* ist
-**bidirektional** (Anmeldedaten rein / Startnummer raus), *Offizieller* sendet **zwei**
-Nutzlasten.
+The source node also shows that a single `direction:` isn't enough: *Role A*
+is **bidirectional** (request data in / confirmation out), while *Role F*
+sends **two** payloads.
 
 ## Decision
-**B3 + strukturierte Flow-Listen + projiziertes Diagramm.**
+**B3 plus structured flow lists plus a projected diagram.**
 
-1. **`EIF`-Knoten nur für echte externe Systeme** (heute genau: DRSL). Datenflüsse
-   zu/von menschlichen **User-Rollen** werden als strukturierte Frontmatter-Felder am
-   jeweiligen `[[STK-...]]` erfasst: `provides:` (eingehend ins System) und `receives:`
-   (ausgehend an den Akteur). User-Rollen bleiben Stakeholder, kein eigener Typ
-   (bestätigt ADR-0009); die Zahl der Inhaltstypen bleibt **dreizehn**.
-2. **Jede `EIF` trägt eine `flows:`-Liste** statt eines einzelnen `direction:`-Feldes;
-   jeder Eintrag `{ data, direction, format?, trigger? }`. Damit sind mehrere und
-   bidirektionale Flüsse pro Nachbar darstellbar. `direction`/`format` als Einzelfelder
-   entfallen.
-3. **Das Kontextdiagramm wird nicht gepflegt, sondern projiziert.** Single Source of
-   Truth sind die strukturierten Kanten (`EIF.flows` + `STK.provides`/`receives`). Eine
-   Dashboard-Render-Route zeichnet das mermaid-Kontextdiagramm on-the-fly; ein
-   LLM-Audit-Loop zeichnet es neu, wenn sich Schnittstellen oder Rollen ändern (Umsetzung
-   in [[ISS-010-kontextdiagramm-projektion-audit-loop|ISS-010]]). Das `diagram:`-Feld des
-   Context-Knotens ist `generated`, kein eingebetteter, driftender mermaid-Block.
+1. **`EIF` nodes only for genuine external systems** (today, exactly: System
+   X). Data flows to/from human **user roles** are captured as structured
+   frontmatter fields on the relevant `[[STK-...]]`: `provides:` (inbound to
+   the system) and `receives:` (outbound to the actor). User roles remain
+   stakeholders, not their own type (confirming ADR-0009); the number of
+   content types stays at **thirteen**.
+2. **Every `EIF` carries a `flows:` list** instead of a single `direction:`
+   field; each entry is `{ data, direction, format?, trigger? }`. This lets
+   multiple and bidirectional flows per neighbour be represented.
+   `direction`/`format` as standalone fields are dropped.
+3. **The context diagram is not maintained by hand, it is projected.** The
+   single source of truth is the structured edges (`EIF.flows` +
+   `STK.provides`/`receives`). A dashboard render route draws the mermaid
+   context diagram on the fly; an LLM audit loop redraws it whenever
+   interfaces or roles change (implementation in
+   [[ISS-010-context-diagram-projection-audit-loop|ISS-010]]). The context
+   node's `diagram:` field is `generated`, not an embedded, drifting mermaid
+   block.
 
 ## Consequences
-`EIF` bleibt klein und bedeutsam (echte Nachbarsysteme); Stakeholder werden bzgl. ihrer
-Datenflüsse maschinenlesbar; das Kontextdiagramm ist jederzeit aus den Kanten
-regenerierbar. Templates `context`, `external-interface` und `stakeholder` werden
-angepasst, die `CLAUDE.md`-Tabelle (EIF „direction") sinngemäß auf `flows` umgestellt.
-Kosten: Render-Route und Audit-Loop sind noch zu bauen ([[ISS-010-kontextdiagramm-projektion-audit-loop|ISS-010]]).
-Schärft die in ADR-0009 bewusst offen gelassene Frage „Nachbarsystem **oder** Kanal zu
-einem Akteur" — Akteur-Kanäle leben jetzt am Stakeholder, nicht als `EIF`.
+`EIF` stays small and meaningful (genuine neighbouring systems); stakeholders
+become machine-readable with respect to their data flows; the context diagram
+can be regenerated from the edges at any time. Templates `context`,
+`external-interface`, and `stakeholder` are updated, and the `CLAUDE.md` table
+(EIF "direction") is changed accordingly to `flows`. Cost: the render route
+and audit loop still need to be built
+([[ISS-010-context-diagram-projection-audit-loop|ISS-010]]). This sharpens
+the question ADR-0009 deliberately left open — "neighbouring system **or**
+channel to an actor" — actor channels now live on the stakeholder, not as
+`EIF`.
 
 ## Amendment (2026-06-22)
-Der in der *Decision* (Punkt 3) genannte **LLM-Audit-Loop entfällt**; die Render-Route ist
-gebaut. Begründung + Auflösung: [[ISS-010-kontextdiagramm-projektion-audit-loop]] (resolved).
-Kanten-Konsistenz und Render-Validität deckt das reguläre Audit ab (`_system/workflows/audit.md`).
+The **LLM audit loop** named in the *Decision* (point 3) is dropped; the
+render route has been built. Rationale and resolution:
+[[ISS-010-context-diagram-projection-audit-loop]] (resolved). Edge consistency
+and render validity are covered by the regular audit
+(`_system/workflows/audit.md`).

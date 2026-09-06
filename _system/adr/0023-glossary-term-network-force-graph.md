@@ -1,161 +1,183 @@
-# ADR-0023: Glossar-Begriffsnetz als interaktiver Force-Graph (cytoscape.js, clientseitiges Layout)
+# ADR-0023: Glossary term network as an interactive force graph (cytoscape.js, client-side layout)
 
 - **Status:** accepted
 - **Date:** 2026-06-22
 
 ## Context
 
-Das Dashboard (`_system/apps/dashboard/`) ist nicht nur ein Viewer, sondern auch ein
-**Demo- und Überzeugungs-Artefakt**: es soll Stakeholder **ohne Obsidian** von der
-Wiki-Idee überzeugen. Für das Glossar — die ubiquitäre Sprache, das Herz der Domäne —
-fehlt eine Sicht, die das *Netz* der Begriffe auf einen Blick lebendig macht. Vorhanden,
-aber unzureichend:
+The dashboard (`_system/apps/dashboard/`) is not just a viewer, it is also a
+**demo and persuasion artifact**: it should win stakeholders over to the wiki
+idea **without Obsidian**. For the glossary — the ubiquitous language, the
+heart of the domain — there is no view that brings the *network* of terms to
+life at a glance. What exists is not enough:
 
-- **Obsidian-Graph** (force-directed, auf `path:wiki/glossary` filterbar) — setzt Obsidian
-  voraus und fällt damit für die Zielgruppe gerade aus.
-- **`glossary.html`** (Tabelle mit „Vernetzung"-Sortierung + Relationen-Zähler) — zeigt den
-  *Grad* der Vernetzung, nicht die *Lage* / Cluster.
-- Alle bisherigen Dashboard-Diagramme (Kontext, Story-Map, Goals) sind **Mermaid**,
-  server-seitig als deterministischer String gerendert ([[ADR-0013]], [[ADR-0018]]).
+- **The Obsidian graph** (force-directed, filterable on `path:wiki/glossary`)
+  — requires Obsidian, which rules it out for the target audience.
+- **`glossary.html`** (a table with a "connectivity" sort plus a relation
+  count) — shows the *degree* of connectedness, not the *layout* / clusters.
+- Every dashboard diagram so far (context, story map, goals) is **Mermaid**,
+  rendered server-side as a deterministic string ([[ADR-0013]], [[ADR-0018]]).
 
-Datenlage (geprüft 2026-06-22): 27 GLO-Knoten; **101 GLO→GLO**-Kanten plus **~35 Querkanten**
-(12 DM, 8 STK, 5 EIF, 3 GOAL, 2 CTX, 3 ISS, 1 FR, 1 CON). `bounded-context` (alle
-„Kinderschwimmliga") und `status` (26 draft, 1 deprecated) sind **uniform** → als Farbachse
-untauglich. GLO-027 (Familie) hat 0 glossar-interne Kanten (Waise).
+Data situation (checked 2026-06-22): 27 GLO nodes; **101 GLO→GLO** edges plus
+**~35 cross edges** (12 DM, 8 STK, 5 EIF, 3 GOAL, 2 CTX, 3 ISS, 1 FR, 1 CON).
+`bounded-context` (all the same single domain) and `status` (26 draft, 1
+deprecated) are **uniform** → unusable as a colour axis. GLO-027 has 0
+glossary-internal edges (an orphan).
 
-**Spannung.** Ein Force-Graph **kann kein Mermaid sein** — Mermaids Auto-Layout ist
-hierarchisch (dagre), kein Physik-Layout; es käme der bekannte Kästchen-und-Pfeile-Look
-heraus, nicht das „lebendige Netz", das die Demo braucht. Das zwingt erstmals eine
-**JS-Graph-Bibliothek** ins Dashboard und ein **clientseitiges, nicht-deterministisches
-Layout** — ein Bruch mit dem bislang durchgehaltenen „alles ist server-gerendertes Mermaid".
+**Tension.** A force graph **cannot be Mermaid** — Mermaid's auto-layout is
+hierarchical (dagre), not a physics layout; it would produce the familiar
+boxes-and-arrows look, not the "living network" the demo needs. This forces a
+**JS graph library** into the dashboard for the first time, and a
+**client-side, non-deterministic layout** — a break with the "everything is
+server-rendered Mermaid" rule held until now.
 
-Optionen:
+Options:
 
-- **A** — Mermaid-Flowchart (dagre). Kein Physik-Layout, kein Cluster-Effekt; verfehlt das
-  Demo-Ziel.
-- **B** — Obsidian-Graph als Demo verwenden. Setzt Obsidian voraus → die Zielgruppe (ohne
-  Obsidian) fällt aus.
-- **C** — Clientseitiger Force-Graph (JS-Lib) über server-projizierte Graph-Daten.
+- **A** — Mermaid flowchart (dagre). No physics layout, no clustering effect;
+  misses the demo goal.
+- **B** — Use the Obsidian graph as the demo. Requires Obsidian → rules out
+  the target audience (who don't have Obsidian).
+- **C** — A client-side force graph (JS library) over server-projected graph
+  data.
 
 ## Decision
 
-**Ein eigenständiges „Begriffsnetz" im Dashboard: ein clientseitiger Force-Graph
-(cytoscape.js + fcose) über eine deterministische Server-Projektion der `related:`-Kanten.**
-Option C.
+**A standalone "term network" in the dashboard: a client-side force graph
+(cytoscape.js + fcose) over a deterministic server projection of the
+`related:` edges.** Option C.
 
-Der Reframe, der die Konsistenz mit [[ADR-0018]] wahrt: **Single Source of Truth bleibt
-server-deterministisch.** Eine Route `/graph/glossary` projiziert aus den typisierten
-`related:`-Kanten ein Graph-JSON `{nodes, edges}` — exakt das Muster von [[ADR-0018]]
-(Projektion typisierter Kanten), nur mit anderem Ausgabeformat als der Mermaid-String.
-**Allein das Layout** wandert in den Browser (Physik). Es ist also keine Abkehr von
-[[ADR-0018]], sondern eine weitere Projektion derselben offenen Familie — die erste mit
-JS- statt Mermaid-Renderer.
+The reframe that keeps this consistent with [[ADR-0018]]: **the single
+source of truth stays server-deterministic.** A route `/graph/glossary`
+projects a graph JSON `{nodes, edges}` from the typed `related:` edges —
+exactly the pattern from [[ADR-0018]] (projection of typed edges), just with
+a different output format than the Mermaid string. **Only the layout** moves
+into the browser (physics). So this is not a departure from [[ADR-0018]] but
+another projection within the same open family — the first one with a JS
+renderer instead of Mermaid.
 
-1. **Renderer: cytoscape.js + fcose-Layout.** Graph-spezialisiert, deklaratives Styling
-   (Selektoren), eingebaute Physik-Layouts, Klick-Handler, gut gepflegt. d3-force wäre die
-   flexibelste Optik, aber am meisten Handarbeit/Wartung — gegen das Prinzip „Wartungskosten
-   ≈ null". Erste JS-Graph-Lib im Dashboard neben mermaid.js.
-2. **Kanten ungerichtet & dedupliziert.** `related:` ist projektweit asymmetrisch
-   (Pointer-to-Context-Konvention, [[ADR-0018]] §1); für ein *semantisches Sprachnetz* ist
-   ungerichtet die ehrliche Darstellung (A↔B als *eine* Kante, sonst falsche Richtungs-
-   Artefakte). Kantenquelle ist **ausschließlich das `related:`-Frontmatter** — **keine**
-   Body-Wikilinks (Rauschen, unkuratiert).
-3. **Default = nur Glossar; Erweiterung schichtweise per Typ-Button.** Initial nur GLO-Knoten
-   + GLO→GLO-Kanten. Querverbindungen zu anderen Typen werden über **Buttons** (DM, STK, EIF,
-   GOAL, „Weitere") eingeblendet — je 1-Hop-Nachbarn der gezeigten GLO-Knoten, additiv,
-   unabhängig schaltbar, mit inkrementell-animiertem Relayout (kein Neu-Würfeln). Die Buttons
-   *sind* die Legende (farbiger Chip mit Typ + Kantenzahl, aktiv = gefüllt). Dramaturgie:
-   der Demo-Präsentator blendet die Schichten nacheinander ein.
-4. **Farbe = Typ; Lesbarkeit zuerst.** GLO ist der blaue Hero; die erweiterbaren Typen tragen
-   je eine eigene Farbe, der Long-Tail bleibt neutral:
+1. **Renderer: cytoscape.js + fcose layout.** Graph-specialised, declarative
+   styling (selectors), built-in physics layouts, click handlers, well
+   maintained. d3-force would be the most flexible visually, but the most
+   hand-rolled/high-maintenance — against the "maintenance cost ≈ zero"
+   principle. The first JS graph library in the dashboard alongside
+   mermaid.js.
+2. **Edges undirected & deduplicated.** `related:` is asymmetric project-wide
+   (the pointer-to-context convention, [[ADR-0018]] §1); for a *semantic
+   language network*, undirected is the honest representation (A↔B as *one*
+   edge, otherwise you get false direction artifacts). The edge source is
+   **exclusively the `related:` frontmatter** — **not** body wikilinks (noisy,
+   uncurated).
+3. **Default = glossary only; expansion layered per type button.** Initially
+   only GLO nodes + GLO→GLO edges. Cross-connections to other types are
+   revealed via **buttons** (DM, STK, EIF, GOAL, "more") — each showing the
+   1-hop neighbours of the displayed GLO nodes, additive, independently
+   toggled, with an incrementally animated relayout (no re-randomizing). The
+   buttons *are* the legend (a coloured chip with type + edge count, filled
+   when active). Dramaturgy: the demo presenter reveals the layers one at a
+   time.
+4. **Colour = type; readability first.** GLO is the blue hero; the
+   expandable types each get their own colour, the long tail stays neutral:
 
-   | Knoten | Farbe | Form |
+   | Node | Colour | Shape |
    |---|---|---|
-   | GLO Begriff (Hero) | Blau `#2f6fb3` | abgerundetes Rechteck |
-   | DM Datenmodell | Teal `#3a8f7d` | Rechteck (Entity) |
-   | STK Stakeholder | Amber `#c98a2b` | Ellipse (Person) |
-   | EIF Schnittstelle | Violett `#7a5ea8` | Hexagon (System) |
-   | GOAL Ziel | Gold `#b8932f` | Raute |
-   | CTX / FR / CON / ISS | Neutralgrau `#9aa3b2` | Raute |
+   | GLO glossary term (hero) | Blue `#2f6fb3` | rounded rectangle |
+   | DM data model | Teal `#3a8f7d` | rectangle (entity) |
+   | STK stakeholder | Amber `#c98a2b` | ellipse (person) |
+   | EIF interface | Violet `#7a5ea8` | hexagon (system) |
+   | GOAL goal | Gold `#b8932f` | diamond |
+   | CTX / FR / CON / ISS | Neutral grey `#9aa3b2` | diamond |
 
-   `bounded-context`/`status` sind uniform → **nicht** als Farbachse genutzt. Innerhalb GLO
-   kodiert **Füllung/Rand** (nicht der Farbton) den Bestätigungsgrad: `agreed: true` voll-blau
-   (weißer Text), `agreed: false` hellblau umrandet, Annahme zusätzlich ein „A"-Badge,
-   `deprecated` grau/gestrichelt. Knotengröße = Vernetzungsgrad (geclamped). Labels **immer
-   sichtbar** (dunkler Text, weißer Halo); Hover/Klick hebt Nachbarn hervor und dimmt den Rest
-   (~15 %) — der größte Lesbarkeits-Hebel im Force-Graph. Harmoniert mit dem
-   Kontextdiagramm-Blau ([[ADR-0013]], [[ADR-0014]]).
-5. **Einstieg über die Glossar-Kachel — keine neue Kachel.** Der Graph ist eine *Sicht aufs
-   Glossar*, kein eigener Inhaltstyp. Die Glossar-Kachel wird vom Ganz-Kachel-`<a>` zu einem
-   `<div class="tile">` mit **zwei CTAs** (`Tabelle →` → `/glossary`, `Begriffsnetz →` →
-   `/graph/glossary`) — Vorbild ist die bereits bestehende **Such-Kachel** (`index.html`).
-   Ein zweiter `<a>` im aktuellen Ganz-Kachel-Anker wäre **verschachtelt = ungültiges HTML**,
-   der Umbau ist also ohnehin nötig. Optional zusätzlich ein „Als Graph ansehen"-Umschalter
-   auf der `/glossary`-Seite.
+   `bounded-context`/`status` are uniform → **not** used as a colour axis.
+   Within GLO, **fill/border** (not hue) encodes the confirmation level:
+   `agreed: true` solid blue (white text), `agreed: false` light-blue
+   outline, an assumption additionally gets an "A" badge, `deprecated` is
+   grey/dashed. Node size = connectivity degree (clamped). Labels are
+   **always visible** (dark text, white halo); hover/click highlights
+   neighbours and dims the rest (~15%) — the biggest readability lever in a
+   force graph. Harmonises with the context-diagram blue ([[ADR-0013]],
+   [[ADR-0014]]).
+5. **Entry point via the glossary tile — no new tile.** The graph is a *view
+   onto the glossary*, not its own content type. The glossary tile changes
+   from a whole-tile `<a>` to a `<div class="tile">` with **two CTAs**
+   (`Table →` → `/glossary`, `Term network →` → `/graph/glossary`) — modelled
+   on the already-existing **search tile** (`index.html`). A second `<a>`
+   inside the current whole-tile anchor would be **nested = invalid HTML**,
+   so the change is needed anyway. Optionally, also a "view as graph" toggle
+   on the `/glossary` page.
 
 ## Consequences
 
-- Erste **clientseitige, nicht-deterministische** Sicht im Dashboard und erste **JS-Graph-
-  Abhängigkeit** (cytoscape.js + fcose) neben mermaid.js. Die Server-Projektion bleibt
-  deterministisch und rein (testbar wie `build_context_diagram()`); nur die Anordnung würfelt
-  pro Laden — für eine Demo ein **Feature** („lebendig"), Reproduzierbarkeit per Seed bei
-  Bedarf nachrüstbar.
-- Reiht sich in die **offene Projektions-Familie** von [[ADR-0018]] ein (dort selbst als
-  „Obsidian-Graph / Dashboard-Routen" vorgesehen). [[ADR-0018]] bleibt **unangetastet** — die
-  Liste ist dort explizit offen; kein „Refactor" akzeptierter ADRs.
-- **Audit-Invariante** (advisory, analog [[ADR-0018]]): jede GLO-`related:`-Kante löst auf eine
-  existierende Seite auf; GLO-Begriffe ohne Kante (heute [[GLO-027-familie]]) werden als
-  mögliche Fehl-Vernetzung sichtbar — der Graph deckt das visuell ab, das Audit
-  (`_system/workflows/audit.md`) als Check.
-- **Trade-off — Muster-Bruch:** Genau diese eine Sicht ist nicht Mermaid. Begründet durch das
-  Demo-Ziel (Physik/Cluster, das Mermaid nicht liefert) und entschärft durch den
-  SSoT-Reframe: server-deterministische Daten, nur Client-Layout.
-- **Umsetzung offen:** Route `/graph/glossary` (JSON-Projektion aus `related:`),
-  cytoscape-Einbindung, Kachel-Umbau (Such-Kachel-Muster), Typ-Buttons. Noch **kein Code** —
-  als nächster Schritt zu bauen und zu tracken.
-- **Reversal** hieße: Route + cytoscape entfernen, Glossar-Kachel zurück auf den
-  Ganz-Kachel-Link — daher dieser Record.
+- The first **client-side, non-deterministic** view in the dashboard, and
+  the first **JS graph dependency** (cytoscape.js + fcose) alongside
+  mermaid.js. The server projection stays deterministic and pure (testable
+  like `build_context_diagram()`); only the arrangement is randomized per
+  load — for a demo, that's a **feature** ("alive"), and reproducibility via
+  a seed can be retrofitted if needed.
+- Joins the **open projection family** from [[ADR-0018]] (itself already
+  anticipated there as "Obsidian graph / dashboard routes"). [[ADR-0018]]
+  stays **untouched** — the list there is explicitly open; this is not a
+  "refactor" of an accepted ADR.
+- **Audit invariant** (advisory, analogous to [[ADR-0018]]): every GLO
+  `related:` edge resolves to an existing page; GLO terms with no edge
+  (today, [[GLO-027-example-term]]) become visible as a possible mis-linking
+  — the graph covers this visually, the audit (`_system/workflows/audit.md`)
+  as a check.
+- **Trade-off — pattern break:** this one view alone is not Mermaid.
+  Justified by the demo goal (physics/clustering, which Mermaid can't
+  deliver) and softened by the SSoT reframe: server-deterministic data, only
+  client-side layout.
+- **Implementation open:** route `/graph/glossary` (JSON projection from
+  `related:`), cytoscape integration, tile rework (search-tile pattern), type
+  buttons. **No code yet** — to be built and tracked as the next step.
+- **Reversal** would mean: remove the route + cytoscape, revert the glossary
+  tile to the whole-tile link — hence this record.
 
-## Amendment (2026-06-22, Umsetzung)
+## Amendment (2026-06-22, implementation)
 
-Umgesetzt auf Branch `feat/glossary-graph`. Eine Korrektur an §4/Context: Das Dashboard
-hat ein **dunkles** Theme (`--bg #0e1726`); das oben genannte helle Canvas (`#f7f9fc`,
-„weißer Halo") wäre ein greller Fremdkörper. Daher an Dark-Mode angepasst — **dunkles
-Canvas, helle Labels mit dunklem Halo**, GLO-Bestätigung über Akzent-Blau `#3ea6ff`. Das
-**semantische** Schema (Farbe = Typ, GLO-Hero-Blau, Größe = Grad, Hover-Fokus) bleibt
-unverändert. cytoscape-fcose ist vendored; fehlt es, greift das eingebaute `cose`-Layout.
+Implemented on branch `feat/glossary-graph`. One correction to §4/Context:
+the dashboard has a **dark** theme (`--bg #0e1726`); the light canvas
+mentioned above (`#f7f9fc`, "white halo") would be a jarring outlier.
+Adapted for dark mode accordingly — **dark canvas, light labels with a dark
+halo**, GLO confirmation via accent blue `#3ea6ff`. The **semantic** scheme
+(colour = type, GLO hero blue, size = degree, hover focus) stays unchanged.
+cytoscape-fcose is vendored; if it's missing, the built-in `cose` layout
+takes over.
 
-Nach visuellem Review zwei Präzisierungen zu §3/§4: **(a)** Der Zustand wird über die
-**Randfarbe** getragen (abgestimmt = grün, Entwurf = amber, veraltet = grau/gestrichelt,
-Annahme = gestrichelt), die **Füllung** bleibt für den Typ; GLO-Füllung jetzt deckend
-(vorher zu blass). **(b)** Zusätzlich zur Button-Leiste gibt es eine **explizite Legende**
-(Typen + Zustände) — die in §4 angedachte „Buttons *sind* die Legende"-Sparsamkeit reicht
-nicht, weil die Buttons weder GLO noch die Zustände erklären.
+After visual review, two refinements to §3/§4: **(a)** State is now carried
+via **border colour** (agreed = green, draft = amber, deprecated =
+grey/dashed, assumption = dashed), while **fill** stays for type; GLO fill is
+now opaque (previously too pale). **(b)** In addition to the button bar there
+is now an **explicit legend** (types + states) — the "the buttons *are* the
+legend" economy considered in §4 wasn't enough, because the buttons explain
+neither GLO nor the states.
 
-## Amendment (2026-06-25, Layout-Engine + Begriff-Ego-Snippet)
+## Amendment (2026-06-25, layout engine + term ego snippet)
 
-Zwei Erweiterungen auf `feat/glossary-graph`, beide innerhalb der Projektions-Familie von
-§Decision (keine neue Entscheidung, nur Verfeinerung der Umsetzung):
+Two extensions on `feat/glossary-graph`, both within the projection family
+from §Decision (no new decision, just a refinement of the implementation):
 
-1. **Layout-Engine cola statt fcose (Default).** fcose (Feder-Embedder) erzwingt keine
-   Überlappungsfreiheit; bei dem dichten Begriffsnetz (⌀-Grad ≈ 7,5) überlappen die
-   label-großen Knoten. **cytoscape-cola** (WebCola, vendored) löst das per
-   `avoidOverlap` als harte Constraint auf den Label-Boxen. cola läuft **endlich**
-   (settle-and-stop), damit das Ziehen eines Knotens nur **diesen** bewegt; beim Loslassen
-   rückt ein kurzer, lokal-gesperrter cola-Lauf nur die direkten Nachbarn zur Seite
-   („make room", alles andere `lock()`). fcose bleibt als A/B-Umschalter erhalten, cose als
-   Fallback. (Die zwischenzeitlich erprobte `infinite`-Variante — Physik dauerhaft an —
-   verworfen: sie ordnet bei *jedem* Greifen das ganze Netz um.)
-2. **Begriff-Ego-Snippet auf der GLO-Detailseite.** Über der textuellen Definition zeigt
-   jede `glossary/`-Detailseite ein **fokussiertes 1-Hop-Netz** des Begriffs: der Term
-   (ringförmig hervorgehoben) + direkte GLO-Nachbarn, mit Buttons **DM / Stakeholder /
-   Ziele** zum schichtweisen Einblenden seiner 1-Hop-Nachbarn dieser Typen. Knoten-Tap
-   öffnet die jeweilige Seite; „ganzes Netz →" führt zu `/graph/glossary`. Server:
-   `build_glossary_ego_graph(stem)` als reine **gefilterte Projektion** von
-   `build_glossary_graph()` (testbar, `tests/test_glossary_ego_graph.py`).
+1. **Layout engine: cola instead of fcose (default).** fcose (a spring
+   embedder) does not enforce overlap-freedom; with the dense term network
+   (average degree ≈ 7.5), the label-sized nodes overlap. **cytoscape-cola**
+   (WebCola, vendored) resolves this via `avoidOverlap` as a hard constraint
+   on the label boxes. cola runs to **completion** (settle-and-stop), so
+   dragging a node moves only **that** node; on release, a brief,
+   locally-locked cola run nudges only the direct neighbours aside ("make
+   room", everything else `lock()`ed). fcose remains available as an A/B
+   toggle, cose as a fallback. (An `infinite` variant tried in the meantime
+   — physics permanently on — was dropped: it rearranges the whole network on
+   *every* grab.)
+2. **Term ego snippet on the GLO detail page.** Above the textual
+   definition, every `glossary/` detail page now shows a **focused 1-hop
+   network** of the term: the term itself (highlighted with a ring) plus its
+   direct GLO neighbours, with **DM / Stakeholder / Goals** buttons to reveal
+   its 1-hop neighbours of those types layer by layer. Tapping a node opens
+   its page; "full network →" leads to `/graph/glossary`. Server side:
+   `build_glossary_ego_graph(stem)` as a pure **filtered projection** of
+   `build_glossary_graph()` (testable, `tests/test_glossary_ego_graph.py`).
 
-Styling, Layout-Engine-Registrierung und `layoutOpts` liegen jetzt **einmalig** in
-`static/glossary-graph.js` (Modul `AQ_GLOSSARY_GRAPH`), das **beide** Sichten — die
-Vollansicht und das Ego-Snippet — nutzen; eine Farb-/Layout-Änderung landet an *einer*
-Stelle (Wartungskosten ≈ null). cola/WebCola sind in `static/vendor/` ergänzt
-(siehe `static/vendor/README.md`).
+Styling, layout-engine registration, and `layoutOpts` now live **once** in
+`static/glossary-graph.js` (module `AQ_GLOSSARY_GRAPH`), used by **both**
+views — the full view and the ego snippet — so a colour/layout change lands
+in *one* place (maintenance cost ≈ zero). cola/WebCola were added under
+`static/vendor/` (see `static/vendor/README.md`).

@@ -8,13 +8,13 @@ Accepted
 
 ## Context
 
-We are about to start modelling Aquarius entities in `wiki/data-models/`. Functional
+We are about to start modelling entities in `wiki/data-models/`. Functional
 programming gives us a clean type-theoretical dichotomy that traditional ER/UML
 modelling handles asymmetrically:
 
 - **Product type** (`A × B × C`) — a record with **all** of its fields present.
-  Examples: a Kind has *vorname* AND *nachname* AND *geburtsdatum* AND … . The
-  ER/UML world models this natively as an entity/class.
+  Example: Entity A has *first name* AND *last name* AND *date of birth* AND … .
+  The ER/UML world models this natively as an entity/class.
 - **Sum type** (`A | B | C`) — a tagged union; a value is **exactly one** of
   several alternatives, each possibly carrying a different payload. ER/UML models
   this awkwardly via inheritance or via a discriminator column with a forest of
@@ -26,14 +26,14 @@ That granularity is too coarse for a graph projection (analogous to the
 context-diagram projection in ADR-0013) and offers no place for the sum-type
 distinction.
 
-A typical Aquarius example of a real sum type with payloads is the
-[[CON-001-versicherungspflicht|Versicherungsweg]], which is exactly one of:
+A typical example of a real sum type with payloads is the
+[[CON-001-example-status-constraint|Status Path]], which is exactly one of:
 
 ```
-Versicherungsweg
-  = VerbandsVersicherung { kaderId, verband }
-  | VereinsVersicherung   { polizzenNr, versicherer, gültigBis }
-  | PrivatVersicherung    { polizzenNr, versicherer, gültigBis }
+StatusPath
+  = VariantA { orgId, org }
+  | VariantB { referenceNr, provider, validUntil }
+  | VariantC { referenceNr, provider, validUntil }
 ```
 
 The three variants share *no* common payload beyond the discriminator. Modelling
@@ -46,19 +46,19 @@ mirror the type-theoretical distinction:
 
 | Stereotype | Meaning | Identity | Use for |
 |---|---|---|---|
-| `entity` | product type **with** identity | yes (key) | first-class business objects (Kind, Wettkampf, Anmeldung, Start) |
-| `value-object` | product type **without** identity | no (equality by value) | data clusters that have no lifecycle of their own (Punktzahl, Adresse) |
-| `sum-type` | tagged union | n/a | values that are exactly one of several heterogeneous variants (Versicherungsweg) |
+| `entity` | product type **with** identity | yes (key) | first-class business objects (Entity A, Entity B, Entity C, Entity D) |
+| `value-object` | product type **without** identity | no (equality by value) | data clusters that have no lifecycle of their own (Address, Money) |
+| `sum-type` | tagged union | n/a | values that are exactly one of several heterogeneous variants (Status Path) |
 
 ### Two flavours of "sum type" — only one needs its own file
 
 1. **Enum-style (no payload).** A finite set of named tags with **no associated
-   data**. Examples: `Start.status ∈ {geplant, läuft, bewertet, annulliert}`,
-   `Anmeldung.status ∈ {angemeldet, bestätigt, abgesagt, erschienen, nicht_erschienen}`.
+   data**. Examples: `EntityD.status ∈ {planned, in_progress, evaluated, cancelled}`,
+   `EntityC.status ∈ {submitted, confirmed, cancelled, attended, no_show}`.
 
    → Modelled **inline as an attribute type**, e.g.
-   `type: "enum(geplant, läuft, bewertet, annulliert)"`. **No own file.** Don't
-   create stand-alone DM files just for the type-theoretical purity — that
+   `type: "enum(planned, in_progress, evaluated, cancelled)"`. **No own file.**
+   Don't create stand-alone DM files just for the type-theoretical purity — that
    inflates the model.
 
 2. **Tagged-union with payloads.** Variants carry **different** fields. Each
@@ -86,12 +86,12 @@ projection in ADR-0013), a sum-type renders as an abstract class annotated
 
 ```mermaid
 classDiagram
-    class Versicherungsweg {
+    class StatusPath {
         <<sum>>
     }
-    Versicherungsweg <|-- VerbandsVersicherung
-    Versicherungsweg <|-- VereinsVersicherung
-    Versicherungsweg <|-- PrivatVersicherung
+    StatusPath <|-- VariantA
+    StatusPath <|-- VariantB
+    StatusPath <|-- VariantC
 ```
 
 The arrow shape (`<|--`) is the standard generalisation arrow; the `<<sum>>`
@@ -119,12 +119,12 @@ contrast to OOP inheritance, which is typically *open*).
    graph projection, hard to query, no place for the sum-type distinction.
 2. **Model sum types as OOP inheritance only (no separate stereotype).**
    Rejected — conflates *is-a* (open extension) with *variants-of* (closed
-   tagging). `Kampfrichter is-a Offizieller` is genuine inheritance;
-   `Versicherungsweg = A | B | C` is a closed sum. Same diagram shape, different
+   tagging). `Role B is-a Role A` is genuine inheritance;
+   `StatusPath = A | B | C` is a closed sum. Same diagram shape, different
    intent; the stereotype preserves the intent.
 3. **Generics / parametrised types** (e.g. `Result<T>`, `Option<T>`). Deferred
-   ("erstmal genügt das so") — most domain models don't need them, and our
-   pragmatic enum + sum-type cover the Aquarius cases we know.
+   ("this is enough for now") — most domain models don't need them, and our
+   pragmatic enum + sum-type cover the cases we know.
 4. **Multiple discriminator dimensions on a single entity** (e.g. status × kind
    × source as three orthogonal enums on one record). Not addressed here; if it
    comes up, model each dimension as a separate inline enum attribute. A

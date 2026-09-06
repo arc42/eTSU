@@ -1,32 +1,37 @@
-# ADR-0012: Funktionale Anforderungen als ein Typ mit Stereotyp (epic|feature|story)
+# ADR-0012: Functional requirements as one type with a stereotype (epic|feature|story)
 
 - **Status:** accepted
 - **Date:** 2026-05-25
 
 ## Context
-Wir hatten **Feature** und **User story** als getrennte Inhaltstypen. req42s
-Product-Backlog (Block 04) ist aber **eine** Hierarchie funktionaler Anforderungen in
-drei Granularitäten — **Epic → Feature → Story** — die man als Story Map projiziert.
-Getrennte Typen zersplittern diese Familie und tragen keinen einheitlichen
-Eltern-/Kind-Graphen. Der Auftraggeber will „eine funktionale Anforderung als Epic,
-Story oder Feature markieren, um eine Hierarchie (oder einen Graphen) zu ermöglichen“.
+We had **Feature** and **User story** as separate content types. But req42's
+product backlog (block 04) is really **one** hierarchy of functional
+requirements at three granularities — **Epic → Feature → Story** — which gets
+projected as a story map. Separate types splinter this family and carry no
+unified parent/child graph. The sponsor wants to be able to "mark a functional
+requirement as an epic, story, or feature, to enable a hierarchy (or a
+graph)".
 
 ## Decision
-Ein Inhaltstyp **Functional requirement** (`wiki/functional-requirements/`, `FR-NNN`)
-mit Feld **`stereotype: epic | feature | story`**. Die Hierarchie entsteht über
-**`parent:`**-Wikilinks (mehrere erlaubt ⇒ Graph, nicht nur Baum). Für die
-Story-Map-Projektion ([[story-mapping]]) tragen die Knoten zusätzlich **`order`**
-(Backbone-Reihenfolge), **`priority`** ([[MoSCoW]]) und **`release`** (Swim-Lane).
+One content type, **Functional requirement**
+(`wiki/functional-requirements/`, `FR-NNN`), with a field
+**`stereotype: epic | feature | story`**. The hierarchy is built via
+**`parent:`** wikilinks (more than one allowed ⇒ a graph, not just a tree).
+For the story-map projection ([[story-mapping]]), nodes additionally carry
+**`order`** (backbone sequence), **`priority`** ([[MoSCoW]]), and **`release`**
+(swim lane).
 
-Die bisherigen, **leeren** Typen Feature und User story gehen darin auf (13 → 12
-Inhaltstypen). Abnahmekriterien werden per neuem Anchor **[[acceptance-criteria]]**
-(Given/When/Then) erfasst — aus den abgelegten Templates geerntet. Das
-Use-Case-Template wurde (Cockburn-Stil) angereichert, bleibt aber ein **eigener** Typ.
-**Estimate/Owner** werden bewusst nicht im Wiki modelliert (Sache des Trackers, z. B.
-JIRA); das Wiki hält Anforderungs-Fakten: Stereotyp, Hierarchie, Priorität, Release, Order.
+The previous, **instance-less** types Feature and User story are absorbed
+into this one (13 → 12 content types). Acceptance criteria are captured via
+the new anchor **[[acceptance-criteria]]** (Given/When/Then) — harvested from
+the retired templates. The use-case template was enriched (Cockburn style)
+but remains its **own** type. **Estimate/owner** are deliberately not modelled
+in the wiki (that belongs to the tracker, e.g. JIRA); the wiki holds
+requirement facts: stereotype, hierarchy, priority, release, order.
 
 ## Consequences
-Einheitlicher, graph-fähiger Backlog; die Story Map ist eine reine Projektion. Alle
-Quer-Verweise heißen jetzt `[[FR-...]]` (statt `[[FEAT-...]]`/`[[US-...]]`). Aktualisiert:
-`CLAUDE.md`-Typtabelle, req42-Anchor + `docs/req42/`, Index, Dashboard-App. Migration:
-keine — beide Alttypen waren instanzenlos.
+A unified, graph-capable backlog; the story map is a pure projection. All
+cross-references are now `[[FR-...]]` (instead of `[[FEAT-...]]`/`[[US-...]]`).
+Updated: the `CLAUDE.md` type table, the req42 anchor + `docs/req42/`, the
+index, the dashboard app. Migration: none — both retired types were
+instance-less.

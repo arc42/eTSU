@@ -1,114 +1,131 @@
-# ADR-0024: Grafische / Marken-Anforderungen als Constraints + Quality-Szenarien; Assets in `raw/`; Geschmack-vs-Messbar als Issue
+# ADR-0024: Graphical / brand requirements as Constraints + Quality scenarios; assets in `raw/`; project identity via `wiki.yaml`
 
 - **Status:** accepted
 - **Date:** 2026-06-24
 
 ## Context
 
-Der Ligapräsident ([[STK-006-ligapraesident|Fritz Flosse]], `influence: high`,
-Gründer/Entscheider/Sponsor) bringt **grafische Anforderungen** ins System ein — und tut
-das aus einer Position, die schwer zu überstimmen ist. Konkret liegen bereits im Posteingang:
+A senior stakeholder with high influence — a founder, decision-maker, or
+sponsor — will, sooner or later, bring **graphical requirements** into a
+project: a logo, a colour palette, a required signature block on printed
+documents, a "must look good and be readable from across the room" display
+screen. Such requests typically arrive as decrees, not analysis, and often
+arrive already embedded inside a functional wish ("print me a nice
+certificate with a colourful logo", "the results board must be readable for
+every visitor").
 
-- **Acht Logo-Farbvarianten** unter `raw/drafts/logos/` (aqua-teal, classic, coral-reef,
-  forest-green, marine-blue, sunset-tide, triple-blue, tropical-water) — d. h. das
-  **Farbschema ist noch nicht entschieden**, es zirkulieren Kandidaten.
-- Zwei Mails, die Grafik in funktionale Wünsche einbetten:
-  `raw/drafts/urkunden-druck-anforderung-flosse.eml` (Urkunde mit „schönem, buntem Logo"
-  **und eingescannter Präsidenten-Unterschrift") und
-  `raw/drafts/ergebnistafel-anforderung-flosse.eml` (digitale Ergebnistafel, „gut sichtbar
-  für alle Besucher").
+The schema taxonomy ([[0002-content-type-taxonomy|ADR-0002]]) has thirteen
+content types — **none** of them is a natural home for "logo / colours /
+brand". That creates two tensions:
 
-Die Schema-Taxonomie ([[0002-content-type-taxonomy|ADR-0002]]) kennt 13 Inhaltstypen —
-**keiner** ist ein natürliches Zuhause für „Logo / Farben / Markenauftritt". Daraus zwei
-Spannungen:
+1. **Graphics are decreed, not derived.** A logo or a palette does not
+   *emerge* from analysis — a stakeholder *dictates* it. That is the textbook
+   definition of a **Constraint** (a fixed boundary on the solution space),
+   not a feature or quality statement derived from requirements. Treating
+   taste as a "requirement" would wrongly put it up for discussion.
+2. **Binary assets do not belong in `wiki/`.** The `wiki/` layer is a
+   **text graph** of linked units; PNG logos and scanned signatures are
+   human sources, not generated knowledge pages.
 
-1. **Grafik ist dekretiert, nicht hergeleitet.** Ein Logo oder eine Palette *emergiert*
-   nicht aus Analyse — der Präsident *verfügt* sie. Das ist die Lehrbuch-Definition eines
-   **Constraints** (fixe Grenze des Lösungsraums), keine aus Anforderungen abgeleitete
-   Feature- oder Quality-Aussage. Würden wir Geschmack als „Requirement" behandeln, würden
-   wir ihn fälschlich zur Diskussion stellen.
-2. **Binär-Assets gehören nicht in `wiki/`.** Die `wiki/`-Schicht ist ein **Text-Graph**
-   aus verlinkten Einheiten; PNG-Logos und gescannte Unterschriften sind menschliche
-   Quellen, keine generierten Wissensseiten.
+There is also a **governance risk**: a stakeholder's taste (which colour
+scheme, "colourful and pretty") can collide with an *objective* need — e.g. a
+pretty but low-contrast scheme that is unreadable on a results board across a
+room. The wiki must neither override the stakeholder's taste nor stay silent
+about the readability problem (CLAUDE.md: *flag and propose, never block or
+silently rewrite — the human decides*).
 
-Hinzu kommt ein **Governance-Risiko**: Geschmack des Präsidenten (welches der 8 Schemata,
-„bunt und schön") kann mit einem *objektiven* Bedarf kollidieren — z. B. ein hübsches, aber
-kontrastarmes Schema, das auf der Ergebnistafel quer durch die Halle unlesbar ist. Die Wiki
-darf hier weder den Geschmack überstimmen noch das Lesbarkeitsproblem verschweigen
-(CLAUDE.md: *flag and propose, never block or silently rewrite — the human decides*).
+Options considered:
 
-Optionen:
-
-- **A** — Ein **14. Inhaltstyp** „Design-/Marken-Asset". Schwergewichtig: eigenes Template,
-  eigener Ordner, eigene Audit-/Index-Logik — für bislang eine Handvoll Regeln. Verstößt
-  gegen das Sparsamkeitsprinzip, das schon [[0021-file-format-specs-at-boundary-owner|ADR-0021]]
-  bei den Dateiformat-Specs durchgesetzt hat.
-- **B** — **Ad hoc** je Mail im jeweiligen FR mitschreiben. Kein gemeinsamer Ort für die
-  Markenregel; Logo-/Farbvorgaben wären über viele FRs verstreut, driften auseinander, und
-  die Geschmack-vs-Messbar-Trennung ginge verloren.
-- **C** — **Zerlegung auf bestehende Typen**: die Markenvorgabe als **Constraint**, ihre
-  Anwendung als **Functional Requirement**, ihre messbare visuelle Güte als **Quality
-  Requirement**; Assets in `raw/`; Geschmack-vs-Messbar-Konflikte als **Issue**.
+- **A** — A **14th content type** "design/brand asset". Heavyweight: its own
+  template, its own folder, its own audit/index logic — for what is so far a
+  handful of rules. Violates the parsimony principle that
+  [[0021-file-format-specs-at-boundary-owner|ADR-0021]] already enforced for
+  file-format specs.
+- **B** — Handle each request **ad hoc** inside whichever FR it touches. No
+  shared home for the brand rule; logo/colour requirements would scatter
+  across many FRs, drift apart, and the taste-vs-measurable distinction would
+  be lost.
+- **C** — **Decompose onto existing types**: the brand mandate as a
+  **Constraint**, its application as a **Functional Requirement**, its
+  measurable visual quality as a **Quality Requirement**; assets in `raw/`;
+  taste-vs-measurable conflicts as an **Issue**.
 
 ## Decision
 
-**Option C.** Grafische / Marken-Anforderungen erhalten **keinen eigenen Inhaltstyp**,
-sondern werden auf die vorhandenen Typen projiziert — analog zum Reframe von
-[[0021-file-format-specs-at-boundary-owner|ADR-0021]] („kein neuer Content-Type, am richtigen
-Owner platzieren").
+**Option C.** Graphical/brand requirements get **no content type of their
+own**; instead they are projected onto the existing types — the same reframe
+[[0021-file-format-specs-at-boundary-owner|ADR-0021]] applied ("no new
+content type, place it with the right owner").
 
-1. **Die Markenvorgabe selbst → Constraint.** Logo, Farbpalette, Typografie und die
-   „Präsidenten-Unterschrift auf offiziellen Dokumenten" werden als **Constraint**
-   festgehalten (`category: organizational`, Origin = [[STK-006-ligapraesident]]). Als
-   Dekret ist der Constraint **per Definition nicht verhandelbar** — wir erfassen ihn treu,
-   wir grillen ihn nicht klein. (Wo der Akzent klar *persönlicher* Geschmack des Präsidenten
-   statt Organisationsstandard ist, ist `category: political` zulässig.)
-2. **Die Anwendung der Marke → Functional Requirement.** Die *Funktion* (welche Daten,
-   welcher Ablauf) lebt im FR — Urkunden-Druck, digitale Ergebnistafel — und **referenziert**
-   den CI-Constraint für ihr Aussehen. Der FR trägt den fachlichen Inhalt, nicht die Pixel.
-3. **Messbare visuelle Güte → Quality Requirement.** Lesbarkeit, Kontrast,
-   Wiedererkennbarkeit werden als **QR** (ISO 25010 `usability` — UI-Ästhetik /
-   Angemessenheit der Erkennbarkeit, plus Barrierefreiheit/Kontrast) mit einer **Zahl**
-   formuliert (z. B. „aus 15 m lesbar; Kontrast ≥ WCAG AA"). **Erst das macht Farbe
-   diskutierbar**, ohne über Geschmack zu streiten.
-4. **Assets bleiben in `raw/`, die Wiki referenziert per Pfad.** Binär-Dateien durchlaufen
-   den Quellen-Lebenszyklus ([[0008-raw-inbox-ingested-archive|ADR-0008]]): Inbox → nach
-   Ingest `raw/ingested/`, mit schlankem Provenance-Record in `raw/sources/`
-   ([[0006-provenance-records-location|ADR-0006]]). Der Constraint nennt **genau eine**
-   kanonische Datei → **Single Source of Truth**; Varianten werden archiviert. `wiki/` hält
-   die *Regel in Text*, nie das Bild.
-5. **Geschmack-vs-Messbar-Konflikt → Issue, nie Überstimmung.** Kollidiert die ästhetische
-   Wahl mit dem QR-Messwert, wird ein **`ISS-NNN`** angelegt
-   ([[0003-issues-as-meta-type|ADR-0003]]), das Constraint und QR verlinkt, den Trade-off
-   darlegt — **der Präsident entscheidet**, mit explizit gemachtem Trade-off.
+1. **The brand mandate itself → Constraint.** A logo, colour palette,
+   typography, or a rule such as "requires a signature block on official
+   documents" is recorded as a **Constraint** (`category: organizational`,
+   with `origin:` pointing at the stakeholder who decreed it). As a decree,
+   the constraint is **by definition non-negotiable** — we record it
+   faithfully, we do not grill it down. (Where the emphasis is clearly a
+   stakeholder's *personal* taste rather than an organizational standard,
+   `category: political` is appropriate.)
+2. **Applying the brand → Functional Requirement.** The *function* (which
+   data, which flow) lives in the FR — e.g. "print a certificate", "show a
+   live results display" — and **references** the brand constraint for its
+   appearance. The FR carries the business content, not the pixels.
+3. **Measurable visual quality → Quality Requirement.** Readability,
+   contrast, and recognizability are captured as a **QR** (ISO 25010
+   `usability` — UI aesthetics / appropriateness of recognizability, plus
+   accessibility/contrast) with a **number** (e.g. "readable from 15 m;
+   contrast ≥ WCAG AA"). **Only this makes colour discussable** without
+   arguing about taste.
+4. **Assets stay in `raw/`, the wiki references them by path.** Binary files
+   go through the source lifecycle
+   ([[0008-raw-inbox-ingested-archive|ADR-0008]]): inbox → after ingest
+   `raw/ingested/`, with a slim provenance record in `raw/sources/`
+   ([[0006-provenance-records-location|ADR-0006]]). The constraint names
+   **exactly one** canonical file → a single source of truth; variants are
+   archived. `wiki/` holds the *rule as text*, never the image.
+5. **Taste-vs-measurable conflict → Issue, never an override.** If the
+   aesthetic choice collides with the QR's measured value, an **`ISS-NNN`**
+   is raised ([[0003-issues-as-meta-type|ADR-0003]]) linking the constraint
+   and the QR and laying out the trade-off — **the stakeholder decides**,
+   with the trade-off made explicit.
 
-**Bewusst offen gelassen:** die *konkrete* Logo-/Farbentscheidung. Fritz ist bei Details
-noch unentschieden (8 Kandidaten). Diese ADR legt nur die **Strategie/Politik** fest; die
-inhaltliche Wahl wird **später** beim Ingest erfasst — als Constraint plus ein **blockierendes
-Issue** „Farbschema noch nicht entschieden", das der QR (Kontrast/Lesbarkeit) eingrenzt.
+### Project identity today: text, not binary assets
+
+The one place this repo currently carries a visual identity is the
+dashboard's hero header (`_system/apps/dashboard/templates/index.html`),
+which renders `system_name` and `tagline` — two plain-text fields read from
+`_system/wiki.yaml` (`_system/apps/dashboard/templates/base.html` uses the
+same `system_name` for the page `<title>` and footer). There is no per-project
+logo, colour scheme, or header artwork: identity is carried entirely as text,
+filled in once during the bootstrap workflow, and the dashboard shows neutral
+defaults while it is blank. The **one fixed graphical mark** anywhere in the
+dashboard is the req42 logo (`static/req42-logo-white.png`), used on the
+`/req42` reference pages to identify that anchor framework — it is not a
+per-project brand asset and is not affected by this ADR. Any future
+per-project logo or colour request is new content, handled per the routing
+rule below — it does not change this mechanism.
 
 ## Consequences
 
-- **Schema bleibt schlank.** Wiederverwendung von Constraint + Quality + Source statt eines
-  14. Typs; [[0002-content-type-taxonomy|ADR-0002]] bleibt unangetastet. Reiht sich in die
-  Sparsamkeitslinie von [[0021-file-format-specs-at-boundary-owner|ADR-0021]] ein.
-- **Routing-Regel für künftige grafische Wünsche:** Dekret → Constraint, Anwendung → FR,
-  messbare Güte → QR, Asset → `raw/`, Geschmack-Konflikt → Issue. Jeder neue Logo-/Farb-/
-  Layout-Wunsch ordnet sich damit selbst ein.
-- **Assets folgen dem Quellen-Lebenszyklus** ([[0008-raw-inbox-ingested-archive|ADR-0008]],
-  [[0006-provenance-records-location|ADR-0006]]); genau **ein** kanonisches File als SSoT
-  entschärft die bereits sichtbare Drift (z. B. `coral-reef-redrawn.png` 628 KB vs. die
-  `-flat`-Varianten).
-- **Farbe wird verhandelbar gemacht, nicht erstritten.** Die objektive Schranke lebt im QR;
-  der Geschmack im Constraint. Differenzen laufen über ein Issue — konsistent mit dem
-  „flag and propose"-Prinzip (CLAUDE.md). Die Wiki nimmt nie selbst Partei.
-- **Konkrete Logo-/Farbwahl bleibt offen** (Fritz unentschieden). Die 8 Kandidaten und die
-  zwei Mails sind weiterhin **grill-gated zu ingesten** — voraussichtlich: 1 CI-Constraint,
-  FRs „Urkunden-Druck" + „Digitale Ergebnistafel" (Letztere überlappt
-  [[QR-001-aktualitaet-live-stand]] und das „Backoffice entlasten"-Ziel), 1–2 QRs
-  (Lesbarkeit/Kontrast, Druckqualität), 1 blockierendes Issue (Farbschema), ggf. Glossar
-  („Ligalogo"/„Corporate Design", „Urkunde", „Ergebnistafel") sowie SRC-Records für
-  Logo-Set und Mails.
-- **Reversal** hieße: einen dedizierten Inhaltstyp „Design/Brand" über eine ablösende ADR
-  einführen — sinnvoll erst, wenn das Volumen an Markenregeln das Eigengewicht eines Typs
-  trägt. Daher dieser Record.
+- **The schema stays lean.** Constraint + Quality + Source are reused instead
+  of adding a 14th type; [[0002-content-type-taxonomy|ADR-0002]] stays
+  untouched. This follows the same parsimony line as
+  [[0021-file-format-specs-at-boundary-owner|ADR-0021]].
+- **Routing rule for future graphical requests:** decree → Constraint,
+  application → FR, measurable quality → QR, asset → `raw/`, taste conflict →
+  Issue. Every new logo/colour/layout request sorts itself accordingly.
+- **Assets follow the source lifecycle**
+  ([[0008-raw-inbox-ingested-archive|ADR-0008]],
+  [[0006-provenance-records-location|ADR-0006]]); exactly **one** canonical
+  file as the single source of truth prevents the kind of drift that
+  otherwise accumulates when several near-duplicate image variants circulate.
+- **Colour/appearance becomes negotiable, not something to fight over.** The
+  objective boundary lives in the QR; the taste lives in the constraint.
+  Disagreements go through an Issue — consistent with the "flag and propose"
+  principle (CLAUDE.md). The wiki never takes a side itself.
+- **The dashboard's own identity mechanism is deliberately minimal** — two
+  text fields in `wiki.yaml`, no binary brand assets to manage — and is
+  orthogonal to this ADR's routing rule for a project's *content* about its
+  own brand requirements.
+- **Reversal** would mean introducing a dedicated "design/brand" content type
+  via a superseding ADR — worth doing only once the volume of brand rules
+  justifies the weight of its own type. Hence this record.

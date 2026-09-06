@@ -1,54 +1,55 @@
-# Gefilterte Graph-Ansichten (Obsidian Workspaces)
+# Filtered graph views (Obsidian workspaces)
 
-Der Obsidian-Graph speichert global nur **eine** Konfiguration
-(`.obsidian/graph.json`). **Groups** färben Knoten nur ein – sie entfernen keine.
-Wer den Graphen auf bestimmte Knoten **reduzieren** will, nutzt das Suchfeld im
-Abschnitt **Filters** der Graph-Einstellungen (oben).
+The Obsidian graph only stores **one** configuration globally
+(`.obsidian/graph.json`). **Groups** only colour nodes in — they don't remove
+any. To **narrow** the graph down to specific nodes, use the search field in
+the **Filters** section of the graph settings (above).
 
-Um mehrere solcher Filter wiederzuverwenden, speichern wir sie als benannte
-**Workspaces** (Core-Plugin „Workspaces"). Ein Workspace sichert das gesamte
-Layout inklusive der Graph-Filter. Die gespeicherten Layouts liegen in
-`.obsidian/workspaces.json`.
+To reuse several such filters, we save them as named **workspaces** (core
+plugin "Workspaces"). A workspace saves the entire layout, including the
+graph filter. The saved layouts live in `.obsidian/workspaces.json`.
 
-## Vorhandene Graph-Workspaces
+## Existing graph workspaces
 
-| Workspace | Filter (`search`) | Zeigt |
+| Workspace | Filter (`search`) | Shows |
 |---|---|---|
-| **Graph: Glossar + Goals** | `["type":"glossary"] OR ["type":"goal"]` | GLO- und GOAL-Knoten (grün / gold) |
-| **Graph: Epics + FRs** | `["type":"functional-requirement"]` | alle FRs, eingefärbt nach Stereotyp epic/feature/story |
-| **Graph: Kind (alles dazu)** | `GLO-006-kind` | den Begriff *Kind* + jede Seite, die darauf verlinkt |
-| **Graph: Data Models** | `["type":"data-model"]` | alle DM-Knoten |
+| **Graph: Glossary + Goals** | `["type":"glossary"] OR ["type":"goal"]` | GLO and GOAL nodes (green / gold) |
+| **Graph: Epics + FRs** | `["type":"functional-requirement"]` | all FRs, coloured by stereotype epic/feature/story |
+| **Graph: Term (everything about it)** | `GLO-006-entity-e` | that term + every page that links to it |
+| **Graph: Data Models** | `["type":"data-model"]` | all DM nodes |
 
-## Laden
+## Loading
 
-1. `Cmd+P` → **Workspaces: Load workspace** (oder Ribbon-Icon) → einen der vier wählen.
-2. Zurück zum normalen Layout: einen regulären Workspace laden/speichern.
+1. `Cmd+P` → **Workspaces: Load workspace** (or the ribbon icon) → pick one of
+   the four.
+2. Back to the normal layout: load/save a regular workspace.
 
-> Wurde `workspaces.json` extern (z. B. von einem Agenten) geschrieben, während
-> Obsidian läuft, muss Obsidian die Datei erst neu einlesen:
-> `Cmd+P` → **Reload app without saving**. **Vorher keinen Workspace speichern**,
-> sonst überschreibt Obsidian die neue Datei mit dem alten Speicherstand.
+> If `workspaces.json` was written externally (e.g. by an agent) while
+> Obsidian is running, Obsidian first needs to re-read the file:
+> `Cmd+P` → **Reload app without saving**. **Don't save a workspace before
+> that**, or Obsidian will overwrite the new file with the old saved state.
 
-## Filter-Syntax (Spickzettel)
+## Filter syntax (cheat sheet)
 
-Das Filter-Feld nutzt dieselbe Such-Syntax wie die globale Suche.
+The filter field uses the same search syntax as the global search.
 
-- `path:wiki/glossary` — nur ein Ordner
-- `["type":"goal"]` — nach Frontmatter-**Property** (robust, auch wenn Dateien umziehen)
-- `["status":"accepted"]` — nach Status
-- `tag:#data-model` — nach Tag (mit `#`)
-- `A OR B` — Vereinigung (**`OR` muss groß geschrieben sein**; `or` ist ein Wort)
-- `-["status":"deprecated"]` — Ausschluss
-- `GLO-006-kind` — der Knoten selbst **plus** alle Seiten, deren Text diesen
-  Wikilink enthält (nutzt die Konvention „jede Referenz ist ein echter Link")
+- `path:wiki/glossary` — a single folder only
+- `["type":"goal"]` — by frontmatter **property** (robust even if files move)
+- `["status":"accepted"]` — by status
+- `tag:#data-model` — by tag (with `#`)
+- `A OR B` — union (**`OR` must be capitalized**; `or` is a regular word)
+- `-["status":"deprecated"]` — exclusion
+- `GLO-006-entity-e` — the node itself **plus** every page whose text
+  contains this wikilink (relies on the convention "every reference is a real
+  link")
 
-## Neuen Graph-Workspace anlegen
+## Creating a new graph workspace
 
-1. Graph öffnen, gewünschten Ausdruck ins **Filters**-Feld eintragen, ggf. Farben
-   unter **Groups** setzen.
-2. `Cmd+P` → **Workspaces: Save workspace as…** → sprechenden Namen vergeben
-   (Konvention hier: Präfix `Graph: …`).
+1. Open the graph, enter the desired expression into the **Filters** field,
+   optionally set colours under **Groups**.
+2. `Cmd+P` → **Workspaces: Save workspace as…** → give it a descriptive name
+   (convention here: prefix `Graph: …`).
 
-> Hinweis: Ein Workspace sichert das **gesamte** Layout, nicht nur den Graphen.
-> Die vier Graph-Workspaces oben übernehmen die seitlichen Panels aus dem
-> Standard-Layout. Beim Laden wird die Pane-Anordnung also umgestellt.
+> Note: a workspace saves the **entire** layout, not just the graph. The four
+> graph workspaces above inherit the side panels from the standard layout.
+> Loading one therefore also rearranges the pane layout.

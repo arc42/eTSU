@@ -14,7 +14,7 @@ judgment call (same stance as `audit.md`).
 
 1. **Concept identity across types (≈100 % — auto-fix).** Pages of different types that
    share the same kebab slug-suffix (or an identical `title:`) denote the *same domain
-   concept* — e.g. `GLO-010-schwimmbad` ⇄ `DM-003-schwimmbad`. They must be reciprocally
+   concept* — e.g. `GLO-010-entity-c` ⇄ `DM-003-entity-c`. They must be reciprocally
    linked in `related:`. Add the missing back-link on whichever side omits it.
 2. **Asymmetric `related:` (high — auto-fix).** A lists B in `related:` but B omits A.
    Repair reciprocity — but **only** for the symmetric relation `related:`. Never touch
@@ -22,8 +22,8 @@ judgment call (same stance as `audit.md`).
    projection (Children, the source's `ingested-pages:`, Goal-coverage — ADR-0018), not a
    back-link.
 3. **Entity ⇄ import-format / boundary-owner (medium — candidate).** A data entity marked
-   *Konfiguration* (loaded from a file — body says „per CSV/Datei eingelesen", or a
-   `raw/drafts/*-format-vorschlag.md` shares its slug) should link the boundary node that
+   *configuration* (loaded from a file — body says "loaded via CSV/file", or a
+   `raw/drafts/*-format-proposal.md` shares its slug) should link the boundary node that
    owns its format: `FR-006` for config bootstrap, the relevant `EIF-` for an external
    feed (ADR-0021) — and that node should list the entities it governs. Suggest; let the
    human confirm. Also flag a **raw-path string** (e.g. `` `raw/drafts/…-format-vorschlag.md` ``)
@@ -53,7 +53,7 @@ judgment call (same stance as `audit.md`).
 
 ## Output
 1. A **relationship report** in chat, grouped by tier and confidence, each candidate
-   stating the exact edge proposed (e.g. „add `[[DM-003-schwimmbad]]` to `GLO-010`
+   stating the exact edge proposed (e.g. "add `[[DM-003-entity-c]]` to `GLO-010`
    `related:`").
 2. **Auto-fix** only Tier-1 reciprocal `related:` back-links (and exact-match symmetric
    Tier-2). Bump `updated:` on every page you touch.
