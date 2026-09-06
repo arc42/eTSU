@@ -31,7 +31,7 @@
       <td class="c-def">
         <div class="stk-profile">{{ r.snapshot | safe }}</div>
         {% if r.rel_links %}
-        <div class="stk-bezuege" aria-label="Links to">
+        <div class="stk-links" aria-label="Links to">
           {% for it in r.rel_links %}<a class="bz bz-{{ it.type }}" href="{{ it.url }}" title="{{ it.id }} · {{ it.label }}">{{ it.label }}</a>{% endfor %}
           {% if r.rel_more %}<a class="bz bz-more" href="/page/stakeholders/{{ r.stem }}" title="all relations on the detail page">+{{ r.rel_more }}</a>{% endif %}
         </div>

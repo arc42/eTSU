@@ -509,14 +509,24 @@ def _diagram_node_id(raw: str) -> str:
     return _NID_RE.sub("", str(raw)) or "N"
 
 
-def _clean_label(s: object) -> str:
-    """Resolve [[a|b]]→b / [[a]]→a, drop a trailing (parenthetical), strip chars
-    that would break the mermaid/HTML text so labels are always render-safe."""
+def _clean_label(s: object, drop_parenthetical: bool = True) -> str:
+    """Resolve [[a|b]]→b / [[a]]→a, optionally drop a trailing (parenthetical),
+    strip chars that would break the mermaid/HTML text so labels are always
+    render-safe.
+
+    `drop_parenthetical=False` for the system name: a vault called
+    "Bookshelf (v2)" showed in full in the hero but as "Bookshelf" in every
+    diagram, which reads as two different systems on the same screen.
+    Square brackets are stripped because mermaid uses them as node-shape
+    delimiters; apostrophes are kept — labels are emitted inside double
+    quotes, and "Member's card" should stay readable.
+    """
     t = str(s or "")
     t = re.sub(r"\[\[[^\]|]+\|([^\]]+)\]\]", r"\1", t)                       # [[a|b]] -> b
     t = re.sub(r"\[\[([^\]]+)\]\]", lambda m: m.group(1).split("/")[-1], t)  # [[a]]   -> a
-    t = re.sub(r"\s*\([^)]*\)\s*$", "", t)                                   # trailing (…)
-    t = re.sub(r'[<>"&|]', "", t)
+    if drop_parenthetical:
+        t = re.sub(r"\s*\([^)]*\)\s*$", "", t)                               # trailing (…)
+    t = re.sub(r'[<>"&|\[\]]', "", t)
     return re.sub(r"\s+", " ", t).strip()
 
 
@@ -525,7 +535,7 @@ def build_context_diagram(center: str | None = None) -> str | None:
 
     Returns None when no edges exist yet. Pure and string-only, so the planned
     audit-loop (ISS-010) can reuse it outside the request cycle."""
-    center = center or _clean_label(wiki_config()["system_name"])
+    center = center or _clean_label(wiki_config()["system_name"], drop_parenthetical=False)
     core = "CORE"
     nodes: list[tuple[str, str, str]] = []   # (node_id, label, css_class)
     edges: list[str] = []
@@ -1513,7 +1523,7 @@ def _mermaid_goal_tree(vision: Page, objectives: list[Page]) -> str | None:
     desktop widths (≥1000 px) without horizontal scrolling."""
     if not vision or not objectives:
         return None
-    root = _clean_label(wiki_config()["system_name"])
+    root = _clean_label(wiki_config()["system_name"], drop_parenthetical=False)
     lines = ["graph TD", f'  V["Vision {root}"]:::vision']
     for o in objectives:
         nid = _diagram_node_id(o.id)
@@ -1534,18 +1544,16 @@ def build_data_model_full_diagram() -> str | None:
 
     Projection from `wiki/data-models/` is not implemented yet; until it is,
     the view renders its empty state rather than a stale hardcoded model.
-    Returns None while there are no data-model pages.
+    `data_model.html` guards on `entities`, not on this diagram, so returning
+    None unconditionally is the whole contract — do not "fix" the guard.
     """
-    if not load_folder("data-models"):
-        return None
-    return None
+    return None  # placeholder — a real projection is future work (ADR-0018 style)
 
 
 def build_data_model_kind_diagram() -> str | None:
-    """Compact diagram for the home tile. See build_data_model_full_diagram()."""
-    if not load_folder("data-models"):
-        return None
-    return None
+    """Compact diagram for the home tile. See build_data_model_full_diagram().
+    `index.html` guards the data-model tile on its entity count, not on this."""
+    return None  # placeholder — a real projection is future work (ADR-0018 style)
 
 
 # Section/callout extractors for the /data-model catalog: each DM page is

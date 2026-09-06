@@ -198,10 +198,62 @@ def test_the_vision_is_chosen_by_stereotype_not_by_id():
         late_vision.unlink(missing_ok=True)
 
 
+def test_a_vision_without_objectives_gets_the_objectives_empty_state():
+    """The state bootstrap.md step 3 leaves behind: a vision captured, no
+    objectives yet. /goals used to say "No goals yet" directly underneath the
+    rendered vision; the fix reworded it, and nothing covered either state."""
+    moved = []
+    try:
+        for f in sorted(_GOALS.glob("GOAL-00[23456]*.md")):
+            moved.append((f, f.read_text(encoding="utf-8")))
+            f.unlink()
+        body = app.app.test_client().get("/goals").get_data(as_text=True)
+        assert "No objectives yet" in body, \
+            "a vision with no objectives does not get the objectives empty state"
+        assert "No goals yet" not in body, \
+            "/goals claims there are no goals while rendering the vision"
+        assert "System X Runs Itself" in body, "the vision itself stopped rendering"
+    finally:
+        for f, text in moved:
+            f.write_text(text, encoding="utf-8")
+
+
+def test_the_goal_type_is_labelled_in_search():
+    """FOLDER_LABELS had no entry for goals/, so the Goal type surfaced as the
+    lowercase folder name `goals` in search results and facets."""
+    assert app.FOLDER_LABELS["goals"] == "Goal", app.FOLDER_LABELS.get("goals")
+    body = app.app.test_client().get("/search").get_data(as_text=True)
+    assert '<span class="badge kind-badge">Goal</span>' in body, \
+        "search results do not label goal pages 'Goal'"
+    assert 'data-type="goals"' not in body, \
+        "the raw folder name leaked into the search type filter"
+
+
+def test_a_parenthesised_system_name_survives_into_the_diagrams():
+    """`system_name: "Bookshelf (v2)"` used to show in full in the hero but as
+    "Bookshelf" in every diagram — two names for one system on one screen."""
+    cfg = Path(os.environ["WIKI_CONFIG"])
+    original = cfg.read_text(encoding="utf-8")
+    try:
+        cfg.write_text('system_name: "System X (v2)"\n', encoding="utf-8")
+        with app.app.app_context():
+            data = app.load_goals()
+            tree = app._mermaid_goal_tree(data["vision"], data["objectives"])
+        assert "System X (v2)" in tree, tree.splitlines()[:2]
+        # square brackets are mermaid node delimiters and must still go
+        assert app._clean_label("Acme [Beta]") == "Acme Beta"
+        assert app._clean_label("Member's card") == "Member's card"
+    finally:
+        cfg.write_text(original, encoding="utf-8")
+
+
 if __name__ == "__main__":
     test_every_objective_page_is_projected()
     test_coverage_reaches_the_fifth_objective()
     test_goals_page_renders_all_objectives_and_the_late_epic()
     test_home_and_backlog_agree_with_the_vault()
     test_the_vision_is_chosen_by_stereotype_not_by_id()
+    test_a_vision_without_objectives_gets_the_objectives_empty_state()
+    test_the_goal_type_is_labelled_in_search()
+    test_a_parenthesised_system_name_survives_into_the_diagrams()
     print(f"OK: all {len(ALL_OBJECTIVES)} objectives projected from the vault")

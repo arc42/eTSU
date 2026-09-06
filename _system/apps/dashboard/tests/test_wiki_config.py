@@ -82,6 +82,19 @@ def test_malformed_config_does_not_crash():
     assert cfg["system_name"] == "Requirements Wiki", cfg
 
 
+def test_non_dict_yaml_falls_back():
+    """`system_name: [a, b]` is valid YAML that parses to a list, not a dict —
+    the guard for it existed but was never exercised."""
+    CONFIG.write_text("- just\n- a\n- list\n", encoding="utf-8")
+    cfg = app.wiki_config()
+    assert cfg["system_name"] == "Requirements Wiki", cfg
+    assert cfg["system_name_set"] is False, cfg
+    assert cfg["tagline"] == "", cfg
+
+    CONFIG.write_text("just a bare string\n", encoding="utf-8")
+    assert app.wiki_config()["system_name"] == "Requirements Wiki"
+
+
 if __name__ == "__main__":
     test_missing_config_falls_back()
     test_blank_config_falls_back()
@@ -89,4 +102,5 @@ if __name__ == "__main__":
     test_config_is_read_live_not_cached()
     test_shipped_default_name_is_flagged_so_the_home_page_can_prompt()
     test_malformed_config_does_not_crash()
+    test_non_dict_yaml_falls_back()
     print("OK: wiki_config()")

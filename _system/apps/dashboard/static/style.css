@@ -294,7 +294,7 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
   overflow: hidden;
 }
-.stk-bezuege { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .5rem; }
+.stk-links { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .5rem; }
 .bz {
   font-size: .72rem; line-height: 1.5; padding: .04rem .45rem; border-radius: 999px;
   border: 1px solid var(--line); color: var(--ink-soft); text-decoration: none;
