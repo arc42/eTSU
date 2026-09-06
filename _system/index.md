@@ -5,9 +5,16 @@ every ingest (`_system/workflows/ingest.md`, step 6).
 
 ## Glossary
 
+- [GLO-001](../wiki/glossary/GLO-001-tour.md) — Tour: a sequence of Shows, contracted and shipped as one unit.
+- [GLO-002](../wiki/glossary/GLO-002-show.md) — Show: one stop of a Tour at a single gallery.
+
 ## Goals
 
+- [GOAL-001](../wiki/goals/GOAL-001-eTSU-vision.md) — Vision: digital tour and gallery management platform for Gus Renoir's business.
+
 ## Stakeholders
+
+- [STK-001](../wiki/stakeholders/STK-001-gus-renoir.md) — Gus Renoir, business owner / Head Office.
 
 ## Context
 
