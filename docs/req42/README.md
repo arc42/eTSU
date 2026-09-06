@@ -7,7 +7,7 @@
 > Canonical source: <https://github.com/Hruschka/req42-framework> · <https://req42.org>
 > The explanatory framing below is additionally **distilled from Dr. Peter Hruschka's
 > req42 chapter** (ordinary copyright, © author) — summarised with attribution, not
-> reproduced; the verbatim chapter is kept privately under `raw/methods/`.
+> reproduced, and the verbatim chapter is not shipped with this starter.
 > For the citable, condensed version used inside the wiki, see `_system/anchors/req42.md` (`[[req42]]`).
 
 ## What req42 is
@@ -100,5 +100,5 @@ content units, and uses req42's recommended standards as semantic anchors. It do
 
 - req42 framework repository — <https://github.com/Hruschka/req42-framework> (CC BY-SA 4.0)
 - req42 website — <https://req42.org>
-- Dr. Peter Hruschka, req42 explanatory chapter (© author) — verbatim in `raw/methods/req42-erklaerung-PH.md`; distilled here with attribution.
+- Dr. Peter Hruschka, req42 explanatory chapter (© author) — distilled here with attribution; the verbatim chapter is not shipped with this starter.
 - Related: arc42 architecture template — <https://arc42.org>

@@ -42,8 +42,8 @@ would drift). Two output shapes — same data, different strengths:
   Best for presentation/review; awkward when the backbone is wide.
 
 Optionally derive a rough **Mermaid** sketch. The default rendering (table vs list) is a
-generator choice, made when a story-map view/export is actually built. Design note with
-worked examples: `raw/methods/story-map-markdown-anleitung.md`.
+generator choice, made when a story-map view/export is actually built. Worked
+examples: `docs/methods/story-mapping.md`.
 
 ## Checklist (audit / grill)
 - [ ] Backbone identified — coarse items in narrative order?

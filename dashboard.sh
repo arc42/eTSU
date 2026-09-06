@@ -19,6 +19,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMPOSE_FILE="$ROOT/_system/apps/dashboard/compose.yaml"
 URL="http://localhost:8080"
+LOCAL_URL="http://localhost:8000"
 
 # Absolute paths to the mounted layers, consumed by compose.yaml.
 export WIKI_DIR="$ROOT/wiki"
@@ -35,6 +36,20 @@ open_browser_at() {
   fi
 }
 
+# Wait (up to ~30 s) until the dashboard actually answers. Opening the browser
+# first gives the facilitator a connection-refused page and a manual reload —
+# guaranteed on the first run, which builds the venv or the image.
+wait_for_url() {
+  local url="$1" tries=60
+  command -v curl >/dev/null 2>&1 || return 0   # nothing to poll with; don't stall
+  while [ "$tries" -gt 0 ]; do
+    if curl -sf --max-time 1 -o /dev/null "$url/"; then return 0; fi
+    tries=$((tries - 1))
+    sleep 0.5
+  done
+  return 1
+}
+
 cmd="${1:-up}"
 
 # Docker is required for every mode except `local`, which is the escape hatch
@@ -47,12 +62,14 @@ fi
 case "$cmd" in
   up)
     docker compose -f "$COMPOSE_FILE" up --build -d
+    wait_for_url "$URL" || echo "… still starting; reload the page if it does not answer."
     echo "✓ Dashboard running at $URL"
     open_browser_at "$URL"
     ;;
   rebuild)
     docker compose -f "$COMPOSE_FILE" build --no-cache
     docker compose -f "$COMPOSE_FILE" up -d
+    wait_for_url "$URL" || echo "… still starting; reload the page if it does not answer."
     echo "✓ Dashboard rebuilt, running at $URL"
     open_browser_at "$URL"
     ;;
@@ -66,14 +83,19 @@ case "$cmd" in
   local)
     cd "$ROOT/_system/apps/dashboard"
     if [ ! -d .venv ]; then
+      echo "→ First run: building the virtualenv and installing requirements (~20 s)…"
       python3 -m venv .venv
-      .venv/bin/pip install -q -r requirements.txt
+      .venv/bin/pip install -q --disable-pip-version-check -r requirements.txt
     fi
     export WIKI_DIR ADR_DIR CONFIG_FILE
     export WIKI_CONFIG="$CONFIG_FILE"
-    echo "✓ Dashboard (local, no Docker) on http://localhost:8000"
-    open_browser_at "http://localhost:8000"
-    exec .venv/bin/python app.py
+    # Start the server first, then open the browser once it actually answers.
+    .venv/bin/python app.py &
+    server_pid=$!
+    wait_for_url "$LOCAL_URL" || echo "… server did not answer yet; reload if the page fails."
+    echo "✓ Dashboard (local, no Docker) on $LOCAL_URL"
+    open_browser_at "$LOCAL_URL"
+    wait "$server_pid" || true
     ;;
   *)
     echo "Unknown command: $cmd" >&2

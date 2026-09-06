@@ -22,8 +22,14 @@ is compiled once and kept current as you add more. You browse it in Obsidian.
 3. **Point your AI agent at the same folder.** Launched there, Claude Code reads
    `CLAUDE.md` automatically and discovers both skills in `.claude/skills/`.
 
-That's it. You won't hand-write wiki pages, and you won't configure anything — the
-AI creates and maintains every page itself.
+4. **Run the bootstrap workflow once.** Tell the agent: **"Run the bootstrap
+   workflow."** It names the vault (the shipped name is `eTSU`, the starter's
+   own — replace it with yours), captures your vision as `GOAL-001`, and takes
+   down the first glossary terms and your first stakeholder. Takes about 30
+   minutes and gives the dashboard something to show.
+
+That's it. You won't hand-write wiki pages beyond that, and there is nothing else
+to configure — the AI creates and maintains every page itself.
 
 ## Your daily loop
 
@@ -44,6 +50,8 @@ Open `_system/index.md` for the catalog, or use the **graph view** to see how ev
 connects. Follow the links. If something's off, just tell the agent. Prefer a browser
 to Obsidian? Run `./dashboard.sh` for a live, read-only view of the same wiki —
 handy for a quick check or for showing someone else without installing anything.
+(That path needs Docker; `./dashboard.sh local` runs the same dashboard directly
+with Python on `http://localhost:8000` instead.)
 
 ### 4. Check what's still unknown
 Ask **"Report open issues."** The AI reads the `wiki/issues/` folder and gives you

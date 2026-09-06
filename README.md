@@ -19,7 +19,8 @@ and evolves with you over time.
 
 1. Run `./dashboard.sh` to start the live dashboard (Docker) at
    `http://localhost:8080` — a browsable view of the wiki, useful even while it's
-   still empty.
+   still empty. No Docker on this machine? `./dashboard.sh local` runs it
+   directly with Python at `http://localhost:8000`.
 2. Open this folder in Obsidian (**Open folder as vault**) to navigate and
    graph-view the wiki directly.
 3. Point Claude Code at this same folder — it reads `CLAUDE.md` automatically and

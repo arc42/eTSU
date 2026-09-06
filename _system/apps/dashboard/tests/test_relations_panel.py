@@ -4,7 +4,7 @@
 
 WIKI_DIR points at tests/fixtures/wiki, a small neutral vault, so the suite is
 independent of whatever content this starter is filled with. Powers the
-detail-page 'Verweist auf' / 'Taucht auf in' section.
+detail-page 'Links to' / 'Linked from' section.
 """
 import os
 import sys

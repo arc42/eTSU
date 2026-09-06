@@ -3,8 +3,8 @@
 > **Attribution.** Distilled summary of **Jeff Patton, "The New User Story Backlog is a
 > Map" (2008)**, © Jeff Patton — <https://jpattonassociates.com/the-new-backlog/>. This
 > is an *adapted summary for internal use*, **not** a verbatim copy (the original is
-> ordinary copyright, not CC). The verbatim article + figures are kept privately under
-> `raw/methods/`. For the citable, applied version see `_system/anchors/story-mapping.md`
+> ordinary copyright, not CC). The verbatim article + figures are not reproduced here —
+> read them at the URL above. For the citable, applied version see `_system/anchors/story-mapping.md`
 > (`[[story-mapping]]`).
 
 ## The problem it solves

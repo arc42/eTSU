@@ -61,5 +61,6 @@ A systematically empty block (e.g. no quality requirements at all) → raise an 
 
 > Cite as `[[req42]]`. Adapted under CC BY-SA 4.0 from the req42 framework
 > (Hruschka & Meuten); the explanatory framing above is distilled from **Dr. Peter
-> Hruschka's req42 chapter** (© author, kept in `raw/methods/`). See `docs/req42/` for
+> Hruschka's req42 chapter** (© author; the original is not shipped with this
+> starter — see ADR-0011 on the method layer). See `docs/req42/` for
 > the full attributed reference.

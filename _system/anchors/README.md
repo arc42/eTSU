@@ -21,8 +21,9 @@ enumerated collection.
 checks instances against the relevant anchor's checklist and raises an `ISS-NNN`
 Issue for misfits — it flags, it does not block or auto-rewrite. The human decides.
 
-**Method & reference layer (ADR-0011).** Method *source* materials live in
-`raw/methods/`; their *applied* standards become anchors here; their *readable*
-distilled references live in `docs/` (e.g. `docs/methods/`, `docs/req42/`) with
-attribution. Copyrighted originals (e.g. Patton, Hruschka) are summarised + attributed
+**Method & reference layer (ADR-0011).** Method *source* materials — the
+copyrighted originals — are not shipped with this starter; ADR-0011 records
+where they lived. What ships is the two derived layers: their *applied*
+standards as anchors here, and their *readable* distilled references in `docs/`
+(`docs/methods/`, `docs/req42/`) with attribution. Copyrighted originals (e.g. Patton, Hruschka) are summarised + attributed
 in `docs/`, never reproduced verbatim there.
