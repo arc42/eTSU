@@ -392,13 +392,13 @@ REQ42_BLOCKS = [
      "note": "Ein Typ, Stereotyp epic|feature|story; Hierarchie via parent: (ADR-0012)."},
     {"num": "05", "title": "Unterstützende Modelle", "en": "Supporting Models",
      "folders": ["use-cases", "activity-models", "data-models"], "scope": "in",
-     "href": "/req42/modelle", "slug": "modelle", "note": ""},
+     "href": "/req42/models", "slug": "models", "note": ""},
     {"num": "06", "title": "Qualitätsanforderungen", "en": "Quality Requirements",
      "folders": ["quality-requirements"], "scope": "in",
-     "href": "/req42/qualitaet", "slug": "qualitaet", "note": ""},
+     "href": "/req42/quality", "slug": "quality", "note": ""},
     {"num": "07", "title": "Randbedingungen", "en": "Constraints",
      "folders": ["constraints"], "scope": "in",
-     "href": "/req42/randbedingungen", "slug": "randbedingungen", "note": ""},
+     "href": "/req42/constraints", "slug": "constraints", "note": ""},
     {"num": "08", "title": "Domänenbegriffe", "en": "Domain Terminology",
      "folders": ["glossary"], "scope": "in", "href": "/glossary", "slug": None, "note": ""},
     {"num": "09", "title": "Betriebsmittel & Personal", "en": "Assets",
@@ -1209,6 +1209,7 @@ def index():
     ]
 
     vision_tile = build_vision_tile(load_goals(), titles)
+    n_entities = len(load_folder("data-models"))
     backlog = build_backlog()
     backlog_tile = {
         "key": "backlog", "label": "Product Backlog", "href": "/req42/backlog",
@@ -1264,10 +1265,11 @@ def index():
             "sub": f"{len(open_issues)} offen",
         },
         {
-            "key": "data-model", "label": "Datenmodell", "href": "/data-model",
+            "key": "data-model", "label": "Data model", "href": "/data-model",
             "icon": "🧩", "active": True,
             "diagram": build_data_model_kind_diagram(),
-            "claim": f"{len(load_folder('data-models'))} Entitäten · Kernknoten: Kind",
+            "claim": (f"{n_entities} entities" if n_entities else
+                      "No entities yet — model them as DM- pages"),
         },
     ]
     needs_mermaid = any(t.get("diagram") for t in tiles)
@@ -1489,80 +1491,23 @@ def _mermaid_goal_tree(vision: Page, objectives: list[Page]) -> str | None:
     return "\n".join(lines)
 
 
-# --- data model projection (req42 block 05: Unterstützende Modelle) -------
-#
-# Test-stage: edges are listed here as constants and projected to mermaid
-# classDiagram. Once the relationship syntax inside each DM body (`- field :
-# n:1 → [[DM-…]], optional` …) is stable enough to parse reliably, replace
-# DM_EDGES with a live extractor from wiki/data-models/.
-#
-# Source of truth (until then): wiki/data-models/DM-001..DM-013.md.
+def build_data_model_full_diagram() -> str | None:
+    """Full class diagram of every modelled entity.
 
-DM_ENTITIES = [
-    "Verein", "Saison", "Schwimmbad", "Figur", "Kind", "Sportverband",
-    "Wettkampf", "Anmeldung", "Station", "Gruppe", "Durchgang", "Start", "Wertung",
-]
-
-# (source, target, kind, label)
-# kind ∈ {"n:1", "n:1-opt", "m:n"} — n:1-opt is the same as n:1 but with the
-# target side "0..1" instead of "1" (target reference is optional on the source).
-DM_EDGES = [
-    ("Kind", "Verein", "n:1-opt", "verein"),
-    ("Kind", "Sportverband", "n:1-opt", "verband"),
-    ("Wettkampf", "Saison", "n:1", "saison"),
-    ("Wettkampf", "Schwimmbad", "n:1", "schwimmbad"),
-    ("Wettkampf", "Figur", "m:n", "figuren"),
-    ("Anmeldung", "Kind", "n:1", "kind"),
-    ("Anmeldung", "Wettkampf", "n:1", "wettkampf"),
-    ("Anmeldung", "Figur", "m:n", "figuren"),
-    ("Anmeldung", "Gruppe", "n:1-opt", "gruppe"),
-    ("Station", "Wettkampf", "n:1", "wettkampf"),
-    ("Gruppe", "Wettkampf", "n:1", "wettkampf"),
-    ("Durchgang", "Gruppe", "n:1", "gruppe"),
-    ("Durchgang", "Station", "n:1", "station"),
-    ("Durchgang", "Figur", "n:1", "figur"),
-    ("Start", "Anmeldung", "n:1", "anmeldung"),
-    ("Start", "Durchgang", "n:1", "durchgang"),
-    ("Wertung", "Start", "n:1", "start"),
-]
+    Projection from `wiki/data-models/` is not implemented yet; until it is,
+    the view renders its empty state rather than a stale hardcoded model.
+    Returns None while there are no data-model pages.
+    """
+    if not load_folder("data-models"):
+        return None
+    return None
 
 
-def _mermaid_dm_edge(src: str, tgt: str, kind: str, label: str) -> str:
-    if kind == "m:n":
-        return f'  {src} "1..n" -- "1..n" {tgt} : {label}'
-    if kind == "n:1-opt":
-        return f'  {src} "0..n" --> "0..1" {tgt} : {label}'
-    return f'  {src} "0..n" --> "1" {tgt} : {label}'
-
-
-def build_data_model_full_diagram() -> str:
-    """Project the full DM class diagram (all entities + relationships)
-    from DM_ENTITIES / DM_EDGES into a mermaid classDiagram string."""
-    lines = ["classDiagram"]
-    for name in DM_ENTITIES:
-        lines.append(f"  class {name}")
-    lines.append("")
-    for src, tgt, kind, label in DM_EDGES:
-        lines.append(_mermaid_dm_edge(src, tgt, kind, label))
-    return "\n".join(lines)
-
-
-def build_data_model_kind_diagram() -> str:
-    """Kind-centric mini diagram for the index tile: Kind plus its three
-    immediate neighbours (Verein, Sportverband, Anmeldung). Stays small
-    enough to fit a tile without scrolling."""
-    lines = [
-        "classDiagram",
-        "  direction LR",
-        "  class Verein",
-        "  class Sportverband",
-        "  class Kind",
-        "  class Anmeldung",
-        '  Kind "0..n" --> "0..1" Verein',
-        '  Kind "0..n" --> "0..1" Sportverband',
-        '  Anmeldung "0..n" --> "1" Kind',
-    ]
-    return "\n".join(lines)
+def build_data_model_kind_diagram() -> str | None:
+    """Compact diagram for the home tile. See build_data_model_full_diagram()."""
+    if not load_folder("data-models"):
+        return None
+    return None
 
 
 # Section/callout extractors for the /data-model catalog: each DM page is
@@ -1694,7 +1639,22 @@ def goals_view():
     data = load_goals()
     vision, objectives = data["vision"], data["objectives"]
     if not vision:
-        abort(404)
+        # Empty vault: no GOAL-001 page yet. Render the empty state rather
+        # than a 404 — this route must work on workshop day one.
+        return render_template(
+            "goals.html",
+            diagram=None,
+            vision={
+                "id": "", "title": "No vision yet", "stereotype": "Vision",
+                "maturity": None, "beneficiary": [],
+                "html": "<p>No vision yet — capture a GOAL- page with "
+                        "<code>stereotype: vision</code>.</p>",
+            },
+            objectives=[],
+            fr_cols=[],
+            matrix_rows=[],
+            needs_mermaid=False,
+        )
 
     def _wikilink_list(items) -> list[str]:
         """Render a frontmatter list of '[[X]]' refs as human-readable labels."""
