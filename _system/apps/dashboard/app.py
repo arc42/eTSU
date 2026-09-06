@@ -64,22 +64,17 @@ CONFIG_PATH = Path(_env_cfg) if _env_cfg else Path(__file__).resolve().parents[2
 
 DEFAULT_SYSTEM_NAME = "Requirements Wiki"
 
-# The name `_system/wiki.yaml` ships with. bootstrap.md step 1 tells the group
-# to REPLACE it with their own system's name, so while it is still in place the
-# vault is named but not yet bootstrapped — the home page says so.
-SHIPPED_SYSTEM_NAME = "eTSU"
-
-
 def wiki_config() -> dict:
     """Project identity from `_system/wiki.yaml`.
 
     Returns `system_name` (never empty — falls back to DEFAULT_SYSTEM_NAME),
-    `system_name_set` (False while the vault is still unnamed),
-    `system_name_is_shipped` (True while it still reads `eTSU`, the starter's
-    own name — bootstrap.md step 1 is to replace it) and `tagline`. The two
-    flags let the home page prompt for the right next step in all three
-    states. A missing, empty or malformed file yields the defaults rather than
-    an error: an unnamed vault is the normal state on day one.
+    `system_name_set` (False while the vault is still unnamed) and `tagline`.
+    A missing, empty or malformed file yields the defaults rather than an
+    error: an unnamed vault is the normal state on day one.
+
+    The vault ships named `eTSU` and that is a real name, not a placeholder —
+    renaming it is bootstrap.md step 1, and the workflow is where that is
+    asked for. The dashboard does not second-guess the configured name.
     """
     try:
         data = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8")) or {}
@@ -91,7 +86,6 @@ def wiki_config() -> dict:
     return {
         "system_name": name or DEFAULT_SYSTEM_NAME,
         "system_name_set": bool(name),
-        "system_name_is_shipped": name == SHIPPED_SYSTEM_NAME,
         "tagline": str(data.get("tagline") or "").strip(),
     }
 

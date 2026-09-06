@@ -28,13 +28,14 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="foot">
-    <img class="foot-mark" src="{{ url_for('static', filename='etsu-mark.png') }}" alt="">
-    <div class="foot-title">Live view · {{ system_name }} requirements wiki</div>
-    <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki pattern</div>
-    <button type="button" class="theme-toggle" id="theme-toggle">
-      <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
-      <span class="theme-toggle-label">Light theme</span>
-    </button>
+    <div class="foot-line">
+      <span class="foot-title">Live view · {{ system_name }} requirements wiki</span>
+      <button type="button" class="theme-toggle" id="theme-toggle">
+        <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
+        <span class="theme-toggle-label">Light theme</span>
+      </button>
+    </div>
+    <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki</div>
   </footer>
   {% block scripts %}{% endblock %}
   <script>

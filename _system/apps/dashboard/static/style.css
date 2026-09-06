@@ -509,7 +509,11 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
   border-bottom-color: var(--card-2); z-index: 20; pointer-events: none;
 }
 
-.foot { color: var(--ink-dim); font-size: .82rem; text-align: center; padding: 1.6rem 2rem; border-top: 1px solid var(--line); }
+.foot { color: var(--ink-dim); font-size: .82rem; text-align: center;
+  padding: .9rem 2rem 1.1rem; border-top: 1px solid var(--line); }
+/* caption and theme switch share one line; wraps to two on a narrow window */
+.foot-line { display: flex; align-items: center; justify-content: center;
+  gap: .85rem; flex-wrap: wrap; }
 .foot-title { color: var(--ink-soft); font-weight: 600; letter-spacing: .02em; }
 .foot-sub { margin-top: .25rem; }
 
@@ -779,17 +783,13 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
   padding: .55rem .8rem; border-radius: var(--radius);
   background: var(--plate); box-shadow: var(--shadow);
 }
-.foot-mark {
-  display: block; width: auto; height: 2.1rem; margin: 0 auto .55rem;
-  padding: .3rem .45rem; border-radius: 10px; background: var(--plate); opacity: .9;
-}
 
 /* Theme switch. It lives in the footer because the topbar carries breadcrumbs
    only and is absent entirely on the home page — there is no header nav to
    hang it off. base.html stamps the choice on <html> before first paint. */
 .theme-toggle {
   display: inline-flex; align-items: center; gap: .45rem;
-  margin: .9rem 0 0; padding: .35rem .85rem;
+  margin: 0; padding: .3rem .8rem;
   font: inherit; font-size: .8rem; color: var(--ink-soft);
   background: var(--card); border: 1px solid var(--line);
   border-radius: 999px; cursor: pointer;
