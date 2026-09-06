@@ -76,8 +76,11 @@ def test_goal_epic_diagram_string():
     assert "GOAL-002" in dia and "/goals#GOAL-002" in dia
     # epics present and clickable to their FR page under the new folder route
     assert "FR-001" in dia and "/functional-requirements/" in dia
-    # enabler epics (goal: []) stay reachable under the Plattform node
+    # enabler epics (goal: []) stay reachable under the Platform node, whose
+    # label must be English — it was the last German string in the dashboard,
+    # rendered as a labelled mermaid box on /req42/backlog (ADR-0005).
     assert "ENABLER" in dia and "FR-006" in dia
+    assert 'ENABLER["Platform / Enabler"]' in dia, dia
     # two levels only — no story IDs leak into the overview map
     assert "FR-003" not in dia
     print("OK goal-epic diagram:", dia.count("-->"), "edges")

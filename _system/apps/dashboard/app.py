@@ -1020,7 +1020,7 @@ def build_backlog() -> dict:
 def _mermaid_goal_epic_tree(goals: dict, backlog: dict) -> str | None:
     """Compact top-of-backlog map: each Objective links down to the Epics that
     contribute to it (FR `goal:` coverage, ADR-0018). Enabler epics (`goal: []`)
-    hang under a shared `Plattform / Enabler` node so they stay visible. Two
+    hang under a shared `Platform / Enabler` node so they stay visible. Two
     levels only — it must stay readable as the backlog grows, which is exactly
     why the old full Epic→Feature→Story tree was split out to the epic pages.
     Goal nodes jump to their card on /goals; epic nodes open their epic page.
@@ -1060,7 +1060,7 @@ def _mermaid_goal_epic_tree(goals: dict, backlog: dict) -> str | None:
 
     enabler_epics = [epic_by_id[fr.id] for fr in enablers if fr.id in epic_by_id]
     if enabler_epics:
-        lines.append('  ENABLER["Plattform / Enabler"]:::enabler')
+        lines.append('  ENABLER["Platform / Enabler"]:::enabler')
         for e in enabler_epics:
             epic_edge("ENABLER", e)
 
