@@ -31,6 +31,7 @@
   --graph-bg: #0c1424;         /* cytoscape / mermaid canvas ground */
   --graph-glow: #16223d;
   --plate: #e8eef9;            /* backing behind the eTSU mark (see .hero-mark) */
+  --logo-filter: none;         /* req42-logo-white.png is white-on-transparent */
   --hairline: rgba(255,255,255,.02);
   --chip-bg: rgba(255,255,255,.08);
   --on-accent: #06101f;        /* text on an --accent fill */
@@ -71,6 +72,10 @@
   --graph-glow: #dfeaf8;
   --plate: #ffffff;            /* the mark is navy-on-white artwork: on a light
                                   page it needs no plate, just a flush ground */
+  --logo-filter: invert(1);    /* the req42 mark is white artwork and vanishes on a
+                                  white card. It is bilevel white-on-transparent, so
+                                  a straight invert lands on black and keeps the
+                                  alpha — no second asset to ship and keep in sync. */
   --hairline: rgba(20,33,60,.03);
   --chip-bg: rgba(20,33,60,.06);
   --on-accent: #ffffff;        /* --accent is dark here, so this flips */
@@ -160,7 +165,8 @@ code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-si
    count line beneath it in place of the big number */
 /* align-self stops the flex column from stretching the logo to full width
    (which was squashing it); fixed width + auto height keeps its 142:75 ratio */
-.tile-logo { align-self: flex-start; width: 104px; height: auto; margin: .15rem 0 .55rem; }
+.tile-logo { align-self: flex-start; width: 104px; height: auto; margin: .15rem 0 .55rem;
+  filter: var(--logo-filter); }
 .tile-subcount { color: var(--ink-soft); font-size: .85rem; margin: 0 0 .4rem; }
 
 .tile-head { display: flex; align-items: center; gap: .5rem; margin-bottom: .2rem; }
@@ -187,7 +193,8 @@ code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-si
 .ml-out { color: var(--ink-dim); }
 
 /* ---- req42 schema overview (/req42) ---- */
-.req42-logo-head { display: block; height: 3.4rem; width: auto; margin: .2rem 0 1.2rem; }
+.req42-logo-head { display: block; height: 3.4rem; width: auto; margin: .2rem 0 1.2rem;
+  filter: var(--logo-filter); }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .req42-block { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
