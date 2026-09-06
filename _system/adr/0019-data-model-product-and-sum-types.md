@@ -1,4 +1,4 @@
-# 19. Data-Model stereotypes — product types and sum types
+# ADR-0019: Data-Model stereotypes — product types and sum types
 
 Date: 2026-05-28
 
@@ -13,7 +13,7 @@ programming gives us a clean type-theoretical dichotomy that traditional ER/UML
 modelling handles asymmetrically:
 
 - **Product type** (`A × B × C`) — a record with **all** of its fields present.
-  Example: Entity A has *first name* AND *last name* AND *date of birth* AND … .
+  Example: Entity E has *first name* AND *last name* AND *date of birth* AND … .
   The ER/UML world models this natively as an entity/class.
 - **Sum type** (`A | B | C`) — a tagged union; a value is **exactly one** of
   several alternatives, each possibly carrying a different payload. ER/UML models
@@ -46,15 +46,15 @@ mirror the type-theoretical distinction:
 
 | Stereotype | Meaning | Identity | Use for |
 |---|---|---|---|
-| `entity` | product type **with** identity | yes (key) | first-class business objects (Entity A, Entity B, Entity C, Entity D) |
+| `entity` | product type **with** identity | yes (key) | first-class business objects (Entity E, Entity F, Entity G, Entity H) |
 | `value-object` | product type **without** identity | no (equality by value) | data clusters that have no lifecycle of their own (Address, Money) |
 | `sum-type` | tagged union | n/a | values that are exactly one of several heterogeneous variants (Status Path) |
 
 ### Two flavours of "sum type" — only one needs its own file
 
 1. **Enum-style (no payload).** A finite set of named tags with **no associated
-   data**. Examples: `EntityD.status ∈ {planned, in_progress, evaluated, cancelled}`,
-   `EntityC.status ∈ {submitted, confirmed, cancelled, attended, no_show}`.
+   data**. Examples: `EntityH.status ∈ {planned, in_progress, evaluated, cancelled}`,
+   `EntityG.status ∈ {submitted, confirmed, cancelled, attended, no_show}`.
 
    → Modelled **inline as an attribute type**, e.g.
    `type: "enum(planned, in_progress, evaluated, cancelled)"`. **No own file.**
@@ -119,7 +119,7 @@ contrast to OOP inheritance, which is typically *open*).
    graph projection, hard to query, no place for the sum-type distinction.
 2. **Model sum types as OOP inheritance only (no separate stereotype).**
    Rejected — conflates *is-a* (open extension) with *variants-of* (closed
-   tagging). `Role B is-a Role A` is genuine inheritance;
+   tagging). `Role G is-a Role F` is genuine inheritance;
    `StatusPath = A | B | C` is a closed sum. Same diagram shape, different
    intent; the stereotype preserves the intent.
 3. **Generics / parametrised types** (e.g. `Result<T>`, `Option<T>`). Deferred

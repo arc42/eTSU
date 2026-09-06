@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Concept-cluster audit — deterministic implementation of relations.md Tiers 1-2.
 
-A single domain concept (e.g. "Kind") legitimately appears across several content
+A single domain concept (e.g. "Entity E") legitimately appears across several content
 types as different lenses: a glossary term (what the word means), a data-model entity
 (what we store), a stakeholder (what the actor wants). That is *projection*, not
 redundancy — the right handling is to LINK the lenses, never to merge them.

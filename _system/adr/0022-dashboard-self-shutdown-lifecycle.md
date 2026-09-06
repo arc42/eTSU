@@ -1,4 +1,4 @@
-# 22. The dashboard shuts itself down once the browser tab is closed
+# ADR-0022: The dashboard shuts itself down once the browser tab is closed
 
 Date: 2026-06-22
 

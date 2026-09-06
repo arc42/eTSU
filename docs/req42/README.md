@@ -27,11 +27,11 @@ the drawers are always open; whatever you learn about your endeavour goes in the
 drawer, in any form that lets stakeholders communicate. The 12 drawers fall into three
 groups:
 
-- **Clean Start** — 01 Vision/Ziele · 09 Assets · 02 Stakeholder · 03 Scope. The
+- **Clean Start** — 01 Business Goals · 09 Assets · 02 Stakeholder · 03 Scope. The
   Product-Owner foundation: align goals, know your means, your stakeholders and your boundary.
-- **Hauptteil (main part)** — 04 funktionale Anforderungen · 08 Domänenbegriffe ·
-  06 Qualitätsanforderungen · 07 Randbedingungen · 05 Modelle. The day-to-day RE work.
-- **Management** — 11 Roadmaps · 10 Teamstruktur · 12 Risiken & Annahmen.
+- **Main part** — 04 Product Backlog · 08 Domain Terminology ·
+  06 Quality Requirements · 07 Constraints · 05 Supporting Models. The day-to-day RE work.
+- **Management** — 11 Roadmaps · 10 Teams · 12 Risks & Assumptions.
 
 Two principles worth keeping: **"Ziele sind Anforderungen"** (goals *are* requirements —
 the ones that shouldn't keep changing within their period), and functional requirements
@@ -83,18 +83,18 @@ content units, and uses req42's recommended standards as semantic anchors. It do
 
 | req42 building block | This vault |
 |----------------------|------------|
-| 01 Visionen & Ziele | Goals on `wiki/stakeholders/` + feature rationale; framed via `[[PAM]]` / `[[SMART]]` |
+| 01 Business Goals (Visionen & Ziele) | `wiki/goals/`, framed via `[[PAM]]` / `[[SMART]]` (ADR-0016) |
 | 02 Stakeholder | `wiki/stakeholders/` |
-| 03 Scope & Abgrenzung | `wiki/context/` + `wiki/external-interfaces/` (ADR-0009) |
+| 03 Scope (Scope & Abgrenzung) | `wiki/context/` + `wiki/external-interfaces/` (ADR-0009) |
 | 04 Product Backlog | `wiki/functional-requirements/` — one type, `stereotype: epic\|feature\|story`; hierarchy via `parent:`, story-mapped + `[[user-story-format]]`, `[[acceptance-criteria]]`, `[[INVEST]]`, `[[MoSCoW]]` |
-| 05 Modelle zur Unterstützung | `wiki/use-cases/`, `wiki/activity-models/`, `wiki/data-models/` |
-| 06 Qualitätsanforderungen | `wiki/quality-requirements/` (ISO 25010 + ATAM) |
-| 07 Randbedingungen | `wiki/constraints/` (arc42 categories) |
-| 08 Domänenbegriffe | `wiki/glossary/` |
-| 09 Betriebsmittel & Personal | *out of scope* |
-| 10 Teamstruktur | *out of scope* |
+| 05 Supporting Models (Modelle zur Unterstützung) | `wiki/use-cases/`, `wiki/activity-models/`, `wiki/data-models/` |
+| 06 Quality Requirements (Qualitätsanforderungen) | `wiki/quality-requirements/` (ISO 25010 + ATAM) |
+| 07 Constraints (Randbedingungen) | `wiki/constraints/` (arc42 categories) |
+| 08 Domain Terminology (Domänenbegriffe) | `wiki/glossary/` |
+| 09 Assets (Betriebsmittel & Personal) | *out of scope* |
+| 10 Teams (Teamstruktur) | *out of scope* |
 | 11 Roadmaps | *out of scope* |
-| 12 Risiken & Annahmen | `wiki/issues/` (`kind: risk`) + `[!assumption]` flags |
+| 12 Risks & Assumptions (Risiken & Annahmen) | `wiki/issues/` (`kind: risk`) + `[!assumption]` flags |
 
 ## Sources
 

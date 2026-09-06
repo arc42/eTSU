@@ -1,4 +1,4 @@
-# 21. File-format specifications live at the boundary owner of the data flow
+# ADR-0021: File-format specifications live at the boundary owner of the data flow
 
 Date: 2026-06-01
 

@@ -1,4 +1,4 @@
-# 20. Master data as configuration: file import, runtime CRUD only for Entity A, no soft-delete
+# ADR-0020: Master data as configuration: file import, runtime CRUD only for Entity A, no soft-delete
 
 Date: 2026-06-01
 
