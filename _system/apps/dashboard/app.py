@@ -297,7 +297,7 @@ def extract_labeled(page: Page, label: str, titles: dict[str, str],
 
 
 _PAM_BULLET_RE = re.compile(
-    r"^[ \t]*-\s+\*\*(?P<label>[A-Za-zÄÖÜäöü]+)\.\*\*\s+"
+    r"^[ \t]*-\s+\*\*(?P<label>[A-Za-z]+)\.\*\*\s+"
     r"(?P<body>.+?)(?=\n[ \t]*-\s+\*\*|\n##\s|\n\s*\n|\Z)",
     re.DOTALL | re.MULTILINE,
 )
@@ -445,7 +445,7 @@ def build_req42_blocks(sample: int = 5) -> list[dict]:
     """Enrich each block with its entry count and a few sample entries —
     shared by the index tile (counts) and the /req42 overview (samples).
 
-    Block 01 (Visionen & Ziele) gets a special `diagram` payload: the Vision
+    Block 01 (Business Goals) gets a special `diagram` payload: the Vision
     →Objectives tree replaces the sample list on the /req42 overview, and
     `claim` carries the Vision tagline as a sub-headline."""
     out = []
@@ -866,7 +866,7 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
     if not vision:
         return {
             "key": "vision", "label": "Vision", "href": None,
-            "count": "—", "unit": "Platzhalter", "icon": "🎯",
+            "count": "—", "unit": "placeholder", "icon": "🎯",
             "rows": [], "active": False,
         }
     claim = str(vision.meta.get("tile_claim") or "").strip()
@@ -1529,7 +1529,7 @@ _DM_NOTE_RE = re.compile(
 
 _DM_ATTRIBUTES_BLOCK_RE = re.compile(
     r"\*\*Attributes\.\*\*\s*\n(?P<body>.+?)"
-    r"(?=^\*\*[A-Za-zÄÖÜäöü][^*\n]+?\.\*\*|^>\s*\[!|^##\s|\Z)",
+    r"(?=^\*\*[A-Za-z][^*\n]+?\.\*\*|^>\s*\[!|^##\s|\Z)",
     re.DOTALL | re.MULTILINE,
 )
 _DM_ATTR_BULLET_RE = re.compile(
