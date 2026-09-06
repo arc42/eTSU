@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Issues{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Issues</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Issues <span class="count-pill">{{ total }}</span></h1>
 <p class="lead">Offene Fragen, Widersprüche und Lücken — quer zu allen Inhaltstypen.</p>
 
+{% if items %}
 <div class="filterbar" role="tablist">
   <button class="fbtn active" data-filter="all">Alle <span class="fnum">{{ total }}</span></button>
   <button class="fbtn" data-filter="open">Offen <span class="fnum">{{ open_count }}</span></button>
@@ -45,6 +47,9 @@
 <div id="issue-store" hidden>
   {% for it in items %}<div data-id="{{ it.id }}">{{ it.html | safe }}</div>{% endfor %}
 </div>
+{% else %}
+{{ empty_state("issues") }}
+{% endif %}
 
 <script>
   const buttons = document.querySelectorAll('.fbtn');

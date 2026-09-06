@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Datenmodell · req42{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> 05 Unterstützende Modelle <span>/</span> Datenmodell</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Datenmodell</h1>
 <p class="lead">Vollständige Projektion aller modellierten Entitäten als Klassendiagramm.
@@ -8,6 +9,7 @@
   bidirektionale Linien stehen für m:n. Quelle:
   <code>wiki/data-models/</code> ({{ entities|length }} Entitäten).</p>
 
+{% if diagram %}
 <figure class="goals-diagram dm-diagram">
   <pre class="mermaid">{{ diagram }}</pre>
 </figure>
@@ -15,7 +17,9 @@
 <p class="dm-note">Testphase: Beziehungen sind aktuell als Konstantenliste in
   <code>app.py</code> gepflegt. Sobald die Beziehungs-Syntax in den DM-Bodies
   stabil ist, ersetzt ein Live-Extraktor diese Liste.</p>
+{% endif %}
 
+{% if entities %}
 <section class="dm-overview">
   <h2>Entity-Typen im Überblick</h2>
   <p class="lead">Schnellübersicht aller Entitäten mit ihren Attribut-Namen.
@@ -91,6 +95,9 @@
   </article>
   {% endfor %}
 </section>
+{% else %}
+{{ empty_state("data-model entities") }}
+{% endif %}
 <script>
   // sortable headers on the entity-overview table: click a th[data-sort]
   // to sort ascending; click again to flip. data-sort="numeric" sorts by

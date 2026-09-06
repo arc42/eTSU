@@ -74,9 +74,23 @@ def test_data_model_diagrams_are_none_when_no_entities():
     assert app.build_data_model_kind_diagram() is None
 
 
+# routes whose empty state must tell the reader what to do next
+CTA_ROUTES = ["/", "/glossary", "/stakeholders", "/goals", "/req42/backlog",
+              "/data-model", "/issues"]
+
+
+def test_empty_views_offer_a_next_step():
+    client = app.app.test_client()
+    for route in CTA_ROUTES:
+        body = client.get(route).get_data(as_text=True)
+        assert "raw/" in body, \
+            f"{route} empty state does not tell the reader to add a source"
+
+
 if __name__ == "__main__":
     test_all_get_routes_render_empty()
     test_missing_pages_are_404_not_500()
     test_ping_is_204()
     test_data_model_diagrams_are_none_when_no_entities()
+    test_empty_views_offer_a_next_step()
     print(f"OK: {len(GET_ROUTES)} routes render on an empty vault")

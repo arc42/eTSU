@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Begriffsnetz{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/glossary">Glossar</a> <span>/</span> Begriffsnetz</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Begriffsnetz <span class="count-pill">{{ n_glo }} Begriffe</span></h1>
 <p class="lead">Die ubiquitäre Sprache als Netz — projiziert aus den <code>related:</code>-Kanten
@@ -10,6 +11,7 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
 öffnet die Seite. <strong>Layout</strong> wählt die Anordnung (<em>cola</em> überlappungsfrei,
 <em>fcose</em> Feder); ein Klick auf das aktive Layout ordnet neu an.</p>
 
+{% if n_glo %}
 <div class="graph-toolbar" id="graph-layers">
   <span class="fbar-label">Erweitern:</span>
   {% for L in named_layers %}
@@ -45,9 +47,13 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
 </div>
 
 <div id="cy" class="graph-canvas" role="img" aria-label="Begriffsnetz des Glossars"></div>
+{% else %}
+{{ empty_state("glossary terms") }}
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
+{% if n_glo %}
 <script src="{{ url_for('static', filename='vendor/cytoscape.min.js') }}"></script>
 <script src="{{ url_for('static', filename='vendor/layout-base.js') }}"></script>
 <script src="{{ url_for('static', filename='vendor/cose-base.js') }}"></script>
@@ -252,4 +258,5 @@ Seite, alles andere bleibt liegen. Antippen hebt die Nachbarn hervor, erneutes A
   runLayout(true);
 })();
 </script>
+{% endif %}
 {% endblock %}

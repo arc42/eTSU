@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}req42{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> req42</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1 visually-hidden">req42</h1>
 <img class="req42-logo-head" src="{{ url_for('static', filename='req42-logo-white.png') }}"
@@ -45,7 +46,7 @@
     <a class="req42-all" href="{{ b.href }}">Alle {{ b.count }} ansehen →</a>
     {% endif %}
   {% elif b.scope == 'in' and not b.note %}
-    <p class="req42-empty">Noch nicht erfasst — folgt.</p>
+    {{ empty_state("requirements") }}
   {% endif %}
 </section>
 {% endfor %}

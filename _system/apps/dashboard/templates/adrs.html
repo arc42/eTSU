@@ -1,10 +1,12 @@
 {% extends "base.html" %}
 {% block title %}ADRs{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> ADRs</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Architektur&shy;entscheidungen <span class="count-pill">{{ total }}</span></h1>
 <p class="lead">Strukturelle Entscheidungen über die Anforderungs-Wiki (Nygard-ADRs, <code>_system/adr/</code>).</p>
 
+{% if items %}
 <div class="toolbar">
   <input type="search" id="adr-search" class="search-input" placeholder="ADRs durchsuchen — Titel, ID, Volltext…"
          autocomplete="off" spellcheck="false" aria-label="ADRs durchsuchen">
@@ -48,6 +50,9 @@
 <div id="adr-store" hidden>
   {% for a in items %}<div data-id="{{ a.id }}">{{ a.html | safe }}</div>{% endfor %}
 </div>
+{% else %}
+{{ empty_state("architecture decisions") }}
+{% endif %}
 
 <script>
   const buttons = document.querySelectorAll('.fbtn');
@@ -91,7 +96,7 @@
     activeFilter = b.dataset.filter;
     apply();
   }));
-  search.addEventListener('input', () => {
+  if (search) search.addEventListener('input', () => {
     query = search.value.trim().toLowerCase();
     apply();
   });

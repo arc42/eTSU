@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <header class="hero">
   <h1 class="hero-title">{{ system_name }}</h1>
@@ -33,9 +34,13 @@
       <span class="tile-icon">{{ t.icon }}</span>
       <h2>{{ t.label }}</h2>
     </div>
+    {% if t.diagram %}
     <figure class="tile-mini-diagram">
       <pre class="mermaid">{{ t.diagram }}</pre>
     </figure>
+    {% elif t.claim and t.claim.startswith('No entities') %}
+    {{ empty_state("data-model entities") }}
+    {% endif %}
     {% if t.claim %}<p class="tile-dm-claim">{{ t.claim }}</p>{% endif %}
     {% elif t.key == 'backlog' and t.active %}
     <div class="tile-head">
@@ -46,6 +51,7 @@
       <span class="num">{{ t.count }}</span>
       <span class="unit">{{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</span>
     </div>
+    {% if t.epic_rows %}
     <ul class="mini-list">
       {% for e in t.epic_rows %}
       <li>
@@ -54,6 +60,7 @@
       </li>
       {% endfor %}
     </ul>
+    {% endif %}
     {% elif t.logo %}
     <img class="tile-logo" src="{{ url_for('static', filename=t.logo) }}" alt="{{ t.label }}">
     <div class="tile-subcount">{{ t.count }} {{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</div>
@@ -84,6 +91,14 @@
       </li>
       {% endfor %}
     </ul>
+    {% elif t.count is defined and t.count == 0 and not t.rows %}
+      {% if t.key == 'glossary' %}{{ empty_state("glossary terms") }}
+      {% elif t.key == 'stakeholders' %}{{ empty_state("stakeholders") }}
+      {% elif t.key == 'adrs' %}{{ empty_state("architecture decisions") }}
+      {% elif t.key == 'issues' %}{{ empty_state("issues") }}
+      {% elif t.key == 'backlog' %}{{ empty_state("backlog items") }}
+      {% else %}{{ empty_state(t.label|lower) }}
+      {% endif %}
     {% elif not t.active %}
     <p class="tile-empty">Noch nicht erfasst — folgt.</p>
     {% endif %}

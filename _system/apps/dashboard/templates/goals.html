@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Vision & Ziele{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Vision & Ziele</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 
 <h1 class="page-h1">Vision & Ziele</h1>
@@ -20,6 +21,7 @@
   <div class="goal-prose">{{ vision.html | safe }}</div>
 </section>
 
+{% if objectives %}
 {% for o in objectives %}
 <section id="{{ o.id }}" class="goal-card goal-objective">
   <header class="goal-card-head">
@@ -87,6 +89,9 @@
   </div>
   <p class="goal-matrix-legend">● = FR adressiert dieses Ziel · gestrichelte Spalten = Enabler (Plattform-Schiene, nicht aus Vision motiviert).</p>
 </section>
+{% else %}
+{{ empty_state("goals") }}
+{% endif %}
 
 {% endblock %}
 

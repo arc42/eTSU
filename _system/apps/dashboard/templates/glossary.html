@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Glossar{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Glossar</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Glossar <span class="count-pill">{{ total }} Begriffe</span></h1>
 <p class="lead">Ubiquitäre Sprache der Kinderschwimmliga — eine kanonische Bedeutung je Begriff.</p>
@@ -13,6 +14,7 @@
   <button class="fbtn" data-sort="relations">Vernetzung</button>
 </div>
 
+{% if rows %}
 <div class="table-card">
 <table class="glossary">
   <thead>
@@ -41,6 +43,9 @@
   </tbody>
 </table>
 </div>
+{% else %}
+{{ empty_state("glossary terms") }}
+{% endif %}
 
 <script>
   const body = document.getElementById('glossary-body');

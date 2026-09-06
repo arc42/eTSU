@@ -2,10 +2,12 @@
 {% block title %}Stakeholder{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> Stakeholder</nav>{% endblock %}
 {% set lvl = {'high': 'hoch', 'medium': 'mittel', 'low': 'gering'} %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Stakeholder <span class="count-pill">{{ total }} Personas</span></h1>
 <p class="lead">Vereinfachte Personas: Ziele, Anliegen, Einfluss und Interesse.</p>
 
+{% if rows %}
 <div class="table-card">
 <table class="data-table">
   <thead>
@@ -43,4 +45,7 @@
   </tbody>
 </table>
 </div>
+{% else %}
+{{ empty_state("stakeholders") }}
+{% endif %}
 {% endblock %}

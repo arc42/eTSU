@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Product Backlog{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Übersicht</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> Product Backlog</nav>{% endblock %}
+{% from "_empty.html" import empty_state %}
 {% block content %}
 
 <h1 class="page-h1">Product Backlog</h1>
@@ -12,6 +13,7 @@
 </figure>
 {% endif %}
 
+{% if backlog.epics %}
 <div class="backlog-epics">
   {% for e in backlog.epics %}
   <a class="backlog-card backlog-card-link" href="/functional-requirements/{{ e.stem }}">
@@ -32,6 +34,9 @@
   </a>
   {% endfor %}
 </div>
+{% else %}
+{{ empty_state("backlog items") }}
+{% endif %}
 
 {% if backlog.orphans %}
 <section class="backlog-card backlog-orphans">
