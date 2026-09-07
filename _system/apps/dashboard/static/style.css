@@ -905,3 +905,4 @@ html.etsu-disconnected {
   border: 1px dashed var(--rule, #9aa3b2); opacity: .85; line-height: 1.5;
 }
 .empty-state code { font-size: .95em; }
+.empty-state-tight { margin: .2rem 0 .4rem; }

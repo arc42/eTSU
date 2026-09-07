@@ -39,7 +39,8 @@
       <span class="foot-title">Live view · {{ system_name }} requirements wiki</span>
       <span class="presence" id="presence" hidden>
         <span class="presence-dot" aria-hidden="true"></span>
-        <span class="presence-count" id="presence-count">0</span> participants
+        <span class="presence-count" id="presence-count">0</span>
+        <span class="presence-unit" id="presence-unit">clients</span>
       </span>
       {% if request.path != '/who' %}
       <a class="whos-here" href="/who">Who's here?</a>
@@ -93,7 +94,7 @@
     })();
     // Failure detection is shared between the 20s /ping and the 5s
     // /presence/count poll below — the faster one dominates once the server
-    // is actually down, so a participant sees the "session ended" state
+    // is actually down, so a client sees the "session ended" state
     // within ~10s instead of waiting out a full 20s heartbeat cycle twice
     // (up to 40s, which read as "disconnecting takes ages" even though the
     // server itself stops in under 2s).
@@ -164,6 +165,7 @@
     // trip wire (that's the heartbeat above). Shown to every viewer.
     var presenceEl = document.getElementById("presence");
     var presenceCountEl = document.getElementById("presence-count");
+    var presenceUnitEl = document.getElementById("presence-unit");
     function updatePresence() {
       fetch("/presence/count").then(function (r) {
         if (!r.ok) { markFailure(); return null; }
@@ -172,6 +174,7 @@
         if (!d || !presenceEl) { return; }
         markSuccess();
         presenceCountEl.textContent = d.count;
+        if (presenceUnitEl) { presenceUnitEl.textContent = d.count === 1 ? "client" : "clients"; }
         presenceEl.hidden = false;
       }).catch(markFailure);
     }
@@ -184,7 +187,9 @@
     // currently Yoda, and re-hides it if that ever stops being true.
     if (disconnectBtn) {
       disconnectBtn.addEventListener("click", function () {
-        if (!window.confirm("Disconnect all " + presenceCountEl.textContent + " participant(s) and stop the dashboard?")) {
+        var n = parseInt(presenceCountEl.textContent, 10) || 0;
+        var who = n === 1 ? "1 other client" : n + " other clients";
+        if (!window.confirm("Disconnect " + who + " and stop the dashboard?")) {
           return;
         }
         // Disabled the instant it's actioned: prevents a second click while

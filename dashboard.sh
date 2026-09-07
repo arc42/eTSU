@@ -26,6 +26,12 @@ export WIKI_DIR="$ROOT/wiki"
 export ADR_DIR="$ROOT/_system/adr"
 export CONFIG_FILE="$ROOT/_system/wiki.yaml"
 
+# Footer time in the host's zone, not UTC: Docker containers default to UTC.
+if [ -z "${TZ:-}" ] && [ -L /etc/localtime ]; then
+  TZ="$(readlink /etc/localtime | sed 's#.*/zoneinfo/##')"
+fi
+export TZ="${TZ:-UTC}"
+
 # Open a URL in the default browser (a normal tab is fine — the server stops
 # itself when the tab/window is closed, so nothing needs to close the window
 # programmatically). See ADR-0022. Shared by every mode below.

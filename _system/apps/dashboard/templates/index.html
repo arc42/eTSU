@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_empty.html" import empty_state, empty_bootstrap %}
+{% from "_empty.html" import empty_state, empty_bootstrap, empty_adrs %}
 {% block header_nickname %}{% endblock %}
 {% block content %}
 <header class="hero">
@@ -31,6 +31,7 @@
     <div class="tile-head tile-head-second">
       <h2>Goals</h2>
     </div>
+    {% if t.objective_rows %}
     <ul class="mini-list mini-list-vision">
       {% for o in t.objective_rows %}
       <li>
@@ -39,6 +40,10 @@
       </li>
       {% endfor %}
     </ul>
+    {% else %}
+    <p class="empty-state empty-state-tight">No objectives yet — ask the agent:
+      <em>“derive objectives from the vision”</em>.</p>
+    {% endif %}
     {% elif t.key == 'vision' %}
     {# day one: no vision page yet. Same shape as every other empty tile —
        heading + next step, no "Demo" chip, no placeholder counter. #}
@@ -111,7 +116,7 @@
     {% elif t.count is defined and t.count == 0 and not t.rows %}
       {% if t.key == 'glossary' %}{{ empty_state("glossary terms") }}
       {% elif t.key == 'stakeholders' %}{{ empty_state("stakeholders") }}
-      {% elif t.key == 'adrs' %}{{ empty_state("architecture decisions") }}
+      {% elif t.key == 'adrs' %}{{ empty_adrs() }}
       {% elif t.key == 'issues' %}{{ empty_state("issues") }}
       {% elif t.key == 'backlog' %}{{ empty_state("backlog items") }}
       {% else %}{{ empty_state(t.label|lower) }}

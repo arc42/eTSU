@@ -161,8 +161,8 @@ def test_presence_list_reports_nickname_browser_and_duration():
                                   "AppleWebKit/537.36 (KHTML, like Gecko) "
                                   "Chrome/120.0 Safari/537.36"})
     resp = client.get("/presence/list").get_json()
-    assert len(resp["participants"]) == 1, resp
-    p = resp["participants"][0]
+    assert len(resp["clients"]) == 1, resp
+    p = resp["clients"][0]
     assert p["browser"] == "Chrome" and p["os"] == "macOS", p
     assert isinstance(p["connected_seconds"], int)
     assert p["nickname"]  # non-empty, and stable for the same client_id
@@ -177,7 +177,7 @@ def test_presence_list_excludes_the_facilitator():
     client = app.app.test_client()
     _ping(client, "yoda")   # connects first -> the only client -> facilitator
     resp = client.get("/presence/list").get_json()
-    assert resp["participants"] == []
+    assert resp["clients"] == []
 
 
 def test_disconnect_all_rejects_a_non_facilitator():

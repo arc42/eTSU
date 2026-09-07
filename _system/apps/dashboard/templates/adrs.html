@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}ADRs{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> ADRs</nav>{% endblock %}
-{% from "_empty.html" import empty_state %}
+{% from "_empty.html" import empty_adrs %}
 {% block content %}
 <h1 class="page-h1">Architecture decisions <span class="count-pill">{{ total }}</span></h1>
 <p class="lead">Structural decisions about the requirements wiki (Nygard ADRs, <code>_system/adr/</code>).</p>
@@ -51,7 +51,7 @@
   {% for a in items %}<div data-id="{{ a.id }}">{{ a.html | safe }}</div>{% endfor %}
 </div>
 {% else %}
-{{ empty_state("architecture decisions") }}
+{{ empty_adrs() }}
 {% endif %}
 
 <script>

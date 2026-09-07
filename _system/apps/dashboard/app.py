@@ -30,19 +30,24 @@ mimetypes.add_type("image/webp", ".webp")
 app = Flask(__name__)
 
 # Timezone for the "last refreshed" footer; honours the container's TZ env.
-DISPLAY_TZ = os.environ.get("TZ", "UTC")
+# Empty (not "UTC") when unset, so inject_refresh_time can fall back to the
+# host's own local zone instead of forcing UTC.
+DISPLAY_TZ = os.environ.get("TZ") or ""
 
 
 @app.context_processor
 def inject_refresh_time():
     """Every render carries the moment its data was (re)parsed — pages parse the
     wiki live, so this is effectively the page load / data refresh time."""
-    try:
-        tz = ZoneInfo(DISPLAY_TZ)
-    except (ZoneInfoNotFoundError, ValueError):
-        tz = None
+    tz = None
+    if DISPLAY_TZ:
+        try:
+            tz = ZoneInfo(DISPLAY_TZ)
+        except (ZoneInfoNotFoundError, ValueError):
+            tz = None
+    now = datetime.now(tz) if tz else datetime.now().astimezone()   # host's local zone
     # ISO-ish and locale-free: "06.09.2026" reads as 9 June to half the room.
-    return {"refreshed_at": datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S %Z").strip()}
+    return {"refreshed_at": now.strftime("%Y-%m-%d %H:%M:%S %Z").strip()}
 
 # Root of the wiki layer. In Docker this is a read-only bind mount at /wiki;
 # for local runs it falls back to the repo's wiki/ folder (4 levels up from
@@ -1870,7 +1875,7 @@ def req42_block_view(slug):
 
 # ---------------------------------------------------------------------------
 # Server lifecycle: self-shutdown as soon as no browser is watching anymore.
-# Multiple browsers (workshop participants) may watch at once, so presence is
+# Multiple browsers (workshop clients) may watch at once, so presence is
 # tracked per client (a random id each tab generates once, in base.html)
 # rather than as a single "is anyone home" flag.
 #
@@ -1958,7 +1963,7 @@ def _facilitator_client_id():
     footer counter and /who — not merely "not yet evicted by the 90s
     heartbeat grace" (`_clients`/`_first_seen` only drop an entry that late).
     Without this, a tab gone 40s ago could still hold the role for another
-    50s, and everyone actually present would show as a plain participant
+    50s, and everyone actually present would show as a plain client
     (nobody would pass the `cid == _facilitator_client_id()` check at all).
     Call under `_lifecycle_lock`."""
     now = time.monotonic()
@@ -2097,10 +2102,10 @@ def heartbeat_leaving():
 
 @app.route("/presence/count")
 def presence_count():
-    """How many distinct *participant* tabs have pinged within
+    """How many distinct *client* tabs have pinged within
     `_PRESENCE_WINDOW` — the number shown in the footer. Excludes Yoda, the
     current facilitator (`_facilitator_client_id`): otherwise the badge reads
-    "3 connected" for two participants because the facilitator's own
+    "3 connected" for two clients because the facilitator's own
     already-open tab pings too, which looks like a bug. Polled every few
     seconds; cheap (an in-memory dict scan, no I/O, no thread held)."""
     now = time.monotonic()
@@ -2163,10 +2168,10 @@ def _parse_user_agent(ua: str) -> tuple[str, str]:
 
 @app.route("/presence/list")
 def presence_list():
-    """Per-participant detail for the "who's here" page: a fun deterministic
+    """Per-client detail for the "who's here" page: a fun deterministic
     nickname, a coarse browser/OS, and how long they've been connected.
     Excludes Yoda, same as /presence/count. Shown to every viewer, not
-    facilitator-gated — it's meant as a bit of a moment for participants,
+    facilitator-gated — it's meant as a bit of a moment for everyone else,
     not an admin tool."""
     now = time.monotonic()
     with _lifecycle_lock:
@@ -2183,7 +2188,7 @@ def presence_list():
                 "connected_seconds": round(now - _first_seen.get(cid, last)),
             })
     rows.sort(key=lambda r: r["connected_seconds"], reverse=True)
-    return {"participants": rows}
+    return {"clients": rows}
 
 
 @app.route("/who")
@@ -2197,7 +2202,7 @@ def who_page():
 #
 # No token, no cookie, no `remote_addr` check (which can't work here anyway:
 # under Docker Desktop's NAT, the facilitator's own `localhost:8080` request
-# and a tunnel's forwarded participant traffic arrive at the container
+# and a tunnel's forwarded client traffic arrive at the container
 # looking identical). The facilitator is just "Yoda" — whoever connected
 # first and is still here (`_facilitator_client_id`) — and the only shared
 # secret involved is each tab's own random client_id, which is never shown

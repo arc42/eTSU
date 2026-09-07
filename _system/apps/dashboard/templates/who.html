@@ -2,8 +2,8 @@
 {% block title %}Who's here{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Who's here</nav>{% endblock %}
 {% block content %}
-<h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 participants</span></h1>
-<p class="lead">Everyone with this dashboard open right now — a fun nickname, not a real name. Updates live; closes the tab, drops off the list.</p>
+<h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 clients</span></h1>
+<p class="lead">Everyone with this dashboard open right now — a fun nickname, not a real name. Updates live; close the tab and you drop off the list.</p>
 
 <p class="empty-state" id="who-empty" hidden>No one's connected yet — open this dashboard's link on another device and you'll show up here.</p>
 <div class="who-grid" id="who-grid"></div>
@@ -24,11 +24,11 @@
     return h + "h " + (m % 60) + "m";
   }
 
-  function render(participants) {
-    countEl.textContent = participants.length + (participants.length === 1 ? " participant" : " participants");
-    empty.hidden = participants.length > 0;
+  function render(clients) {
+    countEl.textContent = clients.length + (clients.length === 1 ? " client" : " clients");
+    empty.hidden = clients.length > 0;
     grid.innerHTML = "";
-    participants.forEach(function (p) {
+    clients.forEach(function (p) {
       var card = document.createElement("div");
       card.className = "who-card";
       var meta = p.browser + (p.os ? " · " + p.os : "");
@@ -42,7 +42,7 @@
 
   function refresh() {
     fetch("/presence/list").then(function (r) { return r.json(); }).then(function (d) {
-      render(d.participants || []);
+      render(d.clients || []);
     }).catch(function () {});
   }
   refresh();
