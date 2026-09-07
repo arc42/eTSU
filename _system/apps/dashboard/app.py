@@ -283,13 +283,52 @@ def render_wikilinks(text: str, titles: dict[str, str],
 
 CALLOUT_RE = re.compile(r"^>\s*\[!(\w+)\]\s*(.*)$", re.MULTILINE)
 
+# Lines that START a markdown block. A prose line that follows one of these
+# is left for Markdown's own lazy-continuation rules; a prose line that
+# follows another prose line is a hard wrap in the source file and is joined.
+_BLOCK_START_RE = re.compile(r"^(\s*([-*+]|\d+[.)])\s|\s*#|\s*>|\s*\||\s*```|\s{4,}\S|\t|\s*<)")
+_LIST_START_RE = re.compile(r"^\s*([-*+]|\d+[.)])\s")
+
+
+def _unwrap_prose(body: str) -> str:
+    """Join hard-wrapped prose lines into one line per paragraph, and give a
+    list that follows a prose line the blank line Python-Markdown needs.
+    Agents write wiki pages wrapped at ~80 columns; rendering those wraps as
+    <br> (the old `nl2br` extension) produced ragged paragraphs. Fenced code,
+    explicit two-space line breaks, lists, quotes, tables and headings are
+    passed through untouched."""
+    out: list[str] = []
+    in_fence = False
+    for line in body.split("\n"):
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            out.append(line)
+            continue
+        prev = out[-1] if out else ""
+        prev_is_prose = bool(prev.strip()) and not _BLOCK_START_RE.match(prev)
+        if in_fence or not stripped or _BLOCK_START_RE.match(line):
+            if not in_fence and prev_is_prose and _LIST_START_RE.match(line):
+                out.append("")            # prose → list needs a separating blank line
+            out.append(line)
+            continue
+        if prev_is_prose and not prev.endswith("  "):
+            out[-1] = prev.rstrip() + " " + stripped
+        else:
+            # A lazy continuation line under a block-start (e.g. a wrapped
+            # list item's second line) — dedent it (keeping any trailing
+            # explicit-break spaces) so Markdown's own lazy continuation
+            # joins it with a plain "\n", not a stray indent.
+            out.append(line.lstrip())
+    return "\n".join(out)
+
 
 def render_markdown(body: str, titles: dict[str, str]) -> str:
     # full-text bodies get real hyperlinks; inline-snippet helpers keep spans
     body = render_wikilinks(body, titles, link_index())
     # turn Obsidian callouts `> [!type] title` into a bold label line
     body = CALLOUT_RE.sub(lambda m: f"> **{m.group(2) or m.group(1).title()}**", body)
-    return md.markdown(body, extensions=["extra", "sane_lists", "nl2br"])
+    return md.markdown(_unwrap_prose(body), extensions=["extra", "sane_lists"])
 
 
 def extract_labeled(page: Page, label: str, titles: dict[str, str],

@@ -95,10 +95,18 @@ def test_vision_without_objectives_has_a_hint():
         (_wiki / "goals" / "GOAL-001-vision.md").unlink()
 
 
+def test_search_counts_are_live():
+    body = _client().get("/search").get_data(as_text=True)
+    assert 'id="search-total"' in body
+    assert 'data-total=' in body
+    assert "function updateCounts" in body
+
+
 if __name__ == "__main__":
     test_no_participant_wording_anywhere()
     test_presence_list_uses_clients_key()
     test_footer_has_a_pluralisable_unit()
     test_adr_empty_state_does_not_suggest_ingest()
     test_vision_without_objectives_has_a_hint()
+    test_search_counts_are_live()
     print("OK: copy contract")

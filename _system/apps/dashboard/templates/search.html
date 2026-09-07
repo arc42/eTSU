@@ -2,16 +2,16 @@
 {% block title %}Search{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Search</nav>{% endblock %}
 {% block content %}
-<h1 class="page-h1">Search <span class="count-pill">{{ total }}</span></h1>
+<h1 class="page-h1">Search <span class="count-pill" id="search-total" data-total="{{ total }}">{{ total }}</span></h1>
 <p class="lead">Full-text search across all content — terms, stakeholders, issues, ADRs, and more.</p>
 
 <div class="toolbar">
   <input type="search" id="search-box" class="search-input" placeholder="Enter a search term…"
          autocomplete="off" spellcheck="false" autofocus aria-label="Search the wiki">
   <div class="filterbar" role="tablist">
-    <button class="fbtn active" data-type="all">All <span class="fnum">{{ total }}</span></button>
+    <button class="fbtn active" data-type="all" data-total="{{ total }}">All <span class="fnum">{{ total }}</span></button>
     {% for type, count in facets %}
-    <button class="fbtn" data-type="{{ type }}">{{ type }} <span class="fnum">{{ count }}</span></button>
+    <button class="fbtn" data-type="{{ type }}" data-total="{{ count }}">{{ type }} <span class="fnum">{{ count }}</span></button>
     {% endfor %}
   </div>
 </div>
@@ -81,6 +81,23 @@
     box.hidden = false;
   }
 
+  const totalEl = document.getElementById('search-total');
+  function updateCounts(perType) {
+    // perType == null → back to corpus totals (no query)
+    let all = 0;
+    buttons.forEach(b => {
+      const t = b.dataset.type;
+      if (t === 'all') return;
+      const n = perType ? (perType[t] || 0) : parseInt(b.dataset.total, 10);
+      b.querySelector('.fnum').textContent = n;
+      all += n;
+    });
+    const allBtn = document.querySelector('.fbtn[data-type="all"]');
+    const total = perType ? all : parseInt(allBtn.dataset.total, 10);
+    allBtn.querySelector('.fnum').textContent = total;
+    totalEl.textContent = total;
+  }
+
   function apply() {
     const browsing = query !== '' || activeType !== 'all';
     let shown = 0;
@@ -88,25 +105,30 @@
     if (query) {
       const tokens = query.split(/\s+/).filter(Boolean);
       const scored = [];
+      const perType = {};
       allResults.forEach(el => {
+        const r = relevance(el, tokens, query);
+        if (r > 0) { perType[el.dataset.type] = (perType[el.dataset.type] || 0) + 1; }
         const typeOK = activeType === 'all' || el.dataset.type === activeType;
-        const r = typeOK ? relevance(el, tokens, query) : 0;
-        if (r > 0) {
+        if (r > 0 && typeOK) {
           const freq = tokens.reduce((a, t) => a + countOcc(el.dataset.text, t), 0);
           scored.push([r, freq, el]);
         } else { el.hidden = true; }
       });
+      updateCounts(perType);
       // rank by relevance, then by body frequency, then alphabetically
       scored.sort((a, b) => b[0] - a[0] || b[1] - a[1]
         || a[2].dataset.title.localeCompare(b[2].dataset.title, 'en'));
       scored.forEach(([r, , el]) => { el.hidden = false; setScore(el, r); list.appendChild(el); shown++; });
     } else if (browsing) {                               // facet browse, no query
+      updateCounts(null);
       allResults.forEach(el => {
         const show = activeType === 'all' || el.dataset.type === activeType;
         el.hidden = !show;
         if (show) { el.querySelector('.sresult-score').hidden = true; list.appendChild(el); shown++; }
       });
     } else {
+      updateCounts(null);
       allResults.forEach(el => { el.hidden = true; });
     }
 
