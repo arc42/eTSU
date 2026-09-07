@@ -1,9 +1,6 @@
 # Requirements Wiki — Starter
 
-A ready-to-run, **content-free** requirements wiki for an English-language
-workshop. There are no domain pages here yet — just the schema, the tooling, and
-an empty vault waiting for your sources. You bring the raw material; the AI
-agent files it.
+You bring the raw material; the AI agent files it.
 
 ## The pattern
 
@@ -29,8 +26,3 @@ and evolves with you over time.
 For a full walkthrough, see [`docs/GETTING-STARTED.md`](docs/GETTING-STARTED.md).
 If you're running this as a workshop, see [`docs/WORKSHOP.md`](docs/WORKSHOP.md).
 
-## Provenance
-
-Extracted from the arc42 Aquarius demo (github.com/arc42/aquarius), which is the
-same machinery filled with a worked example. Dashboard improvements there are
-not automatically synced here.
