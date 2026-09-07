@@ -25,8 +25,13 @@ reflects the current state of the vault; just refresh the browser after editing.
 Every page footer shows the data-refresh timestamp (page load time, `%Y-%m-%d`,
 in the `TZ` timezone — default `UTC`).
 
-The dashboard shuts itself down a few seconds after its browser tab is closed
-(ADR-0022), so it never lingers as an orphan process or container.
+The dashboard shuts itself down a few seconds after the last browser tab is
+closed (ADR-0022), so it never lingers as an orphan process or container. The
+footer shows a live participant count and a "Who's here?" page (a fun
+nickname per tab, no real names). Whoever connects first is "Yoda" — the only
+one who sees the "Disconnect all" button, which ends the session for
+everyone; if their tab disappears, the role passes to whoever's left with the
+next-earliest connection.
 
 ## Tiles
 

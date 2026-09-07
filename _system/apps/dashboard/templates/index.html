@@ -1,11 +1,19 @@
 {% extends "base.html" %}
 {% from "_empty.html" import empty_state, empty_bootstrap %}
+{% block header_nickname %}{% endblock %}
 {% block content %}
 <header class="hero">
-  <img class="hero-mark" src="{{ url_for('static', filename='etsu-logo.png') }}"
-       alt="{{ system_name }}">
-  <h1 class="hero-title">{{ system_name }}</h1>
-  {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
+  <div class="hero-row">
+    <img class="hero-mark" src="{{ url_for('static', filename='etsu-logo.png') }}"
+         alt="{{ system_name }}">
+    <div class="hero-text">
+      <h1 class="hero-title">{{ system_name }}</h1>
+      {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
+    </div>
+    <span class="my-nickname hero-nickname" id="my-nickname" hidden>
+      <span id="my-nickname-label">You are</span> <strong id="my-nickname-text"></strong>
+    </span>
+  </div>
   {% if not system_name_set %}
   <p class="lead empty-hint">This vault has no name yet — run the bootstrap
     workflow, or set <code>system_name</code> in <code>_system/wiki.yaml</code>.</p>

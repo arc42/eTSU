@@ -22,7 +22,14 @@
 <body>
   {% set topbar_nav %}{% block crumbs %}{% endblock %}{% endset %}
   {% if topbar_nav|trim %}
-  <header class="topbar">{{ topbar_nav }}</header>
+  <header class="topbar">
+    {{ topbar_nav }}
+    {% block header_nickname %}
+    <span class="my-nickname" id="my-nickname" hidden>
+      <span id="my-nickname-label">You are</span> <strong id="my-nickname-text"></strong>
+    </span>
+    {% endblock %}
+  </header>
   {% endif %}
   <main class="wrap">
     {% block content %}{% endblock %}
@@ -30,34 +37,187 @@
   <footer class="foot">
     <div class="foot-line">
       <span class="foot-title">Live view · {{ system_name }} requirements wiki</span>
+      <span class="presence" id="presence" hidden>
+        <span class="presence-dot" aria-hidden="true"></span>
+        <span class="presence-count" id="presence-count">0</span> participants
+      </span>
+      {% if request.path != '/who' %}
+      <a class="whos-here" href="/who">Who's here?</a>
+      {% endif %}
+      <button type="button" class="disconnect-all" id="disconnect-all" hidden>Disconnect all</button>
       <button type="button" class="theme-toggle" id="theme-toggle">
         <span class="theme-toggle-icon" aria-hidden="true">&#9728;</span>
         <span class="theme-toggle-label">Light theme</span>
       </button>
     </div>
-    <div class="foot-sub">Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki</div>
+    <div class="foot-sub">
+      Data last refreshed: {{ refreshed_at }} · read-only · Karpathy LLM-wiki ·
+      <span class="stack-badge" title="Built with Python + Flask">
+        <svg class="stack-icon" viewBox="0 0 24 24" width="13" height="13" fill="none"
+             stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 3h6"/>
+          <path d="M10 3v5.6L4.9 18.1A2 2 0 0 0 6.7 21h10.6a2 2 0 0 0 1.8-2.9L14 8.6V3"/>
+          <path d="M7.6 15h8.8"/>
+        </svg>
+        Python/Flask
+      </span>
+    </div>
   </footer>
   {% block scripts %}{% endblock %}
   <script>
-  // Lifecycle: a lightweight heartbeat keeps the server alive; when the page
-  // disappears (tab/window closed), the server stops itself. No held stream,
-  // no button. See app.py / ADR-0022.
+  // Lifecycle: a lightweight per-tab heartbeat keeps the server alive; once
+  // the last tab disappears, the server stops itself. No held stream. Each
+  // tab tags its heartbeat with a client_id (kept in sessionStorage, so a
+  // reload/navigation reuses it but a fresh tab gets a new one) so the
+  // server can tell tabs apart — needed for the connected-count footer, for
+  // "disconnect all" to know when everyone is gone, and for the server to
+  // tell each tab its own fun nickname and whether it's currently "Yoda"
+  // (the facilitator — whoever connected first and is still here; see
+  // `_facilitator_client_id` in app.py). See app.py / ADR-0022.
   (function () {
     var HEARTBEAT_MS = 20000;   // < heartbeat grace period (90s); even a throttled
                                 // background tab (~1 ping/min) stays alive
+    var CLIENT_ID = (function () {
+      try {
+        var id = sessionStorage.getItem("etsu-client-id");
+        if (!id) {
+          id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+              : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+          sessionStorage.setItem("etsu-client-id", id);
+        }
+        return id;
+      } catch (e) {
+        return Date.now().toString(36) + Math.random().toString(36).slice(2);
+      }
+    })();
+    // Failure detection is shared between the 20s /ping and the 5s
+    // /presence/count poll below — the faster one dominates once the server
+    // is actually down, so a participant sees the "session ended" state
+    // within ~10s instead of waiting out a full 20s heartbeat cycle twice
+    // (up to 40s, which read as "disconnecting takes ages" even though the
+    // server itself stops in under 2s).
+    var failures = 0;
+    var intervalIds = [];
+
+    function showSessionEnded() {
+      if (document.getElementById("session-ended")) { return; }
+      document.documentElement.classList.add("etsu-disconnected");
+      var bar = document.createElement("div");
+      bar.id = "session-ended";
+      bar.className = "session-ended";
+      bar.textContent = "Session ended by the facilitator — this page is no longer live.";
+      document.body.appendChild(bar);
+      intervalIds.forEach(function (id) { clearInterval(id); });
+    }
+    function markFailure() {
+      failures += 1;
+      if (failures >= 2) { showSessionEnded(); }
+    }
+    function markSuccess() { failures = 0; }
+
+    var nicknameEl = document.getElementById("my-nickname");
+    var nicknameLabelEl = document.getElementById("my-nickname-label");
+    var nicknameTextEl = document.getElementById("my-nickname-text");
+    var disconnectBtn = document.getElementById("disconnect-all");
+
     function ping() {
-      fetch("/ping", { method: "POST", keepalive: true }).catch(function () {});
+      fetch("/ping", {
+        method: "POST", keepalive: true,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ client_id: CLIENT_ID }),
+      }).then(function (r) {
+        if (!r.ok) { markFailure(); return null; }
+        markSuccess();
+        return r.json();
+      }).then(function (d) {
+        if (!d) { return; }
+        if (nicknameEl && d.nickname) {
+          // The facilitator's name is always "Yoda" (app.py) — greeted
+          // differently from everyone else's random nickname.
+          nicknameLabelEl.textContent = d.is_facilitator ? "Welcome," : "You are";
+          nicknameTextEl.textContent = d.nickname;
+          nicknameEl.hidden = false;
+        }
+        // Re-evaluated on every ping: if Yoda's tab disappears, the role
+        // (and the button) moves to whoever's left with the next-earliest
+        // connection, within one heartbeat cycle — no fixed id, no token.
+        if (disconnectBtn) { disconnectBtn.hidden = !d.is_facilitator; }
+      }).catch(markFailure);
     }
     ping();                     // immediately on load (cancels a "/leaving" from the previous page)
     setTimeout(ping, 2500);     // "settle" ping against a late-arriving /leaving
-    setInterval(ping, HEARTBEAT_MS);
+    intervalIds.push(setInterval(ping, HEARTBEAT_MS));
 
     // Signal when the page disappears (tab/window closed OR navigation):
-    // on navigation, the next page pings again immediately and cancels it; on an
-    // actual close, the server stops after a short grace period (~5s).
+    // on navigation, the next page pings again immediately (same client_id)
+    // and cancels it; on an actual close, that client drops after a short
+    // grace period (~5s).
     window.addEventListener("pagehide", function () {
-      if (navigator.sendBeacon) { navigator.sendBeacon("/leaving"); }
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon("/leaving", new Blob(
+          [JSON.stringify({ client_id: CLIENT_ID })], { type: "application/json" }));
+      }
     });
+
+    // Footer "N connected" badge — a live-feeling nicety, not the shutdown
+    // trip wire (that's the heartbeat above). Shown to every viewer.
+    var presenceEl = document.getElementById("presence");
+    var presenceCountEl = document.getElementById("presence-count");
+    function updatePresence() {
+      fetch("/presence/count").then(function (r) {
+        if (!r.ok) { markFailure(); return null; }
+        return r.json();
+      }).then(function (d) {
+        if (!d || !presenceEl) { return; }
+        markSuccess();
+        presenceCountEl.textContent = d.count;
+        presenceEl.hidden = false;
+      }).catch(markFailure);
+    }
+    updatePresence();
+    intervalIds.push(setInterval(updatePresence, 5000));
+
+    // Facilitator-only: end the session for everyone. Hidden by default
+    // (see the button's `hidden` attribute in the footer markup) — `ping()`
+    // above unhides it only once the server confirms this client_id is
+    // currently Yoda, and re-hides it if that ever stops being true.
+    if (disconnectBtn) {
+      disconnectBtn.addEventListener("click", function () {
+        if (!window.confirm("Disconnect all " + presenceCountEl.textContent + " participant(s) and stop the dashboard?")) {
+          return;
+        }
+        // Disabled the instant it's actioned: prevents a second click while
+        // the request is in flight, and signals it took effect even before
+        // the page-wide greyscale kicks in a few seconds later (this tab's
+        // own pings start failing too, once the server is actually down).
+        disconnectBtn.disabled = true;
+        disconnectBtn.textContent = "Disconnecting…";
+        // Yoda's role can in principle move on between this click and the
+        // server processing it (their tab closing right at that moment) —
+        // a bare .catch() would swallow that 403 silently and make the
+        // button look broken instead of explaining why.
+        fetch("/disconnect-all", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ client_id: CLIENT_ID }),
+        }).then(function (r) {
+          if (r.ok) {
+            // We know it worked — don't wait for our own ping to start
+            // failing (that's the whole "takes ages" problem this fixes).
+            showSessionEnded();
+          } else {
+            disconnectBtn.disabled = false;
+            disconnectBtn.textContent = "Disconnect all";
+            window.alert("Could not disconnect (server said " + r.status +
+              "). Reload this page and try again.");
+          }
+        }).catch(function () {
+          disconnectBtn.disabled = false;
+          disconnectBtn.textContent = "Disconnect all";
+          window.alert("Could not reach the dashboard server — it may already be stopped.");
+        });
+      });
+    }
   })();
 
   // Theme switch. The palette itself is pure CSS custom properties, so the

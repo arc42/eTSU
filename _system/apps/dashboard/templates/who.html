@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Who's here{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Who's here</nav>{% endblock %}
+{% block content %}
+<h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 participants</span></h1>
+<p class="lead">Everyone with this dashboard open right now — a fun nickname, not a real name. Updates live; closes the tab, drops off the list.</p>
+
+<p class="empty-state" id="who-empty" hidden>No one's connected yet — open this dashboard's link on another device and you'll show up here.</p>
+<div class="who-grid" id="who-grid"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var grid = document.getElementById("who-grid");
+  var empty = document.getElementById("who-empty");
+  var countEl = document.getElementById("who-count");
+
+  function fmtDuration(sec) {
+    if (sec < 60) { return sec + "s"; }
+    var m = Math.floor(sec / 60), s = sec % 60;
+    if (m < 60) { return m + "m " + s + "s"; }
+    var h = Math.floor(m / 60);
+    return h + "h " + (m % 60) + "m";
+  }
+
+  function render(participants) {
+    countEl.textContent = participants.length + (participants.length === 1 ? " participant" : " participants");
+    empty.hidden = participants.length > 0;
+    grid.innerHTML = "";
+    participants.forEach(function (p) {
+      var card = document.createElement("div");
+      card.className = "who-card";
+      var meta = p.browser + (p.os ? " · " + p.os : "");
+      card.innerHTML =
+        '<div class="who-name">' + p.nickname + '</div>' +
+        '<div class="who-meta">' + meta + '</div>' +
+        '<div class="who-duration">connected ' + fmtDuration(p.connected_seconds) + '</div>';
+      grid.appendChild(card);
+    });
+  }
+
+  function refresh() {
+    fetch("/presence/list").then(function (r) { return r.json(); }).then(function (d) {
+      render(d.participants || []);
+    }).catch(function () {});
+  }
+  refresh();
+  setInterval(refresh, 4000);
+})();
+</script>
+{% endblock %}

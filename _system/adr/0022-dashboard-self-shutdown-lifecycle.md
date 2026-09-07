@@ -124,3 +124,52 @@ pattern) and tie the server's lifecycle to "is a browser watching?".
   up an already-stopped container.
 - Reversal would mean: restart policy back to `unless-stopped`,
   `/ping`+`/leaving`+watchdog removed — hence this record.
+
+## Addendum (2026-09-07): multiple simultaneous viewers
+
+Workshops now project the dashboard to multiple participants at once (via a
+tunnel, e.g. localdock), not one facilitator alone. Presence moved from a
+single `_last_seen` scalar to a `{client_id: last_seen}` dict — each tab
+generates a `client_id` once (`sessionStorage`) and sends it with every
+`/ping`/`/leaving`. The watchdog now shuts down once the dict is empty
+(everyone gone) instead of once the one scalar goes stale; all grace periods
+are unchanged. Two capabilities were layered on top, both driven by the same
+dict:
+
+- `GET /presence/count` — a live "N connected" badge in the footer, shown to
+  everyone, using a tighter 30 s window so it feels responsive rather than
+  waiting out the 90 s shutdown tolerance.
+- `POST /disconnect-all` — a "Disconnect all" button that calls the existing
+  `_shutdown()`, and `GET /presence/list` + `/who` — a "who's here" page with
+  a fun per-tab nickname, browser/OS, and connection duration, for everyone
+  to see (not facilitator-only — nicknames carry no real identity, derived
+  from `client_id` via `_nickname()`, never the id itself).
+
+`/disconnect-all` needs a facilitator concept, and this went through two
+iterations:
+
+- **First**: a shared-secret token. `remote_addr` couldn't gate it (Docker
+  Desktop's NAT makes the facilitator's own `localhost:8080` request
+  indistinguishable from a tunneled participant's once inside the
+  container), so `dashboard.sh` minted a random token and opened the
+  facilitator's tab at `?fac=<token>`; the server set a cookie on that
+  request. This worked but was fragile in practice: a fresh token per
+  `rebuild`/`up` invalidated an already-open tab's cookie (`/disconnect-all`
+  403'd silently — no `response.ok` check on the button, fixed along the
+  way), and persisting the token to a file to survive restarts just traded
+  one failure mode for the risk of every stale localhost tab ever opened
+  accumulating facilitator status.
+- **Current: "Yoda"** — no token, no cookie. `_facilitator_client_id()`
+  returns whichever *currently connected* client (within `_PRESENCE_WINDOW`)
+  has the smallest `_first_seen`: whoever showed up first and is still here.
+  `/ping` reports `is_facilitator` (and a nickname) to each tab on every
+  heartbeat, so `base.html` shows/hides the button live; the server checks
+  the same function again on `/disconnect-all` regardless of what the
+  button shows. If Yoda's tab disappears, the role passes to whoever's left
+  with the next-earliest connection — no promotion logic needed, it falls
+  out of the same data `/who` already tracks. `dashboard.sh` no longer
+  touches tokens or `?fac=` links at all.
+- `/presence/count` and `/presence/list` both exclude the current Yoda:
+  otherwise a two-participant workshop showed "3 connected" (the
+  facilitator's own tab pings the same as anyone else's) — the badge counts
+  participants, not viewers.

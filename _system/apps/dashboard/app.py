@@ -14,6 +14,7 @@ import re
 import signal
 import threading
 import time
+import zlib
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -21,7 +22,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import markdown as md
 import yaml
-from flask import Flask, abort, g, has_request_context, redirect, render_template
+from flask import Flask, abort, g, has_request_context, redirect, render_template, request
 
 # some slim base images lack a webp entry in their mime.types
 mimetypes.add_type("image/webp", ".webp")
@@ -1869,17 +1870,20 @@ def req42_block_view(slug):
 
 # ---------------------------------------------------------------------------
 # Server lifecycle: self-shutdown as soon as no browser is watching anymore.
-# NO stop button — "close tab/window" is how you quit.
+# Multiple browsers (workshop participants) may watch at once, so presence is
+# tracked per client (a random id each tab generates once, in base.html)
+# rather than as a single "is anyone home" flag.
 #
 # Every open page sends a lightweight heartbeat (`POST /ping`) every few
-# seconds. As long as pings keep arriving, the server keeps running; once they
-# stop, the watchdog shuts it down after a grace period — a closed browser
-# window leaves no orphaned container behind. The page additionally reports
-# via a pagehide beacon `POST /leaving` that it is going away: if it was just
-# navigation, the next page's `/ping` immediately clears the signal; if the
-# tab is really closed, the server stops after `_LEAVE_GRACE` (~5 s) instead
-# of waiting out the full heartbeat grace period. So closing the tab alone is
-# enough to quit.
+# seconds, tagged with its client_id. As long as any client keeps pinging,
+# the server keeps running; once the last one goes quiet, the watchdog shuts
+# it down after a grace period — a closed browser window leaves no orphaned
+# container behind. A page additionally reports via a pagehide beacon
+# `POST /leaving` that it is going away: if it was just navigation, the next
+# page's `/ping` (same client_id, carried via sessionStorage) immediately
+# clears the signal; if the tab is really closed, that client is dropped
+# after `_LEAVE_GRACE` (~5 s) instead of waiting out the full heartbeat grace
+# period.
 #
 # Deliberately NO long-lived open connection (an earlier iteration used an
 # SSE/events stream): that tied up a worker thread for a tab's entire
@@ -1889,7 +1893,7 @@ def req42_block_view(slug):
 # entirely. The grace period is generous so a tab throttled in the background
 # (browsers throttle timers to ~1x/min) stays alive; only a genuinely closed
 # tab stops pinging altogether. A single worker keeps the state
-# process-coherent (Dockerfile: --workers 1). See ADR-0022.
+# process-coherent (Dockerfile: --workers 1). See ADR-0022 and its addendum.
 # ---------------------------------------------------------------------------
 
 
@@ -1901,26 +1905,68 @@ def _grace(env_name: str, default: float) -> float:
         return default
 
 
-# Shut down once there has been no heartbeat for longer than this. Larger than
-# the browser's background-tab throttling (~60 s), so a merely hidden tab does
-# not falsely trigger a shutdown; only a genuinely closed tab stops pinging.
+# Shut down once no client has pinged for longer than this. Larger than the
+# browser's background-tab throttling (~60 s), so a merely hidden tab does
+# not falsely trigger a shutdown; only a genuinely closed tab drops out.
 _HEARTBEAT_GRACE = _grace("DASH_HEARTBEAT_GRACE", 90.0)
 # Grace period at startup, until the first heartbeat arrives (a slower first
 # build / first render). If one never comes, the server shuts down afterwards
 # instead of running on as an orphan.
 _STARTUP_GRACE = _grace("DASH_STARTUP_GRACE", 90.0)
-# Short grace period after a "tab is leaving" signal (`/leaving`, via a
-# pagehide beacon) before shutting down. On navigation the next page connects
-# right away (`/ping` clears the signal); if none arrives (tab closed), the
-# server stops after this grace period — much faster than the heartbeat grace
-# period.
+# Short grace period after a client's "tab is leaving" signal (`/leaving`,
+# via a pagehide beacon) before dropping that client. On navigation the next
+# page connects right away (`/ping` clears the signal); if none arrives (tab
+# closed), the client is dropped after this — much faster than the heartbeat
+# grace period.
 _LEAVE_GRACE = _grace("DASH_LEAVE_GRACE", 5.0)
+# How recently a client must have pinged to count as "connected" in the
+# footer's live counter. Deliberately tighter than _HEARTBEAT_GRACE: the
+# counter is a live-feeling UI nicety, not the shutdown trip wire, so it
+# should not wait out the full 90 s tolerance built in for background-tab
+# throttling.
+_PRESENCE_WINDOW = _grace("DASH_PRESENCE_WINDOW", 30.0)
 
 _lifecycle_lock = threading.Lock()
-_last_seen = None        # monotonic time of the last /ping; None = none yet
-_leave_at = None         # monotonic time of a "tab is leaving" signal; None = none
+_clients: dict[str, float] = {}   # client_id -> monotonic time of last /ping
+_leaving: dict[str, float] = {}   # client_id -> monotonic time /leaving arrived
+_first_seen: dict[str, float] = {}   # client_id -> monotonic time of its first-ever /ping
+_user_agents: dict[str, str] = {}    # client_id -> User-Agent header from its latest /ping
+_ever_connected = False
 _shutting_down = False
 _watchdog_started = False
+_server_started = time.monotonic()
+
+
+def _forget_client(cid):
+    """Drop a client_id from every presence structure at once — called from
+    the watchdog's two eviction paths so none of them can go out of sync."""
+    _clients.pop(cid, None)
+    _leaving.pop(cid, None)
+    _first_seen.pop(cid, None)
+    _user_agents.pop(cid, None)
+
+
+def _facilitator_client_id():
+    """"Yoda": whichever *currently connected* client has been here longest
+    (smallest `_first_seen`). Not a fixed id and no shared secret — just
+    connection order, recomputed on every call. If Yoda's tab disappears,
+    the role passes to whoever is left with the next-earliest first_seen; a
+    reload/navigation keeps the same client_id (sessionStorage), so it
+    doesn't cost Yoda the role.
+
+    "Currently connected" means within `_PRESENCE_WINDOW`, same bar as the
+    footer counter and /who — not merely "not yet evicted by the 90s
+    heartbeat grace" (`_clients`/`_first_seen` only drop an entry that late).
+    Without this, a tab gone 40s ago could still hold the role for another
+    50s, and everyone actually present would show as a plain participant
+    (nobody would pass the `cid == _facilitator_client_id()` check at all).
+    Call under `_lifecycle_lock`."""
+    now = time.monotonic()
+    active = {cid: fs for cid, fs in _first_seen.items()
+              if now - _clients.get(cid, 0) <= _PRESENCE_WINDOW}
+    if not active:
+        return None
+    return min(active, key=active.get)
 
 
 def _shutdown(reason):
@@ -1953,27 +1999,35 @@ def _shutdown(reason):
 
 
 def _watchdog():
-    started = time.monotonic()
+    global _ever_connected
     while True:
         time.sleep(1.0)
         with _lifecycle_lock:
             if _shutting_down:
                 return
-            last = _last_seen
-            leave = _leave_at
-        now = time.monotonic()
-        # The tab has said goodbye and no new page has pinged since: shut
-        # down after a short grace period (fast stop on tab close).
-        if leave is not None and (last is None or last <= leave) and now - leave > _LEAVE_GRACE:
-            _shutdown("tab closed (no reconnect after pagehide)")
-            return
-        if last is None:
+            now = time.monotonic()
+            # A client said goodbye and never pinged again: drop it (fast
+            # path on tab close). A fresher ping after the goodbye cancels it
+            # (was just in-page navigation).
+            for cid, left_at in list(_leaving.items()):
+                last = _clients.get(cid)
+                if last is not None and last > left_at:
+                    _leaving.pop(cid, None)
+                elif now - left_at > _LEAVE_GRACE:
+                    _forget_client(cid)
+            # A client simply went stale (no goodbye, no more pings either).
+            for cid, last in list(_clients.items()):
+                if now - last > _HEARTBEAT_GRACE:
+                    _forget_client(cid)
+            anyone_left = bool(_clients)
+            ever = _ever_connected
+        if not ever:
             # Nobody has ever pinged -> startup grace period.
-            if now - started > _STARTUP_GRACE:
+            if now - _server_started > _STARTUP_GRACE:
                 _shutdown("no browser heartbeat within the startup grace period")
                 return
-        elif now - last > _HEARTBEAT_GRACE:
-            _shutdown("no more browser heartbeat (tab closed)")
+        elif not anyone_left:
+            _shutdown("no more browser heartbeat (all tabs closed)")
             return
 
 
@@ -1986,28 +2040,183 @@ def _ensure_watchdog():
     threading.Thread(target=_watchdog, daemon=True).start()
 
 
+def _client_id(req) -> str:
+    """The per-tab id a page sends with /ping and /leaving (generated once in
+    base.html, kept in sessionStorage so it survives in-tab navigation but
+    not a closed tab). Defaulted and length-capped so a missing or malformed
+    body can't wedge the presence dict."""
+    try:
+        data = req.get_json(silent=True, force=True) or {}
+    except Exception:
+        data = {}
+    cid = str(data.get("client_id") or "").strip()[:64]
+    return cid or "anon"
+
+
 @app.route("/ping", methods=["POST"])
 def heartbeat_ping():
-    """Lightweight sign of life from every open page. Updates the `last seen`
-    timestamp, clears any pending "tab is leaving" signal (a live page pinging
-    means no goodbye after all) and returns immediately — holds no thread."""
-    global _last_seen, _leave_at
+    """Lightweight sign of life from one open page. Updates that client_id's
+    `last seen` timestamp and clears any pending "tab is leaving" signal for
+    it (a live page pinging means no goodbye after all). Holds no thread —
+    replies immediately with the two things the page needs back: this tab's
+    name (for the header) and whether it is currently the facilitator (for
+    the disconnect-all button — see `_facilitator_client_id`). The
+    facilitator's name is always literally "Yoda", not a random nickname —
+    everyone else gets one of those. Both are re-sent on every ping, so the
+    header/button follow the role live if it ever transfers (Yoda's tab
+    disappearing, and the next-earliest client becoming Yoda instead)."""
+    global _ever_connected
     _ensure_watchdog()
+    cid = _client_id(request)
+    ua = request.headers.get("User-Agent", "")[:200]
     with _lifecycle_lock:
-        _last_seen = time.monotonic()
-        _leave_at = None
-    return ("", 204)
+        now = time.monotonic()
+        if cid not in _clients:
+            _first_seen[cid] = now
+        _clients[cid] = now
+        _user_agents[cid] = ua
+        _leaving.pop(cid, None)
+        _ever_connected = True
+        is_facilitator = cid == _facilitator_client_id()
+    nickname = "Yoda" if is_facilitator else _nickname(cid)
+    return {"nickname": nickname, "is_facilitator": is_facilitator}
 
 
 @app.route("/leaving", methods=["POST"])
 def heartbeat_leaving():
-    """Beacon sent when the page is left (pagehide: tab closed OR navigated).
-    Sets a short shutdown grace period; if the user was only navigating, the
-    next page's immediate `/ping` clears the signal again before it expires."""
-    global _leave_at
+    """Beacon sent when one page is left (pagehide: tab closed OR navigated).
+    Marks that client_id as possibly-gone; if the user was only navigating,
+    the next page's immediate `/ping` (same client_id) clears the signal
+    again before it expires."""
     _ensure_watchdog()
+    cid = _client_id(request)
     with _lifecycle_lock:
-        _leave_at = time.monotonic()
+        _leaving[cid] = time.monotonic()
+    return ("", 204)
+
+
+@app.route("/presence/count")
+def presence_count():
+    """How many distinct *participant* tabs have pinged within
+    `_PRESENCE_WINDOW` — the number shown in the footer. Excludes Yoda, the
+    current facilitator (`_facilitator_client_id`): otherwise the badge reads
+    "3 connected" for two participants because the facilitator's own
+    already-open tab pings too, which looks like a bug. Polled every few
+    seconds; cheap (an in-memory dict scan, no I/O, no thread held)."""
+    now = time.monotonic()
+    with _lifecycle_lock:
+        yoda = _facilitator_client_id()
+        count = sum(1 for cid, last in _clients.items()
+                    if now - last <= _PRESENCE_WINDOW and cid != yoda)
+    return {"count": count}
+
+
+_NICKNAME_ADJECTIVES = ["Curious", "Swift", "Quiet", "Bold", "Sunny", "Clever",
+                         "Gentle", "Brisk", "Merry", "Wandering", "Sharp", "Calm"]
+_NICKNAME_ANIMALS = ["Otter", "Falcon", "Fox", "Heron", "Lynx", "Puffin",
+                      "Badger", "Wren", "Marten", "Ibex", "Hare", "Tern"]
+
+
+def _nickname(client_id: str) -> str:
+    """A stable, fun, non-identifying label for a client_id, for the "who's
+    here" page — deterministic (the same tab always gets the same nickname
+    across polls) but derived from nothing more than the random id the tab
+    already generated itself, so there's no real identity behind it."""
+    h = zlib.crc32(client_id.encode("utf-8"))
+    adjective = _NICKNAME_ADJECTIVES[h % len(_NICKNAME_ADJECTIVES)]
+    animal = _NICKNAME_ANIMALS[(h // len(_NICKNAME_ADJECTIVES)) % len(_NICKNAME_ANIMALS)]
+    return f"{adjective} {animal}"
+
+
+def _parse_user_agent(ua: str) -> tuple[str, str]:
+    """Coarse browser/OS labels for the "who's here" page. Good enough for
+    the handful of browsers a workshop room actually shows up with — not a
+    real user-agent-parsing library, and doesn't need to be."""
+    ua = ua or ""
+    if "Edg/" in ua:
+        browser = "Edge"
+    elif "OPR/" in ua or "Opera" in ua:
+        browser = "Opera"
+    elif "Firefox/" in ua:
+        browser = "Firefox"
+    elif "CriOS" in ua or ("Chrome/" in ua and "Safari/" in ua):
+        browser = "Chrome"
+    elif "Safari/" in ua:
+        browser = "Safari"
+    else:
+        browser = "a browser"
+
+    if "iPhone" in ua or "iPad" in ua:
+        os_name = "iOS"
+    elif "Android" in ua:
+        os_name = "Android"
+    elif "Mac OS X" in ua:
+        os_name = "macOS"
+    elif "Windows" in ua:
+        os_name = "Windows"
+    elif "Linux" in ua:
+        os_name = "Linux"
+    else:
+        os_name = ""
+    return browser, os_name
+
+
+@app.route("/presence/list")
+def presence_list():
+    """Per-participant detail for the "who's here" page: a fun deterministic
+    nickname, a coarse browser/OS, and how long they've been connected.
+    Excludes Yoda, same as /presence/count. Shown to every viewer, not
+    facilitator-gated — it's meant as a bit of a moment for participants,
+    not an admin tool."""
+    now = time.monotonic()
+    with _lifecycle_lock:
+        yoda = _facilitator_client_id()
+        rows = []
+        for cid, last in _clients.items():
+            if now - last > _PRESENCE_WINDOW or cid == yoda:
+                continue
+            browser, os_name = _parse_user_agent(_user_agents.get(cid, ""))
+            rows.append({
+                "nickname": _nickname(cid),
+                "browser": browser,
+                "os": os_name,
+                "connected_seconds": round(now - _first_seen.get(cid, last)),
+            })
+    rows.sort(key=lambda r: r["connected_seconds"], reverse=True)
+    return {"participants": rows}
+
+
+@app.route("/who")
+def who_page():
+    """The "who's here" page itself — a live list rendered client-side from
+    /presence/list (see who.html)."""
+    return render_template("who.html")
+
+
+# --- Facilitator-only controls -------------------------------------------
+#
+# No token, no cookie, no `remote_addr` check (which can't work here anyway:
+# under Docker Desktop's NAT, the facilitator's own `localhost:8080` request
+# and a tunnel's forwarded participant traffic arrive at the container
+# looking identical). The facilitator is just "Yoda" — whoever connected
+# first and is still here (`_facilitator_client_id`) — and the only shared
+# secret involved is each tab's own random client_id, which is never shown
+# to any other tab (nicknames on /who are derived from it, not equal to it).
+# base.html only shows the "Disconnect all" button once a /ping response
+# says `is_facilitator: true`; the server enforces the same check again here
+# regardless of what the button shows, since the client_id in this POST body
+# is otherwise just as self-asserted as a browser's own /ping.
+@app.route("/disconnect-all", methods=["POST"])
+def disconnect_all():
+    """Facilitator-only: end the session for every connected browser by
+    shutting the server down outright (`_shutdown`, above). Everyone else's
+    next /ping then fails, which the footer script turns into a plain
+    "session ended" notice (base.html)."""
+    cid = _client_id(request)
+    with _lifecycle_lock:
+        if cid != _facilitator_client_id():
+            abort(403)
+    _shutdown("disconnect-all requested by facilitator")
     return ("", 204)
 
 

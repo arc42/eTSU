@@ -121,6 +121,17 @@ code { font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-si
 .crumbs a { color: var(--accent); text-decoration: none; }
 .crumbs span { color: var(--ink-dim); margin: 0 .35rem; }
 
+/* This tab's own name — "Welcome, Yoda" for the facilitator, "You are
+   <nickname>" for everyone else (see /who). Pushed to the far right of
+   whichever row it's in via the auto margin: the topbar on every page
+   except home, or — home page only — the hero row next to the logo/title
+   (index.html overrides `header_nickname` to empty so it isn't shown twice;
+   the topbar itself then has no content and base.html hides it entirely). */
+.my-nickname { margin-left: auto; color: var(--ink-soft); font-size: .85rem;
+  white-space: nowrap; }
+.my-nickname strong { color: var(--ink); }
+.hero-nickname { font-size: .95rem; }
+
 .wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
 .hero-banner { display: block; width: 100%; height: auto; max-height: 190px; object-fit: cover;
   border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
@@ -517,6 +528,88 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .foot-title { color: var(--ink-soft); font-weight: 600; letter-spacing: .02em; }
 .foot-sub { margin-top: .25rem; }
 
+/* small "built with" credit — a bare flask glyph, not a stand-in for either
+   project's actual mark, so it needs no upkeep if either wordmark changes */
+.stack-badge { display: inline-flex; align-items: center; gap: .25rem; }
+.stack-icon { color: var(--ink-dim); vertical-align: -2px; }
+
+/* "N connected" badge — a pulsing dot reads as "live" at a glance from the
+   back of the room, without competing with the theme toggle for attention. */
+.presence { display: inline-flex; align-items: center; gap: .4rem;
+  color: var(--ink-soft); font-size: .8rem; }
+/* The `hidden` attribute alone doesn't survive this rule's own `display`
+   declaration — an author stylesheet always wins over the browser's default
+   `[hidden]{display:none}`, at equal specificity or not. Without this, the
+   element it's toggled on/off with `.hidden = true/false` (JS) stays
+   visible the whole time regardless. */
+.presence[hidden] { display: none; }
+.presence-dot { width: .5rem; height: .5rem; border-radius: 50%;
+  background: var(--accent-2); box-shadow: 0 0 0 rgba(70,211,176,.5);
+  animation: presence-pulse 2s ease-out infinite; }
+.presence-count { color: var(--ink); font-weight: 600; }
+@keyframes presence-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(70,211,176,.45); }
+  70%  { box-shadow: 0 0 0 .4rem rgba(70,211,176,0); }
+  100% { box-shadow: 0 0 0 0 rgba(70,211,176,0); }
+}
+
+.whos-here {
+  display: inline-flex; align-items: center; margin: 0; padding: .3rem .8rem;
+  font-size: .8rem; color: var(--ink-soft); text-decoration: none;
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.whos-here:hover { color: var(--ink); border-color: var(--accent); }
+
+/* ---- /who — a card per connected participant, refreshed live ---- */
+.who-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem; }
+.who-card {
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: .9rem 1.1rem;
+}
+.who-name { font-weight: 700; font-size: 1.05rem; margin-bottom: .3rem; }
+.who-meta { color: var(--ink-soft); font-size: .85rem; }
+.who-duration { color: var(--ink-dim); font-size: .8rem; margin-top: .5rem; }
+
+/* Facilitator-only control — hidden by default in the markup; base.html's
+   JS unhides it only once the server confirms this tab is currently "Yoda"
+   (see `_facilitator_client_id` in app.py), and re-hides it if that ever
+   stops being true. Danger-toned so it reads as the one destructive action
+   in an otherwise read-only footer. */
+.disconnect-all {
+  display: inline-flex; align-items: center; margin: 0; padding: .3rem .8rem;
+  font: inherit; font-size: .8rem; font-weight: 600; color: var(--danger);
+  background: var(--card); border: 1px solid var(--danger);
+  border-radius: 999px; cursor: pointer;
+  transition: color .15s ease, background .15s ease;
+}
+.disconnect-all[hidden] { display: none; }  /* see .presence[hidden] above */
+.disconnect-all:hover { color: var(--on-accent); background: var(--danger); }
+.disconnect-all:focus-visible { outline: 2px solid var(--danger); outline-offset: 2px; }
+.disconnect-all:disabled {
+  color: var(--ink-dim); background: var(--card); border-color: var(--line);
+  cursor: not-allowed; opacity: .7;
+}
+
+/* Full-width notice replacing a dead page once the facilitator disconnects
+   everyone. Fixed to the top so it's visible regardless of scroll position. */
+.session-ended {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: .7rem 1rem; text-align: center;
+  font-size: .85rem; font-weight: 600; color: var(--on-accent);
+  background: var(--warn); box-shadow: var(--shadow);
+}
+
+/* The whole page desaturates the instant a session ends — a glance from
+   across the room reads "this one's dead" without having to read the
+   banner text. The banner still carries the reason. */
+html.etsu-disconnected {
+  filter: grayscale(1) brightness(.92);
+  transition: filter .8s ease;
+}
+
 /* ---- data-model tile + /data-model page (test-stage projection) -------- */
 .tile-mini-diagram { margin: .4rem 0 .5rem; max-height: 10rem; overflow: hidden; }
 .tile-mini-diagram pre.mermaid { margin: 0; background: none; border: 0;
@@ -771,7 +864,12 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 
 /* text hero — replaces the artwork banner in the neutral starter */
 .hero { margin: .2rem 0 1.4rem; }
-.hero-title { font-size: 2.2rem; margin: 0 0 .3rem; letter-spacing: -0.01em; }
+/* Mark + title/tagline side by side rather than stacked — shorter hero,
+   less scrolling before the tiles on a projector. */
+.hero-row { display: flex; align-items: center; gap: 1.1rem; }
+.hero-text { min-width: 0; }
+.hero-title { font-size: 2.2rem; margin: 0; letter-spacing: -0.01em; }
+.hero-text .lead { margin: .2rem 0 0; }
 /* eTSU mark. The artwork is drawn for light grounds and its linework is a navy
    close to the dark theme's --bg, so it sits on a --plate backing rather than
    on the raw background. In the light theme --plate is white, which makes the
@@ -779,10 +877,11 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
    the artwork already has the ground it was drawn for.
    Sized in rem so it scales with a projector's zoom. */
 .hero-mark {
-  display: block; width: auto; height: 5.2rem; margin: 0 0 .9rem;
+  display: block; flex: none; width: auto; height: 5.2rem; margin: 0;
   padding: .55rem .8rem; border-radius: var(--radius);
   background: var(--plate); box-shadow: var(--shadow);
 }
+@media (max-width: 640px) { .hero-row { flex-direction: column; align-items: flex-start; gap: .7rem; } }
 
 /* Theme switch. It lives in the footer because the topbar carries breadcrumbs
    only and is absent entirely on the home page — there is no header nav to

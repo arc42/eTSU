@@ -64,9 +64,12 @@ def test_missing_pages_are_404_not_500():
         assert resp.status_code == 404, (route, resp.status_code)
 
 
-def test_ping_is_204():
+def test_ping_returns_nickname_and_facilitator_flag():
     client = app.app.test_client()
-    assert client.post("/ping").status_code == 204
+    resp = client.post("/ping")
+    assert resp.status_code == 200
+    body = resp.get_json()
+    assert body["nickname"] and isinstance(body["is_facilitator"], bool)
 
 
 def test_data_model_diagrams_are_none_when_no_entities():
@@ -109,7 +112,7 @@ def test_vision_tile_is_an_empty_state_not_a_demo_placeholder():
 if __name__ == "__main__":
     test_all_get_routes_render_empty()
     test_missing_pages_are_404_not_500()
-    test_ping_is_204()
+    test_ping_returns_nickname_and_facilitator_flag()
     test_data_model_diagrams_are_none_when_no_entities()
     test_empty_views_offer_a_next_step()
     test_vision_tile_is_an_empty_state_not_a_demo_placeholder()
