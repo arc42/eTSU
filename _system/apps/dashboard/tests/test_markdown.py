@@ -77,6 +77,16 @@ def test_prose_starting_with_a_wikilink_is_joined():
     assert "wants faster onboarding." in html, html
 
 
+def test_spaced_pipe_in_prose_is_still_joined():
+    html = app.render_markdown("See the linked feature for\ndetails: a | b here.", {})
+    assert "feature for details: a | b here." in html, html
+
+
+def test_leading_pipe_table_survives():
+    html = app.render_markdown("| H1 | H2 |\n|----|----|\n| a | b |", {})
+    assert "<table>" in html, html
+
+
 if __name__ == "__main__":
     test_hard_wrapped_prose_is_one_paragraph()
     test_list_directly_after_prose_line_is_a_list()
@@ -86,4 +96,6 @@ if __name__ == "__main__":
     test_wrapped_list_stays_tight()
     test_headerless_gfm_table_survives()
     test_prose_starting_with_a_wikilink_is_joined()
+    test_spaced_pipe_in_prose_is_still_joined()
+    test_leading_pipe_table_survives()
     print("OK: markdown unwrap contract")

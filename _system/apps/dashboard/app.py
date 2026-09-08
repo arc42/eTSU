@@ -288,8 +288,9 @@ CALLOUT_RE = re.compile(r"^>\s*\[!(\w+)\]\s*(.*)$", re.MULTILINE)
 # follows another prose line is a hard wrap in the source file and is joined.
 _BLOCK_START_RE = re.compile(r"^(\s*([-*+]|\d+[.)])\s|\s*#|\s*>|\s*\||\s*```|\s{4,}\S|\t|\s*<)")
 _LIST_START_RE = re.compile(r"^\s*([-*+]|\d+[.)])\s")
-# A GFM table row/separator, with or without leading "|" (e.g. "Header1 | Header2").
-_TABLE_LINE_RE = re.compile(r"^\s*\|.*|.*\s\|\s.*")
+# A GFM table separator row: "---|---", "|---|:---:|", "| --- | --- |". Must
+# contain at least one "|" — a bare "---" is a thematic break, not a table.
+_TABLE_SEP_RE = re.compile(r"^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)*\|?\s*$")
 
 
 def _unwrap_prose(body: str) -> str:
@@ -301,11 +302,30 @@ def _unwrap_prose(body: str) -> str:
     passed through untouched. A wrapped *list item* (a plain continuation
     line right after a `- `/`1. ` line) is tracked via `in_list` so it stays
     a lazy continuation of that item — dedented, but without inserting the
-    blank line that would turn a tight list into a loose one."""
+    blank line that would turn a tight list into a loose one.
+
+    Tables are recognised by their separator row (`---|---`, `|:---:|…|`),
+    not by the mere presence of a "|" — ordinary prose containing a spaced
+    pipe (e.g. a wikilink alias `[[FEAT-001|Feature | With Pipe]]`) must
+    still be joined. A separator row pulls in the header line right above it
+    and every following non-blank row containing "|" as table lines."""
+    lines = body.split("\n")
+
+    table_lines: set[int] = set()
+    for i, line in enumerate(lines):
+        if "|" in line and _TABLE_SEP_RE.match(line):
+            table_lines.add(i)
+            if i > 0 and "|" in lines[i - 1]:
+                table_lines.add(i - 1)
+            j = i + 1
+            while j < len(lines) and lines[j].strip() and "|" in lines[j]:
+                table_lines.add(j)
+                j += 1
+
     out: list[str] = []
     in_fence = False
     in_list = False
-    for line in body.split("\n"):
+    for idx, line in enumerate(lines):
         stripped = line.strip()
         if stripped.startswith("```"):
             in_fence = not in_fence
@@ -322,7 +342,7 @@ def _unwrap_prose(body: str) -> str:
 
         is_list_start = bool(_LIST_START_RE.match(line))
         is_block_start = (is_list_start or _BLOCK_START_RE.match(line)
-                           or _TABLE_LINE_RE.match(line))
+                           or idx in table_lines)
 
         if in_list and not is_block_start:
             # lazy continuation of the current list item — dedent it, stay in the list
@@ -330,7 +350,8 @@ def _unwrap_prose(body: str) -> str:
             continue
 
         prev = out[-1] if out else ""
-        prev_is_prose = bool(prev.strip()) and not _BLOCK_START_RE.match(prev) and not in_list
+        prev_is_prose = (bool(prev.strip()) and not _BLOCK_START_RE.match(prev)
+                          and (idx - 1) not in table_lines and not in_list)
 
         if is_block_start:
             if prev_is_prose and is_list_start:
