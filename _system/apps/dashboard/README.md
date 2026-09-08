@@ -28,7 +28,8 @@ in `TZ` if set, else the host's local zone).
 The dashboard shuts itself down a few seconds after the last browser tab is
 closed (ADR-0022), so it never lingers as an orphan process or container. The
 footer shows a live client count and a "Who's here?" page (a fun
-nickname per tab, no real names). Whoever connects first is "Yoda" — the only
+nickname per tab, no real names). Whoever connects first is "Yoda" — listed
+and counted like everyone else, but marked as facilitator and the only
 one who sees the "Disconnect all" button, which ends the session for
 everyone; if their tab disappears, the role passes to whoever's left with the
 next-earliest connection.

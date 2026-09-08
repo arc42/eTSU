@@ -70,7 +70,7 @@ def test_presence_count_reflects_distinct_clients():
     _ping(client, "alice")  # a second tab load from the same tab: no double count
     resp = client.get("/presence/count")
     assert resp.status_code == 200
-    assert resp.get_json()["count"] == 1, resp.get_json()  # alice is Yoda (first); bob is the 1 client
+    assert resp.get_json()["count"] == 2, resp.get_json()  # alice (Yoda) and bob
 
 
 def test_presence_count_excludes_clients_outside_the_active_window():
@@ -140,44 +140,48 @@ def test_facilitator_role_transfers_when_yoda_disconnects():
     assert resp["is_facilitator"] is True
 
 
-def test_presence_count_excludes_the_current_facilitator():
-    # Regression: the facilitator's own already-open tab pings too (it's the
-    # same base.html script). If it counted, two real clients would
-    # show as "3 connected" — confusing, and exactly what was reported.
+def test_presence_count_includes_the_current_facilitator():
+    # Yoda's own tab is a client like any other: a facilitator alone in the
+    # room must see "1 client", not "0 clients" next to "Welcome, Yoda"
+    # (reported 2026-09-08; reverses the earlier exclusion in ADR-0022).
     _reset_presence()
     client = app.app.test_client()
     _ping(client, "yoda")             # connects first -> becomes facilitator
+    assert client.get("/presence/count").get_json()["count"] == 1
     _ping(client, "alice")
     _ping(client, "bob")
-    assert client.get("/presence/count").get_json()["count"] == 2
+    assert client.get("/presence/count").get_json()["count"] == 3
 
 
 def test_presence_list_reports_nickname_browser_and_duration():
     _reset_presence()
     client = app.app.test_client()
-    _ping(client, "yoda")  # connects first -> facilitator, excluded from the list
+    _ping(client, "yoda")  # connects first -> facilitator, listed as "Yoda"
     _ping(client, "erin",
           headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                                   "AppleWebKit/537.36 (KHTML, like Gecko) "
                                   "Chrome/120.0 Safari/537.36"})
     resp = client.get("/presence/list").get_json()
-    assert len(resp["clients"]) == 1, resp
-    p = resp["clients"][0]
+    assert len(resp["clients"]) == 2, resp
+    p = next(c for c in resp["clients"] if not c["is_facilitator"])
     assert p["browser"] == "Chrome" and p["os"] == "macOS", p
     assert isinstance(p["connected_seconds"], int)
-    assert p["nickname"]  # non-empty, and stable for the same client_id
+    assert p["nickname"] and p["nickname"] != "Yoda"  # non-empty, stable for the same client_id
 
 
 def test_nickname_is_stable_for_the_same_client_id():
     assert app._nickname("same-id") == app._nickname("same-id")
 
 
-def test_presence_list_excludes_the_facilitator():
+def test_presence_list_shows_the_facilitator_as_yoda():
     _reset_presence()
     client = app.app.test_client()
     _ping(client, "yoda")   # connects first -> the only client -> facilitator
-    resp = client.get("/presence/list").get_json()
-    assert resp["clients"] == []
+    _ping(client, "erin")
+    rows = client.get("/presence/list").get_json()["clients"]
+    yodas = [r for r in rows if r["is_facilitator"]]
+    assert len(yodas) == 1 and yodas[0]["nickname"] == "Yoda", rows
+    assert rows[0] is not None and rows[0]["nickname"] == "Yoda", "longest-connected first"
 
 
 def test_disconnect_all_rejects_a_non_facilitator():
@@ -213,10 +217,10 @@ if __name__ == "__main__":
     test_the_facilitator_is_literally_named_yoda_not_a_random_nickname()
     test_a_stale_earliest_client_does_not_block_the_facilitator_role()
     test_facilitator_role_transfers_when_yoda_disconnects()
-    test_presence_count_excludes_the_current_facilitator()
+    test_presence_count_includes_the_current_facilitator()
     test_presence_list_reports_nickname_browser_and_duration()
     test_nickname_is_stable_for_the_same_client_id()
-    test_presence_list_excludes_the_facilitator()
+    test_presence_list_shows_the_facilitator_as_yoda()
     test_disconnect_all_rejects_a_non_facilitator()
     test_disconnect_all_accepts_the_facilitator()
     print("all presence/disconnect-all tests passed")

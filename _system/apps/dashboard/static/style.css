@@ -617,6 +617,9 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
   padding: .9rem 1.1rem;
 }
 .who-name { font-weight: 700; font-size: 1.05rem; margin-bottom: .3rem; }
+.who-card-facilitator { border-color: var(--accent); }
+.who-role { font: 600 .7rem/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--accent); vertical-align: middle; margin-left: .3rem; }
 .who-meta { color: var(--ink-soft); font-size: .85rem; }
 .who-duration { color: var(--ink-dim); font-size: .8rem; margin-top: .5rem; }
 

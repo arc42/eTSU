@@ -169,7 +169,10 @@ iterations:
   with the next-earliest connection — no promotion logic needed, it falls
   out of the same data `/who` already tracks. `dashboard.sh` no longer
   touches tokens or `?fac=` links at all.
-- `/presence/count` and `/presence/list` both exclude the current Yoda:
-  otherwise a two-participant workshop showed "3 connected" (the
-  facilitator's own tab pings the same as anyone else's) — the badge counts
-  participants, not viewers.
+- `/presence/count` and `/presence/list` originally excluded the current
+  Yoda, so that a two-client workshop would not read "3 connected".
+  **Reversed 2026-09-08:** a facilitator alone in the room saw "Welcome,
+  Yoda" next to "0 clients", which reads as a bug. Both endpoints now
+  include Yoda; the list names that row "Yoda" and flags it
+  `is_facilitator: true`, and `/who` marks it. The badge counts open tabs,
+  the facilitator's included.

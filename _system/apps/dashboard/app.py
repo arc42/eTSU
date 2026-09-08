@@ -2418,17 +2418,16 @@ def heartbeat_leaving():
 
 @app.route("/presence/count")
 def presence_count():
-    """How many distinct *client* tabs have pinged within
-    `_PRESENCE_WINDOW` — the number shown in the footer. Excludes Yoda, the
-    current facilitator (`_facilitator_client_id`): otherwise the badge reads
-    "3 connected" for two clients because the facilitator's own
-    already-open tab pings too, which looks like a bug. Polled every few
-    seconds; cheap (an in-memory dict scan, no I/O, no thread held)."""
+    """How many distinct tabs have pinged within `_PRESENCE_WINDOW` — the
+    number shown in the footer. Yoda's own tab counts like any other: the
+    facilitator alone in the room reads "1 client", not "0 clients" beside
+    "Welcome, Yoda" (an earlier version excluded Yoda; see ADR-0022's
+    2026-09-08 note). Polled every few seconds; cheap (an in-memory dict
+    scan, no I/O, no thread held)."""
     now = time.monotonic()
     with _lifecycle_lock:
-        yoda = _facilitator_client_id()
-        count = sum(1 for cid, last in _clients.items()
-                    if now - last <= _PRESENCE_WINDOW and cid != yoda)
+        count = sum(1 for last in _clients.values()
+                    if now - last <= _PRESENCE_WINDOW)
     return {"count": count}
 
 
@@ -2486,19 +2485,22 @@ def _parse_user_agent(ua: str) -> tuple[str, str]:
 def presence_list():
     """Per-client detail for the "who's here" page: a fun deterministic
     nickname, a coarse browser/OS, and how long they've been connected.
-    Excludes Yoda, same as /presence/count. Shown to every viewer, not
-    facilitator-gated — it's meant as a bit of a moment for everyone else,
-    not an admin tool."""
+    Includes Yoda, same as /presence/count, listed under that name with
+    `is_facilitator: true` so the page can mark the role. Shown to every
+    viewer, not facilitator-gated — it's meant as a bit of a moment for
+    everyone else, not an admin tool."""
     now = time.monotonic()
     with _lifecycle_lock:
         yoda = _facilitator_client_id()
         rows = []
         for cid, last in _clients.items():
-            if now - last > _PRESENCE_WINDOW or cid == yoda:
+            if now - last > _PRESENCE_WINDOW:
                 continue
             browser, os_name = _parse_user_agent(_user_agents.get(cid, ""))
+            is_yoda = cid == yoda
             rows.append({
-                "nickname": _nickname(cid),
+                "nickname": "Yoda" if is_yoda else _nickname(cid),
+                "is_facilitator": is_yoda,
                 "browser": browser,
                 "os": os_name,
                 "connected_seconds": round(now - _first_seen.get(cid, last)),

@@ -3,10 +3,10 @@
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Who's here</nav>{% endblock %}
 {% block content %}
 <h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 clients</span></h1>
-<p class="lead">Everyone with this dashboard open right now — a fun nickname, not a real name. Updates live; close the tab and you drop off the list.</p>
+<p class="lead">Everyone with this dashboard open right now, you included — a fun nickname, not a real name; the facilitator is always Yoda. Updates live; close the tab and you drop off the list.</p>
 <p><a class="whos-here" href="/join">Show the join code →</a></p>
 
-<p class="empty-state" id="who-empty" hidden>No one's connected yet — open this dashboard's link on another device and you'll show up here.</p>
+<p class="empty-state" id="who-empty" hidden>Nobody yet — the list fills in with the first heartbeat, a few seconds after a page opens.</p>
 <div class="who-grid" id="who-grid"></div>
 {% endblock %}
 
@@ -31,10 +31,11 @@
     grid.innerHTML = "";
     clients.forEach(function (p) {
       var card = document.createElement("div");
-      card.className = "who-card";
+      card.className = "who-card" + (p.is_facilitator ? " who-card-facilitator" : "");
       var meta = p.browser + (p.os ? " · " + p.os : "");
       card.innerHTML =
-        '<div class="who-name">' + p.nickname + '</div>' +
+        '<div class="who-name">' + p.nickname +
+          (p.is_facilitator ? ' <span class="who-role">facilitator</span>' : '') + '</div>' +
         '<div class="who-meta">' + meta + '</div>' +
         '<div class="who-duration">connected ' + fmtDuration(p.connected_seconds) + '</div>';
       grid.appendChild(card);
