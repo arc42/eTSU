@@ -2,6 +2,7 @@
 {% block title %}Product Backlog{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> Product Backlog</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
+{% from "_macros.html" import plural %}
 {% block content %}
 
 <h1 class="page-h1">Product Backlog</h1>
@@ -24,7 +25,7 @@
       {% if e.priority %}<span class="badge badge-prio">{{ e.priority }}</span>{% endif %}
       {% if e.release %}<span class="badge">{{ e.release }}</span>{% endif %}
       {% if e.status %}<span class="badge">{{ e.status }}</span>{% endif %}
-      <span class="backlog-counter" title="S = Stories, F = Features (below)">{{ e.n_stories }}S · {{ e.n_features }}F</span>
+      <span class="backlog-counter">{{ plural(e.n_stories, 'story', 'stories') }} · {{ plural(e.n_features, 'feature') }}</span>
     </header>
     {% if e.n_features or e.n_stories %}
     <p class="backlog-card-sub">{{ e.n_features }} Features · {{ e.n_stories }} Stories — View breakdown →</p>

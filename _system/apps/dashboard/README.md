@@ -53,6 +53,19 @@ and a search box. Pressing <kbd>/</kbd> anywhere focuses that box; submitting
 it lands on `/search`, the full-text view. Breadcrumbs sit at the top of the
 page body, under the bar.
 
+## Visual identity
+
+Flat panels with hairline borders and one border radius — no gradients, no
+glow, no drop-shadow hover lift, no emoji anywhere (ADR-0025). Text, headings
+and numbers use the vendored variable font **Bricolage Grotesque**; IDs, code
+and eyebrows use vendored **JetBrains Mono** — both offline (OFL-licensed
+woff2 under `static/vendor/fonts/`, see that folder's README), replacing
+system fonts. A maturity bar (draft → review → accepted → deprecated) sits
+under every tile count and list-page heading; ADR and issue statuses map onto
+the same four steps. Counts are always spelled out in words ("3 stories · 1
+feature", "4 links"), never bare letters or glyphs, via the single `plural()`
+macro in `templates/_macros.html`.
+
 ## Tiles
 
 The home page (`/`) opens with the vault name, its tagline and a status strip
@@ -129,13 +142,15 @@ status-strip source count already reads.
 ```
 _system/apps/dashboard/
   app.py             Flask app + wiki/ADR parser + all diagram projections
-  templates/         base, index, _empty (shared empty state), _mermaid (loader),
-                     glossary, graph, stakeholders, issues, adrs, search, detail,
-                     goals, backlog, fr, data_model, req42, req42_block
+  templates/         base, index, _empty (shared empty state), _macros (plural()),
+                     _maturity (maturity bar/legend), _mermaid (loader),
+                     _provenance (sources chips), glossary, graph, stakeholders,
+                     issues, adrs, search, detail, goals, backlog, fr, data_model,
+                     req42, req42_block, join, who
   static/style.css   dashboard styling
   static/glossary-graph.js   the cytoscape term network
   static/*.png       eTSU logo / mark / favicon, req42 logo
-  static/vendor/     vendored mermaid + cytoscape (offline diagrams)
+  static/vendor/     vendored mermaid + cytoscape + fonts (offline, no CDN)
   tests/             plain-assert test scripts (no pytest) + a fixture vault
   Dockerfile         python:3.12-slim + gunicorn
   compose.yaml       service def, mounts ${WIKI_DIR}:/wiki:ro, ${ADR_DIR}:/adr:ro
@@ -153,8 +168,9 @@ for t in tests/test_*.py; do .venv/bin/python "$t"; done
 
 They cover the empty vault (every route must render on day one), a populated
 fixture vault, the backlog and goal projections, the glossary graphs,
-`wiki_config()`, the ADR metadata in `_system/adr/`, and the contract between
-`_templates/` and `app.py`'s parser.
+`wiki_config()`, the ADR metadata in `_system/adr/`, the contract between
+`_templates/` and `app.py`'s parser, and the copy contract (client wording
+with correct plurals, no glyph abbreviations, ADR-0025 is indexed).
 
 ## Obsidian
 

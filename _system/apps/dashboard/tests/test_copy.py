@@ -104,6 +104,22 @@ def test_search_counts_are_live():
     assert "function updateCounts" in body
 
 
+def test_no_bare_glyph_abbreviations():
+    tpl = HERE / "templates"
+    for p in tpl.glob("*.html"):
+        txt = p.read_text(encoding="utf-8")
+        assert "⤳" not in txt, p.name
+        assert not re.search(r"\}\}S\b|\}\}F\b|n_stories \}\}S", txt), f"S/F abbreviation in {p.name}"
+
+
+def test_adr_0025_is_indexed():
+    # HERE is the dashboard dir itself (tests/test_copy.py's parent.parent),
+    # so parents[1] is _system/ (parents[0] is apps/).
+    adr = HERE.parents[1] / "adr" / "0025-dashboard-req42-home-and-visual-identity.md"
+    assert adr.is_file()
+    assert "0025-dashboard-req42-home-and-visual-identity" in (HERE.parents[1] / "index.md").read_text(encoding="utf-8")
+
+
 if __name__ == "__main__":
     test_no_participant_wording_anywhere()
     test_presence_list_uses_clients_key()
@@ -111,4 +127,6 @@ if __name__ == "__main__":
     test_adr_empty_state_does_not_suggest_ingest()
     test_vision_without_objectives_has_a_hint()
     test_search_counts_are_live()
+    test_no_bare_glyph_abbreviations()
+    test_adr_0025_is_indexed()
     print("OK: copy contract")

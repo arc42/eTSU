@@ -1,0 +1,1 @@
+{% macro plural(n, word, words=None) %}{{ n }} {{ word if n == 1 else (words or word ~ 's') }}{% endmacro %}

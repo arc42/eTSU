@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_provenance.html" import provenance_chips %}
+{% from "_macros.html" import plural %}
 {% block title %}{{ fr.id }} · {{ fr.title }}{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42/backlog">Product Backlog</a>{% for a in ancestors %} <span>/</span> <a href="/functional-requirements/{{ a.stem }}">{{ a.id }}</a>{% endfor %} <span>/</span> {{ fr.id }}</nav>{% endblock %}
 {% block content %}
@@ -11,7 +12,7 @@
   {% if fr.priority %}<span class="badge badge-prio">{{ fr.priority }}</span>{% endif %}
   {% if fr.release %}<span class="badge">{{ fr.release }}</span>{% endif %}
   {% if fr.stereotype in ('epic', 'feature') and (fr.n_stories or fr.n_features) %}
-  <span class="backlog-counter" title="S = Stories, F = Features (below)">{{ fr.n_stories }}S{% if fr.stereotype == 'epic' %} · {{ fr.n_features }}F{% endif %}</span>
+  <span class="backlog-counter">{{ plural(fr.n_stories, 'story', 'stories') }}{% if fr.stereotype == 'epic' %} · {{ plural(fr.n_features, 'feature') }}{% endif %}</span>
   {% endif %}
 </div>
 {% if sources is not none %}{{ provenance_chips(sources) }}{% endif %}

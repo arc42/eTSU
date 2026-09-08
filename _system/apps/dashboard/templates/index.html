@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% from "_empty.html" import empty_state, empty_bootstrap, empty_adrs %}
 {% from "_maturity.html" import maturity_bar, maturity_legend %}
+{% from "_macros.html" import plural %}
 {% block content %}
 <header class="hero">
   <div class="hero-row">
@@ -45,7 +46,7 @@
       {% for o in t.objective_rows %}
       <li>
         <span class="ml-title"><code class="ml-id">{{ o.id }}</code> {{ o.title }}</span>
-        <span class="ml-count" title="covering epics">{{ o.epics }} epic{{ '' if o.epics == 1 else 's' }}</span>
+        <span class="ml-count" title="covering epics">{{ plural(o.epics, 'epic') }}</span>
       </li>
       {% endfor %}
     </ul>
@@ -80,7 +81,7 @@
       {% for e in t.epic_rows %}
       <li>
         <span class="ml-title"><code class="ml-id">{{ e.id }}</code> {{ e.title }}</span>
-        <span class="ml-count{% if e.n_features == 0 and e.n_stories == 0 %} ml-out{% endif %}">{{ e.n_stories }} {{ 'story' if e.n_stories == 1 else 'stories' }} · {{ e.n_features }} feature{{ '' if e.n_features == 1 else 's' }}</span>
+        <span class="ml-count{% if e.n_features == 0 and e.n_stories == 0 %} ml-out{% endif %}">{{ plural(e.n_stories, 'story', 'stories') }} · {{ plural(e.n_features, 'feature') }}</span>
       </li>
       {% endfor %}
     </ul>
@@ -90,8 +91,8 @@
       <li>
         <span class="ml-title">{% if r.id %}<code class="ml-id">{{ r.id }}</code> {% endif %}{{ r.title }}</span>
         {% if r.severity is defined %}<span class="ml-count">{{ r.severity }}</span>
-        {% elif r.pages is defined %}<span class="ml-count" title="pages of this type">{{ r.pages }} page{{ '' if r.pages == 1 else 's' }}</span>
-        {% elif r.relations is defined %}<span class="ml-count" title="linked wiki pages">{{ r.relations }} link{{ '' if r.relations == 1 else 's' }}</span>{% endif %}
+        {% elif r.pages is defined %}<span class="ml-count" title="pages of this type">{{ plural(r.pages, 'page') }}</span>
+        {% elif r.relations is defined %}<span class="ml-count" title="linked wiki pages">{{ plural(r.relations, 'link') }}</span>{% endif %}
       </li>
       {% endfor %}
     </ul>
