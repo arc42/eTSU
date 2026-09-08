@@ -70,7 +70,7 @@ def test_presence_count_reflects_distinct_clients():
     _ping(client, "alice")  # a second tab load from the same tab: no double count
     resp = client.get("/presence/count")
     assert resp.status_code == 200
-    assert resp.get_json()["count"] == 1, resp.get_json()  # alice is Yoda (first); bob is the 1 participant
+    assert resp.get_json()["count"] == 1, resp.get_json()  # alice is Yoda (first); bob is the 1 client
 
 
 def test_presence_count_excludes_clients_outside_the_active_window():
@@ -142,7 +142,7 @@ def test_facilitator_role_transfers_when_yoda_disconnects():
 
 def test_presence_count_excludes_the_current_facilitator():
     # Regression: the facilitator's own already-open tab pings too (it's the
-    # same base.html script). If it counted, two real participants would
+    # same base.html script). If it counted, two real clients would
     # show as "3 connected" — confusing, and exactly what was reported.
     _reset_presence()
     client = app.app.test_client()

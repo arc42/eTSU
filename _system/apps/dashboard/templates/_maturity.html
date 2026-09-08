@@ -1,6 +1,6 @@
-{% macro maturity_bar(m, compact=False) %}
+{% macro maturity_bar(m) %}
 {% if m and m.total %}
-<div class="maturity{% if compact %} maturity-compact{% endif %}" role="img" aria-label="Maturity: {{ m.label }}" title="{{ m.label }}">
+<div class="maturity" role="img" aria-label="Maturity: {{ m.label }}" title="{{ m.label }}">
   {% for s in m.segments %}<span class="maturity-seg maturity-{{ s.status }}" style="flex-basis: {{ s.pct }}%"></span>{% endfor %}
 </div>
 {% endif %}

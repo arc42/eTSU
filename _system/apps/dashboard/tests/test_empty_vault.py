@@ -76,7 +76,6 @@ def test_ping_returns_nickname_and_facilitator_flag():
 
 def test_data_model_diagrams_are_none_when_no_entities():
     assert app.build_data_model_full_diagram() is None
-    assert app.build_data_model_kind_diagram() is None
 
 
 # routes whose empty state must tell the reader what to do next

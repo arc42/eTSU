@@ -133,6 +133,10 @@ h2 { letter-spacing: -.01em; }
   color: var(--ink); text-decoration: none; white-space: nowrap; }
 .brand-mark { width: 1.35rem; height: 1.35rem; border-radius: 4px; }
 .mainnav { display: flex; gap: .15rem; overflow-x: auto; scrollbar-width: none; }
+/* `scrollbar-width: none` is Firefox-only; without this the global
+   ::-webkit-scrollbar rule draws an 11px channel under the nav in Chrome
+   the moment the links overflow. */
+.mainnav::-webkit-scrollbar { display: none; }
 .mainnav a { padding: .35rem .6rem; border-radius: 6px; color: var(--ink-soft);
   text-decoration: none; font-size: var(--step--1); white-space: nowrap; }
 .mainnav a:hover { color: var(--ink); background: var(--chip-bg); }
@@ -158,8 +162,6 @@ h2 { letter-spacing: -.01em; }
 .my-nickname strong { color: var(--ink); }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
-.hero-banner { display: block; width: 100%; height: auto; max-height: 190px; object-fit: cover;
-  border-radius: var(--radius); border: 1px solid var(--line); margin-bottom: 1.5rem; }
 .page-h1 { font-size: var(--step-3); font-weight: 700; margin: 0 0 .25rem; letter-spacing: -.025em; }
 .page-h1 + .maturity { max-width: 22rem; margin-top: .2rem; }
 .lead { color: var(--ink-soft); margin: 0 0 2rem; }
@@ -247,8 +249,6 @@ h2 { letter-spacing: -.01em; }
 .req42-all { display: inline-block; margin-top: .35rem; color: var(--accent);
   font-size: .88rem; font-weight: 600; text-decoration: none; }
 .req42-all:hover { text-decoration: underline; }
-.req42-empty { color: var(--ink-dim); font-style: italic; font-size: .9rem; margin: .1rem 0 0; }
-
 /* block 01 (Business Goals): vision tagline + embedded goal-tree diagram.
    Strips the goals-diagram card chrome so the figure sits flush inside the
    already-card-styled req42-block. */
@@ -469,12 +469,6 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
   background: var(--card-2); color: var(--ink-soft); }
 .goal-card-head .stereo-vision { color: var(--tint-ink); border-color: rgba(62,166,255,.45);
   background: rgba(62,166,255,.1); }
-.goal-card-head .maturity { margin-left: auto; font-size: .72rem; text-transform: uppercase;
-  letter-spacing: .05em; padding: .15rem .55rem; border-radius: 999px;
-  border: 1px solid var(--line); background: var(--card-2); color: var(--ink-soft); }
-.goal-card-head .maturity-smart { color: var(--accent-2); border-color: rgba(70,211,176,.4);
-  background: rgba(70,211,176,.1); }
-
 .pam-fields { display: grid; grid-template-columns: max-content 1fr; gap: .3rem .9rem;
   margin: .1rem 0 .8rem; font-size: .92rem; }
 .pam-fields dt { color: var(--ink-dim); font-weight: 600; font-size: .78rem;
@@ -668,7 +662,7 @@ html.etsu-disconnected {
 .dm-summary-table .muted { color: var(--ink-dim); }
 .dm-summary-table a.dm-jump { color: inherit; text-decoration: none; }
 .dm-summary-table a.dm-jump:hover code,
-.dm-summary-table a.dm-jump:hover .term { color: var(--accent, #7fc0ff); }
+.dm-summary-table a.dm-jump:hover .term { color: var(--accent); }
 
 /* sortable header styling: ▲ on ascending, ▼ on descending, ↕ on idle */
 .dm-summary-table th.sortable { cursor: pointer; user-select: none;
@@ -678,7 +672,7 @@ html.etsu-disconnected {
   font-size: .8em; font-weight: normal; }
 .dm-summary-table th.sortable.sort-asc::after { content: "▲"; color: var(--ink); }
 .dm-summary-table th.sortable.sort-desc::after { content: "▼"; color: var(--ink); }
-.dm-summary-table th.sortable:hover { color: var(--accent, #7fc0ff); }
+.dm-summary-table th.sortable:hover { color: var(--accent); }
 
 .dm-overview { margin: 2.4rem 0 1.4rem; }
 .dm-overview > h2 { margin: 0 0 .35rem; }
@@ -691,7 +685,7 @@ html.etsu-disconnected {
 .dm-toc a { color: var(--ink); text-decoration: none; padding: .25rem .55rem;
   border-radius: 6px; font-size: .85rem; border: 1px solid var(--line);
   background: var(--card-2); transition: background .12s ease, border-color .12s ease; }
-.dm-toc a:hover { background: rgba(62,166,255,.12); border-color: var(--accent, #7fc0ff);
+.dm-toc a:hover { background: rgba(62,166,255,.12); border-color: var(--accent);
   color: var(--ink); }
 .dm-toc code { background: none; padding: 0; margin-right: .3rem;
   color: var(--ink-soft); font-size: .8rem; }
@@ -915,9 +909,9 @@ html.etsu-disconnected {
 .join-url code { font-size: var(--step-2); }
 @media (max-width: 780px) { .join { grid-template-columns: 1fr; } .hero-join { margin-left: 0; } }
 
-/* Theme switch. It lives in the footer because the topbar carries breadcrumbs
-   only and is absent entirely on the home page — there is no header nav to
-   hang it off. base.html stamps the choice on <html> before first paint. */
+/* Theme switch. It lives in the footer, not the topbar: the topbar is the
+   req42 reading order and the search box, and a colour preference is not
+   navigation. base.html stamps the choice on <html> before first paint. */
 .theme-toggle {
   display: inline-flex; align-items: center; gap: .45rem;
   margin: 0; padding: .3rem .8rem;
@@ -933,7 +927,7 @@ html.etsu-disconnected {
 /* empty states — the first thing a workshop audience sees */
 .empty-state {
   margin: .8rem 0; padding: .9rem 1.1rem; border-radius: 8px;
-  border: 1px dashed var(--rule, #9aa3b2); opacity: .85; line-height: 1.5;
+  border: 1px dashed var(--line); opacity: .85; line-height: 1.5;
 }
 .empty-state code { font-size: .95em; }
 .empty-state-tight { margin: .2rem 0 .4rem; }

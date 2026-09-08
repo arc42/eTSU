@@ -57,8 +57,14 @@ def _client():
 
 
 def test_no_participant_wording_anywhere():
+    """The word is banned in the UI *and* in the code that describes it — a
+    comment that still says "participant" is how the wording creeps back.
+    This file is the one exception: the ban itself has to name the word."""
     bad = re.compile(r"participant", re.IGNORECASE)
-    for p in list((HERE / "templates").glob("*.html")) + [HERE / "app.py", HERE / "README.md"]:
+    scanned = (list((HERE / "templates").glob("*.html"))
+               + [p for p in (HERE / "tests").glob("test_*.py") if p.name != "test_copy.py"]
+               + [HERE / "app.py", HERE / "README.md", HERE / "static" / "style.css"])
+    for p in scanned:
         assert not bad.search(p.read_text(encoding="utf-8")), f"'participant' still in {p.name}"
 
 

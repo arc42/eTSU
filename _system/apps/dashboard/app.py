@@ -1806,12 +1806,6 @@ def build_data_model_full_diagram() -> str | None:
     return None  # placeholder — a real projection is future work (ADR-0018 style)
 
 
-def build_data_model_kind_diagram() -> str | None:
-    """Compact diagram for the home tile. See build_data_model_full_diagram().
-    `index.html` guards the data-model tile on its entity count, not on this."""
-    return None  # placeholder — a real projection is future work (ADR-0018 style)
-
-
 # Section/callout extractors for the /data-model catalog: each DM page is
 # rendered as bold-led sections (**Purpose.**, **Attributes.**, **Relationships.**,
 # **Invariants / rules.** …) plus 0..n `> [!note] X` callouts (Open points,
