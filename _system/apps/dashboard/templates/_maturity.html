@@ -1,0 +1,15 @@
+{% macro maturity_bar(m, compact=False) %}
+{% if m and m.total %}
+<div class="maturity{% if compact %} maturity-compact{% endif %}" role="img" aria-label="Maturity: {{ m.label }}" title="{{ m.label }}">
+  {% for s in m.segments %}<span class="maturity-seg maturity-{{ s.status }}" style="flex-basis: {{ s.pct }}%"></span>{% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+{% macro maturity_legend() %}
+<p class="maturity-legend" aria-hidden="true">
+  <span class="maturity-key maturity-accepted"></span>accepted
+  <span class="maturity-key maturity-review"></span>in review
+  <span class="maturity-key maturity-draft"></span>draft
+  <span class="maturity-key maturity-deprecated"></span>deprecated
+</p>
+{% endmacro %}

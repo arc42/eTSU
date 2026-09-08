@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ block.title }} · req42{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42">req42</a> <span>/</span> {{ block.num }} {{ block.title }}</nav>{% endblock %}
+{% from "_maturity.html" import maturity_bar %}
 {% block content %}
 <h1 class="page-h1"><span class="req42-num">{{ block.num }}</span> {{ block.title }} <span class="count-pill">{{ total }}</span></h1>
+{{ maturity_bar(maturity) }}
 <p class="lead">{{ block.title }} — req42 block {{ block.num }}.{% if block.note %} {{ block.note }}{% endif %}</p>
 
 {% if context_diagram %}

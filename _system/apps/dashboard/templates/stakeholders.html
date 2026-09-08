@@ -3,8 +3,10 @@
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Stakeholders</nav>{% endblock %}
 {% set lvl = {'high': 'high', 'medium': 'medium', 'low': 'low'} %}
 {% from "_empty.html" import empty_state %}
+{% from "_maturity.html" import maturity_bar %}
 {% block content %}
 <h1 class="page-h1">Stakeholders <span class="count-pill">{{ total }} personas</span></h1>
+{{ maturity_bar(maturity) }}
 <p class="lead">Simplified personas: goals, concerns, influence, and interest.</p>
 
 {% if rows %}

@@ -2,8 +2,10 @@
 {% block title %}Glossary{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Glossary</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
+{% from "_maturity.html" import maturity_bar %}
 {% block content %}
 <h1 class="page-h1">Glossary <span class="count-pill">{{ total }} terms</span></h1>
+{{ maturity_bar(maturity) }}
 <p class="lead">Ubiquitous language of {{ system_name }} — one canonical meaning per term.</p>
 
 <div class="filterbar" role="tablist" id="glossary-sort">

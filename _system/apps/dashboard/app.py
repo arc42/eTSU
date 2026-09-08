@@ -470,6 +470,32 @@ def extract_pam_bullet(page: Page, label: str, titles: dict[str, str],
 CLOSED_STATUSES = {"resolved", "wontfix"}
 
 
+# The four-step lifecycle every content type shares (CLAUDE.md: draft → review →
+# accepted → deprecated). ADR and issue statuses are mapped onto it so one thin
+# bar reads the same on every tile.
+MATURITY_ORDER = ["accepted", "review", "draft", "deprecated"]
+_MATURITY_ALIASES = {
+    "proposed": "review", "in-progress": "review",
+    "resolved": "accepted", "ingested": "accepted",
+    "open": "draft",
+    "superseded": "deprecated", "rejected": "deprecated", "wontfix": "deprecated",
+}
+
+
+def maturity(statuses) -> dict:
+    """Bucket status strings into MATURITY_ORDER and return the segments of a
+    stacked bar (percent widths) plus a text label for the tooltip/aria."""
+    counts = {k: 0 for k in MATURITY_ORDER}
+    for s in statuses:
+        s = _MATURITY_ALIASES.get(str(s or "").strip().lower(), str(s or "").strip().lower())
+        counts[s if s in counts else "draft"] += 1
+    total = sum(counts.values())
+    segments = [{"status": k, "n": counts[k], "pct": round(100 * counts[k] / total)}
+                for k in MATURITY_ORDER if counts[k]]
+    label = " · ".join(f'{s["n"]} {s["status"]}' for s in segments) or "nothing yet"
+    return {"total": total, "segments": segments, "label": label}
+
+
 # --- ADRs (Nygard format, no frontmatter) ----------------------------------
 
 ADR_HEADING_RE = re.compile(r"^#\s*(ADR-\d{3,4})\s*:\s*(.+?)\s*$", re.MULTILINE)
@@ -1449,6 +1475,14 @@ def index():
         {"key": "changes", "label": "Latest changes", "eyebrow": "Recently modified", "href": None,
          "folders": [], "active": True, "rows": recent_changes(5)},
     ]
+    for t in tiles:
+        if t["key"] == "changes":
+            continue
+        if t["key"] == "adrs":
+            t["maturity"] = maturity([a["status"] for a in adrs])
+        else:
+            t["maturity"] = maturity(
+                p.status for f in t["folders"] for p in load_folder(f))
     return render_template("index.html", tiles=tiles, status=vault_status())
 
 
@@ -1473,7 +1507,8 @@ def glossary_view():
         })
     # Default order is alphabetical by term; other orders are applied client-side.
     rows.sort(key=lambda r: r["title"].lower())
-    return render_template("glossary.html", rows=rows, total=len(rows))
+    return render_template("glossary.html", rows=rows, total=len(rows),
+                           maturity=maturity(p.status for p in pages))
 
 
 @app.route("/graph/glossary")
@@ -1513,6 +1548,7 @@ def issues_view():
     return render_template(
         "issues.html", items=items, total=len(items),
         open_count=open_count, closed_count=len(items) - open_count,
+        maturity=maturity(p.status for p in pages),
     )
 
 
@@ -1546,7 +1582,8 @@ def stakeholders_view():
             "rel_more": max(0, len(rel) - _REL_MAX),
             "status": p.status,
         })
-    return render_template("stakeholders.html", rows=rows, total=len(rows))
+    return render_template("stakeholders.html", rows=rows, total=len(rows),
+                           maturity=maturity(p.status for p in pages))
 
 
 @app.route("/adrs")
@@ -1566,7 +1603,8 @@ def adrs_view():
             other += 1
     buckets = [{"key": k, "label": labels[k], "count": tally[k]} for k in primary]
     buckets.append({"key": "other", "label": labels["other"], "count": other})
-    return render_template("adrs.html", items=items, total=len(items), buckets=buckets)
+    return render_template("adrs.html", items=items, total=len(items), buckets=buckets,
+                           maturity=maturity(a["status"] for a in items))
 
 
 @app.route("/page/<folder>/<stem>")
@@ -1997,6 +2035,7 @@ def req42_block_view(slug):
     return render_template(
         "req42_block.html", block=block, rows=rows, total=len(rows),
         context_diagram=context_diagram, needs_mermaid=bool(context_diagram),
+        maturity=maturity(r["status"] for r in rows),
     )
 
 

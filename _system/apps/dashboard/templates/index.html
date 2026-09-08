@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_empty.html" import empty_state, empty_bootstrap, empty_adrs %}
+{% from "_maturity.html" import maturity_bar, maturity_legend %}
 {% block content %}
 <header class="hero">
   <div class="hero-row">
@@ -22,6 +23,7 @@
   <span><strong>{{ status.sources }}</strong> source{{ '' if status.sources == 1 else 's' }} ingested</span>
   <span>last change <strong>{{ status.last_change }}</strong></span>
 </p>
+{{ maturity_legend() }}
 
 <section class="tiles">
   {% for t in tiles %}
@@ -31,6 +33,7 @@
       <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     {% if t.key == 'vision' and t.active %}
+    {{ maturity_bar(t.maturity) }}
     {% if t.claim %}<p class="tile-vision-claim">{{ t.claim }}</p>{% endif %}
     {% if t.objective_rows %}
     <ul class="mini-list mini-list-vision">
@@ -48,6 +51,7 @@
     {% elif t.key == 'vision' %}
     {# day one: no vision page yet. Same shape as every other empty tile —
        heading + next step, no "Demo" chip, no placeholder counter. #}
+    {{ maturity_bar(t.maturity) }}
     {{ empty_bootstrap("vision") }}
     {% elif t.key == 'changes' %}
     {% if t.rows %}
@@ -65,6 +69,7 @@
     {% else %}{{ empty_state("pages") }}{% endif %}
     {% else %}
     <div class="tile-count"><span class="num">{{ t.count }}</span><span class="unit">{{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</span></div>
+    {{ maturity_bar(t.maturity) }}
     {% if t.key == 'backlog' and t.epic_rows %}
     <ul class="mini-list">
       {% for e in t.epic_rows %}

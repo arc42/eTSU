@@ -2,8 +2,10 @@
 {% block title %}Issues{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Issues</nav>{% endblock %}
 {% from "_empty.html" import empty_state %}
+{% from "_maturity.html" import maturity_bar %}
 {% block content %}
 <h1 class="page-h1">Issues <span class="count-pill">{{ total }}</span></h1>
+{{ maturity_bar(maturity) }}
 <p class="lead">Open questions, contradictions, and gaps — cutting across every content type.</p>
 
 {% if items %}
