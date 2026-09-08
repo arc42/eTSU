@@ -20,6 +20,8 @@ services:
       - "${WIKI_DIR:-../../../wiki}:/wiki:ro"
       # ADRs live outside the wiki layer, in _system/adr/ — also read-only.
       - "${ADR_DIR:-../../../_system/adr}:/adr:ro"
+      # Provenance records (raw/sources/) — counted on the home status strip.
+      - "${SOURCES_DIR:-../../../raw/sources}:/sources:ro"
       # Project identity (_system/wiki.yaml), read-only like the rest.
       - "${CONFIG_FILE:-../../wiki.yaml}:/config/wiki.yaml:ro"
     # No auto-restart: the dashboard is an on-demand viewer that stops itself

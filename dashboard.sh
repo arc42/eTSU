@@ -24,6 +24,7 @@ LOCAL_URL="http://localhost:8000"
 # Absolute paths to the mounted layers, consumed by compose.yaml.
 export WIKI_DIR="$ROOT/wiki"
 export ADR_DIR="$ROOT/_system/adr"
+export SOURCES_DIR="$ROOT/raw/sources"
 export CONFIG_FILE="$ROOT/_system/wiki.yaml"
 
 # Footer time in the host's zone, not UTC: Docker containers default to UTC.
@@ -93,8 +94,9 @@ case "$cmd" in
       python3 -m venv .venv
       .venv/bin/pip install -q --disable-pip-version-check -r requirements.txt
     fi
-    export WIKI_DIR ADR_DIR CONFIG_FILE
+    export WIKI_DIR ADR_DIR SOURCES_DIR CONFIG_FILE
     export WIKI_CONFIG="$CONFIG_FILE"
+    export RAW_SOURCES_DIR="$SOURCES_DIR"
     # Start the server first, then open the browser once it actually answers.
     .venv/bin/python app.py &
     server_pid=$!

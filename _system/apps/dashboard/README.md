@@ -33,21 +33,34 @@ one who sees the "Disconnect all" button, which ends the session for
 everyone; if their tab disappears, the role passes to whoever's left with the
 next-earliest connection.
 
+## Navigation
+
+Every page carries the same topbar: the vault name (back to the home page), a
+nav bar in req42 reading order (Goals · Stakeholders · Scope · Backlog ·
+Quality · Glossary · Issues · ADRs · req42) with the current section marked,
+and a search box. Pressing <kbd>/</kbd> anywhere focuses that box; submitting
+it lands on `/search`, the full-text view. Breadcrumbs sit at the top of the
+page body, under the bar.
+
 ## Tiles
 
-The home page (`/`) is nine tiles, in render order:
+The home page (`/`) opens with the vault name, its tagline and a status strip
+(pages · open issues · sources ingested · last change), then eleven tiles in
+req42 reading order:
 
-| Tile | Content |
-|------|---------|
-| **Vision** | the claim line from the vision goal page plus every objective with its epic count; links to `/goals`. Before a vision exists it shows an empty state pointing at the bootstrap workflow. |
-| **req42** | entries per req42 building block (9 of 12 in scope), each row linking into `/req42` |
-| **Search** | in-tile incremental search over every page title/ID; full results at `/search` |
-| **Glossary** | term count + a scrollable per-term relation list; rendered glossary table at `/glossary`, term network at `/graph/glossary` |
-| **Product Backlog** | epic/feature/story counts + per-epic breakdown; story map at `/req42/backlog` |
-| **Stakeholders** | persona count + scrollable list; profile, influence and interest at `/stakeholders` |
-| **ADRs** | decision count + scrollable list; `/adrs` is filterable by status and expands the full text of a row |
-| **Issues** | issue count + open count; filterable list (All / Open / Closed) at `/issues` |
-| **Data model** | entity count and the per-kind sketch; full catalog at `/data-model` |
+| Tile | req42 block | Content |
+|------|-------------|---------|
+| **Vision** | 01 Business Goals | the claim line from the vision goal page plus every objective with its covering-epic count; links to `/goals`. Before a vision exists it shows an empty state pointing at the bootstrap workflow. Spans two columns. |
+| **Stakeholders** | 02 Stakeholders | persona count + scrollable list; profile, influence and interest at `/stakeholders` |
+| **Scope** | 03 Scope | external-interface count, whether a context page exists, and the interfaces by relation count; system boundary and context diagram at `/req42/scope` |
+| **Product Backlog** | 04 Product Backlog | epic/feature/story counts + per-epic breakdown; story map at `/req42/backlog` |
+| **Supporting models** | 05 Supporting Models | use-case, activity-model and data-model page counts, one row per populated type; `/req42/models` |
+| **Quality requirements** | 06 Quality Requirements | scenario count + list; `/req42/quality` |
+| **Constraints** | 07 Constraints | constraint count + list; `/req42/constraints` |
+| **Glossary** | 08 Domain Terminology | term count + a scrollable per-term relation list; rendered glossary table at `/glossary`, term network at `/graph/glossary` |
+| **Issues** | 12 Risks & Assumptions | open-issue count (and the total), the five most severe first; filterable list (All / Open / Closed) at `/issues` |
+| **Architecture decisions** | — | decision count + scrollable list; `/adrs` is filterable by status and expands the full text of a row |
+| **Latest changes** | — | the five most recently modified wiki pages with a relative timestamp, each row linking to the page |
 
 Every tile that has no content yet renders a shared empty state naming the next
 step, rather than a placeholder — a fresh vault is the normal day-one state.
@@ -56,6 +69,11 @@ The in-tile lists show ~4–5 rows and scroll for the rest. The relation count i
 the number of distinct other wiki pages a page links to (frontmatter `related:`
 plus body `[[wikilinks]]`), excluding self-references and `raw/` provenance
 links. An issue counts as **closed** when its status is `resolved` or `wontfix`.
+"Latest changes" and "last change" read the files' modification times, so a
+freshly regenerated vault shows up on the next page refresh. The status strip's
+source count comes from `raw/sources/` (`RAW_SOURCES_DIR`, mounted read-only at
+`/sources` in Docker); it is the only folder outside `wiki/` and `_system/adr/`
+the dashboard reads.
 ADRs use the Nygard format (`# ADR-NNNN:` heading, `- **Status:**`,
 `- **Date:**` — no frontmatter); `0000-template.md` is skipped, and the status
 filter buttons are derived from the statuses actually present.
@@ -96,7 +114,8 @@ _system/apps/dashboard/
   static/vendor/     vendored mermaid + cytoscape (offline diagrams)
   tests/             plain-assert test scripts (no pytest) + a fixture vault
   Dockerfile         python:3.12-slim + gunicorn
-  compose.yaml       service def, mounts ${WIKI_DIR}:/wiki:ro and ${ADR_DIR}:/adr:ro
+  compose.yaml       service def, mounts ${WIKI_DIR}:/wiki:ro, ${ADR_DIR}:/adr:ro
+                     and ${SOURCES_DIR}:/sources:ro
 ```
 
 ## Tests

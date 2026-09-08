@@ -81,8 +81,9 @@ def test_adr_empty_state_does_not_suggest_ingest():
     assert "architecture decision" in body.lower()
     assert "raw/" not in body, "ADRs are never produced by ingesting raw/"
     home = _client().get("/").get_data(as_text=True)
+    # the ADR tile is second-to-last on the home page, ahead of "Latest changes"
     start = home.index("tile-adrs")
-    end = home.index("tile-issues", start)
+    end = home.index("tile-changes", start)
     assert "raw/" not in home[start:end]
 
 

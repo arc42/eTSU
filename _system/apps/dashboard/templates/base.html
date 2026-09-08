@@ -20,18 +20,28 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  {% set topbar_nav %}{% block crumbs %}{% endblock %}{% endset %}
-  {% if topbar_nav|trim %}
+  {# One persistent topbar on every page: brand, the req42 reading order as a
+     nav, search, and this tab's own nickname. Breadcrumbs moved into <main>
+     (same capture-the-block pattern, one level down) so the nav keeps the top
+     row to itself; index.html defines no crumbs block, so the row is absent
+     on the home page. #}
   <header class="topbar">
-    {{ topbar_nav }}
-    {% block header_nickname %}
+    <a class="brand" href="/"><img class="brand-mark" src="{{ url_for('static', filename='etsu-favicon.png') }}" alt=""> {{ system_name }}</a>
+    <nav class="mainnav" aria-label="Main">
+      {% for href, label in [('/goals','Goals'), ('/stakeholders','Stakeholders'), ('/req42/scope','Scope'), ('/req42/backlog','Backlog'), ('/req42/quality','Quality'), ('/glossary','Glossary'), ('/issues','Issues'), ('/adrs','ADRs'), ('/req42','req42')] %}
+      <a href="{{ href }}"{% if request.path == href or (href != '/req42' and request.path.startswith(href)) %} aria-current="page"{% endif %}>{{ label }}</a>
+      {% endfor %}
+    </nav>
+    <form class="nav-search" action="/search" method="get" role="search">
+      <input type="search" name="q" id="nav-search" class="search-input" placeholder="Search  /" autocomplete="off" aria-label="Search the wiki">
+    </form>
     <span class="my-nickname" id="my-nickname" hidden>
       <span id="my-nickname-label">You are</span> <strong id="my-nickname-text"></strong>
     </span>
-    {% endblock %}
   </header>
-  {% endif %}
   <main class="wrap">
+    {% set crumbs_html %}{% block crumbs %}{% endblock %}{% endset %}
+    {% if crumbs_html|trim %}<div class="crumbs-row">{{ crumbs_html }}</div>{% endif %}
     {% block content %}{% endblock %}
   </main>
   <footer class="foot">
@@ -222,6 +232,17 @@
         });
       });
     }
+
+    // "/" jumps to the nav search box — the shortcut every wiki-ish tool has,
+    // and the reason the placeholder advertises it. Ignored while typing in a
+    // field, and while a modifier is held (Cmd-/ etc. belong to the browser).
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target.tagName || "").toLowerCase();
+      if (e.key === "/" && tag !== "input" && tag !== "textarea" && !e.metaKey && !e.ctrlKey) {
+        var box = document.getElementById("nav-search");
+        if (box) { e.preventDefault(); box.focus(); }
+      }
+    });
   })();
 
   // Theme switch. The palette itself is pure CSS custom properties, so the

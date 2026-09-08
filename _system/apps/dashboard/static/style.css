@@ -116,26 +116,42 @@ h2 { letter-spacing: -.01em; }
   border: 2px solid transparent; background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-soft); }
 
+/* One bar on every page: brand, the req42 reading order as a nav, search,
+   nickname. Sticky, so the nav is reachable without scrolling back up — the
+   `.table-card thead` sticky offset below is measured against its height. */
 .topbar {
-  display: flex; align-items: center; gap: 1.5rem;
-  padding: 1rem 2rem; border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: .55rem var(--space-5); border-bottom: 1px solid var(--line);
   background: var(--topbar-bg); backdrop-filter: blur(8px);
   position: sticky; top: 0; z-index: 10;
 }
+.brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700;
+  color: var(--ink); text-decoration: none; white-space: nowrap; }
+.brand-mark { width: 1.35rem; height: 1.35rem; border-radius: 4px; }
+.mainnav { display: flex; gap: .15rem; overflow-x: auto; scrollbar-width: none; }
+.mainnav a { padding: .35rem .6rem; border-radius: 6px; color: var(--ink-soft);
+  text-decoration: none; font-size: var(--step--1); white-space: nowrap; }
+.mainnav a:hover { color: var(--ink); background: var(--chip-bg); }
+.mainnav a[aria-current="page"] { color: var(--ink); background: var(--chip-bg); font-weight: 600; }
+.nav-search { margin-left: auto; }
+.nav-search .search-input { width: 13rem; min-width: 0; padding: .35rem .8rem; font-size: var(--step--1); }
+@media (max-width: 780px) {
+  .topbar { flex-wrap: wrap; }
+  .nav-search { margin-left: 0; flex: 1 1 100%; }
+  .nav-search .search-input { width: 100%; }
+}
+
+/* Breadcrumbs sit at the top of <main> now that the topbar carries the nav. */
+.crumbs-row { margin: 0 0 var(--space-3); }
 .crumbs { color: var(--ink-soft); font-size: .92rem; }
 .crumbs a { color: var(--accent); text-decoration: none; }
 .crumbs span { color: var(--ink-dim); margin: 0 .35rem; }
 
 /* This tab's own name — "Welcome, Yoda" for the facilitator, "You are
-   <nickname>" for everyone else (see /who). Pushed to the far right of
-   whichever row it's in via the auto margin: the topbar on every page
-   except home, or — home page only — the hero row next to the logo/title
-   (index.html overrides `header_nickname` to empty so it isn't shown twice;
-   the topbar itself then has no content and base.html hides it entirely). */
-.my-nickname { margin-left: auto; color: var(--ink-soft); font-size: .85rem;
-  white-space: nowrap; }
+   <nickname>" for everyone else (see /who). Last item in the topbar on
+   every page; `hidden` until the first /ping answers with a nickname. */
+.my-nickname { color: var(--ink-soft); font-size: .85rem; white-space: nowrap; }
 .my-nickname strong { color: var(--ink); }
-.hero-nickname { font-size: .95rem; }
 
 .wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
 .hero-banner { display: block; width: 100%; height: auto; max-height: 190px; object-fit: cover;
@@ -144,6 +160,12 @@ h2 { letter-spacing: -.01em; }
 .lead { color: var(--ink-soft); margin: 0 0 2rem; }
 .count-pill { font-size: .8rem; vertical-align: middle; background: var(--card-2); color: var(--ink-soft);
   padding: .2rem .6rem; border-radius: 999px; border: 1px solid var(--line); margin-left: .4rem; }
+
+/* One line of vault vitals under the hero: how much is captured, what is
+   still open, how much material it rests on, how fresh it is. */
+.vault-status { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5);
+  margin: 0 0 var(--space-5); color: var(--ink-soft); font-size: var(--step--1); }
+.vault-status strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 /* ---- tiles ---- */
 /* max 3 per row; minmax(0,1fr) keeps wide tiles from overflowing the grid */
@@ -174,7 +196,12 @@ h2 { letter-spacing: -.01em; }
 .mini-list li:last-child { border-bottom: 0; }
 .ml-title { color: var(--ink); }
 .ml-count { color: var(--ink-soft); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: .25rem; }
-.ml-rel { color: var(--accent); }
+/* a whole mini-list row as one link (latest changes) */
+.ml-hit { display: flex; align-items: baseline; gap: .4rem; width: 100%;
+  text-decoration: none; color: var(--ink); }
+.ml-hit:hover .ml-title { color: var(--accent); }
+.ml-hit .ml-id { flex: none; }   /* the id never wraps mid-token */
+.ml-when { color: var(--ink-dim); font-size: .78rem; white-space: nowrap; margin-left: auto; }
 .ml-id { color: var(--violet); font-size: .8em; margin-right: .15rem; }
 .ml-out { color: var(--ink-dim); }
 
@@ -254,7 +281,7 @@ h2 { letter-spacing: -.01em; }
 .table-card table { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .table-card thead th { text-align: left; padding: .9rem 1rem; background: var(--bg-soft);
   color: var(--ink-soft); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em;
-  border-bottom: 1px solid var(--line); position: sticky; top: 57px; }
+  border-bottom: 1px solid var(--line); position: sticky; top: 53px; }
 .table-card tbody td { padding: .85rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 .table-card tbody tr:last-child td { border-bottom: 0; }
 .table-card tbody tr:hover { background: rgba(62,166,255,.05); }
@@ -364,12 +391,11 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
 /* hide the raw mermaid source until mermaid has rendered it (no FOUC) */
 pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 
-/* ---- vision tile: claim under the "Vision" header, then a parallel
-        "Goals" header above the goal list. Two headers in one tile. */
+/* ---- vision tile: the claim line, then the objectives with their epic
+        counts. Spans two grid columns — it is the page's opening statement. */
 .tile-vision-claim { margin: .15rem 0 .9rem; color: var(--ink);
   font-style: italic; font-weight: 500; line-height: 1.45;
   padding-bottom: .7rem; border-bottom: 1px dashed var(--line); }
-.tile-head-second { margin-top: .1rem; }
 /* goal list: allow titles to wrap (some are long), keep the epic counter pinned */
 .mini-list-vision { max-height: 9.5rem; }
 .mini-list-vision li { align-items: flex-start; line-height: 1.35; }
@@ -579,14 +605,7 @@ html.etsu-disconnected {
   transition: filter .8s ease;
 }
 
-/* ---- data-model tile + /data-model page (test-stage projection) -------- */
-.tile-mini-diagram { margin: .4rem 0 .5rem; max-height: 10rem; overflow: hidden; }
-.tile-mini-diagram pre.mermaid { margin: 0; background: none; border: 0;
-  padding: 0; text-align: center; }
-.tile-mini-diagram pre.mermaid svg { max-width: 100%; height: auto;
-  max-height: 9.5rem; }
-.tile-dm-claim { margin: .25rem 0 0; font-size: .82rem; color: var(--ink-soft);
-  font-style: italic; }
+/* ---- /data-model page (test-stage projection) -------------------------- */
 .dm-diagram { padding: 1.2rem 1.1rem 1.4rem; }
 .dm-diagram pre.mermaid svg { max-width: 100%; height: auto; }
 .dm-note { color: var(--ink-soft); font-size: .82rem; font-style: italic;
@@ -600,7 +619,7 @@ html.etsu-disconnected {
    Detail cards live below; this is the quick index. */
 .dm-summary { margin: 0 0 1.4rem; }
 .dm-summary-table { table-layout: auto; }
-/* opt out of the global `.table-card thead th { position: sticky; top: 57px }`
+/* opt out of the global `.table-card thead th { position: sticky; top: 53px }`
    — that rule could leave the first tbody row visually behind the pinned header
    at certain scroll positions. The 13-row catalog is short enough to scroll
    together with the page. */

@@ -3,7 +3,8 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     WIKI_DIR=/wiki \
-    ADR_DIR=/adr
+    ADR_DIR=/adr \
+    RAW_SOURCES_DIR=/sources
 
 WORKDIR /app
 

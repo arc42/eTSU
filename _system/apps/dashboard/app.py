@@ -61,6 +61,11 @@ WIKI_DIR = Path(_env_wiki) if _env_wiki else Path(__file__).resolve().parents[3]
 _env_adr = os.environ.get("ADR_DIR")
 ADR_DIR = Path(_env_adr) if _env_adr else Path(__file__).resolve().parents[3] / "_system" / "adr"
 
+# Provenance records (raw/sources/, Source type, ADR-0006). Read-only mount at
+# /sources in Docker; repo fallback for local runs. Only ever read.
+_env_src = os.environ.get("RAW_SOURCES_DIR")
+SOURCES_DIR = Path(_env_src) if _env_src else Path(__file__).resolve().parents[3] / "raw" / "sources"
+
 # Project identity. Everything the original demo vault hardcoded (page title,
 # footer, hero, goal-tree root, context-diagram centre) reads from here so a
 # fresh vault can be renamed in one place. Read per call, never cached: during
@@ -113,6 +118,10 @@ class Page:
     meta: dict                      # parsed frontmatter
     body: str                       # markdown body (frontmatter stripped)
     folder: str                     # owning wiki subfolder, e.g. glossary
+    # Last-modified time of the source file. Last field, and defaulted, so every
+    # existing positional/keyword construction keeps working. Feeds the home
+    # page's "Latest changes" tile — see recent_changes().
+    mtime: float = 0.0
 
     @property
     def id(self) -> str:
@@ -204,7 +213,8 @@ def _parse(path: Path, folder: str) -> Page | None:
             meta = yaml.safe_load(m.group(1)) or {}
         except yaml.YAMLError:
             meta = {}
-        page = Page(stem=path.stem, meta=meta, body=m.group(2), folder=folder)
+        page = Page(stem=path.stem, meta=meta, body=m.group(2), folder=folder,
+                    mtime=mtime)
     _PARSE_CACHE[path] = (mtime, page)
     return page
 
@@ -219,6 +229,17 @@ def load_folder(folder: str) -> list[Page]:
 
 
 @_request_cached
+def load_sources() -> list[Page]:
+    """Provenance records from raw/sources/ — counted on the home page's status
+    strip so the room can see how much material the wiki actually rests on.
+    Not a wiki folder: it lives outside WIKI_DIR and is never rendered."""
+    if not SOURCES_DIR.is_dir():
+        return []
+    pages = [_parse(p, "sources") for p in sorted(SOURCES_DIR.glob("*.md"))]
+    return [p for p in pages if p is not None]
+
+
+@_request_cached
 def load_all_pages() -> list[Page]:
     """Every wiki page across all content-type folders, for global search."""
     out: list[Page] = []
@@ -227,6 +248,41 @@ def load_all_pages() -> list[Page]:
             if d.is_dir():
                 out.extend(load_folder(d.name))
     return out
+
+
+def _relative_when(ts: float, now: float | None = None) -> str:
+    """'just now' / '12 min ago' / '3 h ago' / '2026-09-06' — coarse on purpose."""
+    now = time.time() if now is None else now
+    d = max(0, int(now - ts))
+    if d < 60:
+        return "just now"
+    if d < 3600:
+        return f"{d // 60} min ago"
+    if d < 86400:
+        return f"{d // 3600} h ago"
+    return datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+
+
+def recent_changes(n: int = 5) -> list[dict]:
+    """The n most recently modified wiki pages (file mtime — the cheapest
+    'what changed' there is; the vault is regenerated a few times per
+    workshop, nobody watches it live)."""
+    pages = sorted(load_all_pages(), key=lambda p: -p.mtime)[:n]
+    return [{"id": p.id, "title": p.title, "kind": FOLDER_LABELS.get(p.folder, p.folder),
+             "url": _page_url(p.folder, p.stem), "when": _relative_when(p.mtime)} for p in pages]
+
+
+def vault_status() -> dict:
+    """The one-line state of the vault under the hero: how much is captured,
+    what is still open, how much source material it rests on, and how fresh
+    the whole thing is."""
+    pages = load_all_pages()
+    issues = load_folder("issues")
+    last = max((p.mtime for p in pages), default=0.0)
+    return {"pages": len(pages),
+            "open_issues": sum(1 for i in issues if i.status not in CLOSED_STATUSES),
+            "sources": len(load_sources()),
+            "last_change": _relative_when(last) if last else "—"}
 
 
 @_request_cached
@@ -997,7 +1053,8 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
         # every other empty tile. Deliberately carries no `count`/`unit` so
         # index.html renders the empty state rather than a placeholder dash.
         return {
-            "key": "vision", "label": "Vision", "href": "/goals",
+            "key": "vision", "label": "Vision", "eyebrow": "01 · Business Goals",
+            "href": "/goals", "folders": ["goals"], "span": 2,
             "rows": [], "active": False,
         }
     claim = str(vision.meta.get("tile_claim") or "").strip()
@@ -1007,7 +1064,8 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
         "epics": len(coverage.get(o.id, [])),
     } for o in objectives]
     return {
-        "key": "vision", "label": "Vision", "href": "/goals",
+        "key": "vision", "label": "Vision", "eyebrow": "01 · Business Goals",
+        "href": "/goals", "folders": ["goals"], "span": 2,
         "active": True,
         "claim": claim,
         "objective_rows": rows,
@@ -1310,10 +1368,12 @@ def build_search_records() -> list[dict]:
 
 @app.route("/")
 def index():
+    """The home page: one tile per req42 building block, in the order the
+    framework reads them (01 Business Goals → 12 Risks), then the method
+    decisions and what changed last. The projector audience should be able to
+    walk the page top to bottom and get the whole requirements story."""
     titles = title_index()
-    glossary = load_folder("glossary")
     issues = load_folder("issues")
-    stakeholders = load_folder("stakeholders")
     adrs = load_adrs()
 
     def by_relations(pages):
@@ -1324,23 +1384,7 @@ def index():
 
     open_issues = [i for i in issues if i.status not in CLOSED_STATUSES]
 
-    req42_blocks = build_req42_blocks()
-    req42_rows = [
-        {"num": b["num"], "title": b["title"], "count": b["count"], "scope": b["scope"]}
-        for b in req42_blocks
-    ]
-    req42_total = sum(b["count"] for b in req42_blocks if b["scope"] == "in")
-    req42_in_scope = sum(1 for b in req42_blocks if b["scope"] == "in")
-
-    # Slim index embedded in the page so the search tile can preview matches
-    # as the user types (title/id/type only — full-text search lives on /search).
-    search_slim = [
-        {"id": r["id"], "type": r["type"], "title": r["title"], "url": r["url"], "key": r["key"]}
-        for r in build_search_records()
-    ]
-
     vision_tile = build_vision_tile(load_goals(), titles)
-    n_entities = len(load_folder("data-models"))
     backlog = build_backlog()
     backlog_tile = {
         "key": "backlog", "label": "Product Backlog", "href": "/req42/backlog",
@@ -1354,61 +1398,50 @@ def index():
         ],
     }
 
-    # Row 1: Vision, req42, Search.  Row 2: Product Backlog, Glossary, Stakeholders.
-    # Row 3+: ADRs, Issues, Data model.
+    def plain(key, label, eyebrow, href, folders, unit, rows=None, links=None, sub=""):
+        """The default tile: a count over one or more wiki folders plus a
+        relation-ranked preview list. Tiles that need a different body (vision,
+        backlog, issues, ADRs, latest changes) are spelled out below."""
+        pages = [p for f in folders for p in load_folder(f)]
+        return {"key": key, "label": label, "eyebrow": eyebrow, "href": href, "folders": folders,
+                "count": len(pages), "unit": unit, "sub": sub, "active": True,
+                "rows": rows if rows is not None else by_relations(pages), "links": links or []}
+
+    context = load_folder("context")
+    eifs = load_folder("external-interfaces")
     tiles = [
         vision_tile,
-        {
-            "key": "req42", "label": "req42", "href": "/req42",
-            "count": req42_total, "unit": "entries", "logo": "req42-logo-white.png",
-            "rows": req42_rows, "active": True,
-            "sub": f"{req42_in_scope} of 12 blocks in scope",
-        },
-        {
-            "key": "search", "label": "Search", "href": "/search",
-            "rows": [], "active": True, "search": True,
-        },
-        backlog_tile,
-        {
-            "key": "glossary", "label": "Glossary",
-            "count": len(glossary), "unit": "terms",
-            "rows": by_relations(glossary), "active": True,
-            "links": [
-                {"label": "Table", "href": "/glossary"},
-                {"label": "Term network", "href": "/graph/glossary"},
-            ],
-        },
-        {
-            "key": "stakeholders", "label": "Stakeholders", "href": "/stakeholders",
-            "count": len(stakeholders), "unit": "personas",
-            "rows": by_relations(stakeholders), "active": True,
-        },
-        {
-            "key": "adrs", "label": "ADRs", "href": "/adrs",
-            "count": len(adrs), "unit": "decisions",
-            "rows": [{"id": a["id"], "title": a["title"], "status": a["status"]} for a in adrs],
-            "active": True,
-        },
-        {
-            "key": "issues", "label": "Issues", "href": "/issues",
-            "count": len(issues), "unit": "Issues",
-            "rows": [], "active": True,
-            "sub": f"{len(open_issues)} open",
-        },
-        {
-            "key": "data-model", "label": "Data model", "href": "/data-model",
-            "active": True,
-            "diagram": build_data_model_kind_diagram(),
-            # Empty -> no claim at all: index.html renders the shared empty
-            # state, and a second "No entities yet" line under it read as two
-            # contradictory messages stacked on one tile.
-            "claim": (f"{n_entities} entities" if n_entities else ""),
-            "entities": n_entities,
-        },
+        plain("stakeholders", "Stakeholders", "02 · Stakeholders", "/stakeholders",
+              ["stakeholders"], "personas"),
+        plain("scope", "Scope", "03 · Scope", "/req42/scope", ["context", "external-interfaces"],
+              "external interfaces", rows=by_relations(eifs),
+              sub=("context described" if context else "no context page yet")),
+        {**backlog_tile, "eyebrow": "04 · Product Backlog", "folders": ["functional-requirements"]},
+        plain("models", "Supporting models", "05 · Supporting Models", "/req42/models",
+              ["use-cases", "activity-models", "data-models"], "model pages",
+              rows=[{"title": m["title"], "relations": m["relations"]}
+                    for m in _supporting_model_entries()]),
+        plain("quality", "Quality requirements", "06 · Quality Requirements", "/req42/quality",
+              ["quality-requirements"], "scenarios"),
+        plain("constraints", "Constraints", "07 · Constraints", "/req42/constraints",
+              ["constraints"], "constraints"),
+        plain("glossary", "Glossary", "08 · Domain Terminology", None, ["glossary"], "terms",
+              links=[{"label": "Table", "href": "/glossary"},
+                     {"label": "Term network", "href": "/graph/glossary"}]),
+        {"key": "issues", "label": "Issues", "eyebrow": "12 · Risks & Assumptions", "href": "/issues",
+         "folders": ["issues"], "count": len(open_issues), "unit": "open", "active": True,
+         "sub": f"{len(issues)} in total",
+         "rows": [{"id": i.id, "title": i.title, "severity": str(i.meta.get("severity") or "")}
+                  for i in sorted(open_issues,
+                                  key=lambda i: ({"blocker": 0, "major": 1, "minor": 2}
+                                                 .get(str(i.meta.get("severity") or ""), 3), i.id))][:5]},
+        {"key": "adrs", "label": "Architecture decisions", "eyebrow": "ADR · method decisions",
+         "href": "/adrs", "folders": [], "count": len(adrs), "unit": "decisions", "active": True,
+         "rows": [{"id": a["id"], "title": a["title"], "status": a["status"]} for a in adrs]},
+        {"key": "changes", "label": "Latest changes", "eyebrow": "Recently modified", "href": None,
+         "folders": [], "active": True, "rows": recent_changes(5)},
     ]
-    needs_mermaid = any(t.get("diagram") for t in tiles)
-    return render_template("index.html", tiles=tiles, search_slim=search_slim,
-                           needs_mermaid=needs_mermaid)
+    return render_template("index.html", tiles=tiles, status=vault_status())
 
 
 @app.route("/glossary")
