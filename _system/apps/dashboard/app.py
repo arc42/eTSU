@@ -288,6 +288,8 @@ CALLOUT_RE = re.compile(r"^>\s*\[!(\w+)\]\s*(.*)$", re.MULTILINE)
 # follows another prose line is a hard wrap in the source file and is joined.
 _BLOCK_START_RE = re.compile(r"^(\s*([-*+]|\d+[.)])\s|\s*#|\s*>|\s*\||\s*```|\s{4,}\S|\t|\s*<)")
 _LIST_START_RE = re.compile(r"^\s*([-*+]|\d+[.)])\s")
+# A GFM table row/separator, with or without leading "|" (e.g. "Header1 | Header2").
+_TABLE_LINE_RE = re.compile(r"^\s*\|.*|.*\s\|\s.*")
 
 
 def _unwrap_prose(body: str) -> str:
@@ -296,39 +298,63 @@ def _unwrap_prose(body: str) -> str:
     Agents write wiki pages wrapped at ~80 columns; rendering those wraps as
     <br> (the old `nl2br` extension) produced ragged paragraphs. Fenced code,
     explicit two-space line breaks, lists, quotes, tables and headings are
-    passed through untouched."""
+    passed through untouched. A wrapped *list item* (a plain continuation
+    line right after a `- `/`1. ` line) is tracked via `in_list` so it stays
+    a lazy continuation of that item — dedented, but without inserting the
+    blank line that would turn a tight list into a loose one."""
     out: list[str] = []
     in_fence = False
+    in_list = False
     for line in body.split("\n"):
         stripped = line.strip()
         if stripped.startswith("```"):
             in_fence = not in_fence
+            in_list = False
             out.append(line)
             continue
+        if in_fence:
+            out.append(line)
+            continue
+        if not stripped:
+            in_list = False
+            out.append(line)
+            continue
+
+        is_list_start = bool(_LIST_START_RE.match(line))
+        is_block_start = (is_list_start or _BLOCK_START_RE.match(line)
+                           or _TABLE_LINE_RE.match(line))
+
+        if in_list and not is_block_start:
+            # lazy continuation of the current list item — dedent it, stay in the list
+            out.append(line.lstrip())
+            continue
+
         prev = out[-1] if out else ""
-        prev_is_prose = bool(prev.strip()) and not _BLOCK_START_RE.match(prev)
-        if in_fence or not stripped or _BLOCK_START_RE.match(line):
-            if not in_fence and prev_is_prose and _LIST_START_RE.match(line):
+        prev_is_prose = bool(prev.strip()) and not _BLOCK_START_RE.match(prev) and not in_list
+
+        if is_block_start:
+            if prev_is_prose and is_list_start:
                 out.append("")            # prose → list needs a separating blank line
             out.append(line)
+            in_list = is_list_start
             continue
+
         if prev_is_prose and not prev.endswith("  "):
             out[-1] = prev.rstrip() + " " + stripped
         else:
-            # A lazy continuation line under a block-start (e.g. a wrapped
-            # list item's second line) — dedent it (keeping any trailing
-            # explicit-break spaces) so Markdown's own lazy continuation
-            # joins it with a plain "\n", not a stray indent.
-            out.append(line.lstrip())
+            out.append(line)
     return "\n".join(out)
 
 
 def render_markdown(body: str, titles: dict[str, str]) -> str:
+    # unwrap hard-wrapped prose first — before wikilinks turn a leading
+    # [[...]] into an <a>, which would otherwise look like an HTML block start
+    body = _unwrap_prose(body)
     # full-text bodies get real hyperlinks; inline-snippet helpers keep spans
     body = render_wikilinks(body, titles, link_index())
     # turn Obsidian callouts `> [!type] title` into a bold label line
     body = CALLOUT_RE.sub(lambda m: f"> **{m.group(2) or m.group(1).title()}**", body)
-    return md.markdown(_unwrap_prose(body), extensions=["extra", "sane_lists"])
+    return md.markdown(body, extensions=["extra", "sane_lists"])
 
 
 def extract_labeled(page: Page, label: str, titles: dict[str, str],

@@ -61,10 +61,29 @@ def test_explicit_two_space_break_is_kept():
     assert "<br" in html, html
 
 
+def test_wrapped_list_stays_tight():
+    html = app.render_markdown("- Replace the ad-hoc\n  coordination.\n- Second item", {})
+    assert "<li><p>" not in html, html
+    assert html.count("<li>") == 2, html
+
+
+def test_headerless_gfm_table_survives():
+    html = app.render_markdown("Header1 | Header2\n--- | ---\na | b", {})
+    assert "<table>" in html, html
+
+
+def test_prose_starting_with_a_wikilink_is_joined():
+    html = app.render_markdown("[[STK-001]] wants faster\nonboarding.", {})
+    assert "wants faster onboarding." in html, html
+
+
 if __name__ == "__main__":
     test_hard_wrapped_prose_is_one_paragraph()
     test_list_directly_after_prose_line_is_a_list()
     test_wrapped_list_item_stays_one_item()
     test_fenced_code_is_untouched()
     test_explicit_two_space_break_is_kept()
+    test_wrapped_list_stays_tight()
+    test_headerless_gfm_table_survives()
+    test_prose_starting_with_a_wikilink_is_joined()
     print("OK: markdown unwrap contract")
