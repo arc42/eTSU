@@ -76,6 +76,10 @@
     apply(b.dataset.filter);
   }));
 
+  const want = new URLSearchParams(location.search).get('filter');
+  const pre = want && document.querySelector('.fbtn[data-filter="' + want + '"]');
+  if (pre) pre.click();
+
   function showDetail(row) {
     rows.forEach(r => r.classList.remove('selected'));
     row.classList.add('selected');

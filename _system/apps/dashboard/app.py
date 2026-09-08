@@ -318,6 +318,20 @@ def link_index() -> dict[str, tuple[str, str]]:
     return idx
 
 
+def open_issue_counts() -> dict[str, int]:
+    """folder -> number of OPEN issues whose links (frontmatter `related:` or
+    body wikilinks) resolve to a page in that folder. One issue can count for
+    several folders; an issue that links nothing resolvable counts nowhere."""
+    links = link_index()
+    out: dict[str, int] = {}
+    for iss in load_folder("issues"):
+        if iss.status in CLOSED_STATUSES:
+            continue
+        for folder in {links[t][0] for t in iss.link_targets() if t in links}:
+            out[folder] = out.get(folder, 0) + 1
+    return out
+
+
 # --- rendering helpers -----------------------------------------------------
 
 def render_wikilinks(text: str, titles: dict[str, str],
@@ -1475,6 +1489,7 @@ def index():
         {"key": "changes", "label": "Latest changes", "eyebrow": "Recently modified", "href": None,
          "folders": [], "active": True, "rows": recent_changes(5)},
     ]
+    flags = open_issue_counts()
     for t in tiles:
         if t["key"] == "changes":
             continue
@@ -1483,6 +1498,8 @@ def index():
         else:
             t["maturity"] = maturity(
                 p.status for f in t["folders"] for p in load_folder(f))
+        if t["key"] not in ("issues", "changes"):
+            t["open_issues"] = sum(flags.get(f, 0) for f in t.get("folders", []))
     return render_template("index.html", tiles=tiles, status=vault_status())
 
 

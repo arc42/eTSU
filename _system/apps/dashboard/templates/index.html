@@ -31,6 +31,7 @@
     <div class="tile-head">
       <span class="tile-eyebrow">{{ t.eyebrow }}</span>
       <h2 class="tile-title">{{ t.label }}</h2>
+      {% if t.open_issues %}<span class="tile-flag" title="Open issues that point at pages of this type">{{ t.open_issues }} open issue{{ '' if t.open_issues == 1 else 's' }}</span>{% endif %}
     </div>
     {% if t.key == 'vision' and t.active %}
     {{ maturity_bar(t.maturity) }}
