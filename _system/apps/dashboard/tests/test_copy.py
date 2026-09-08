@@ -116,6 +116,7 @@ def test_no_bare_glyph_abbreviations():
         txt = p.read_text(encoding="utf-8")
         assert "⤳" not in txt, p.name
         assert not re.search(r"\}\}S\b|\}\}F\b|n_stories \}\}S", txt), f"S/F abbreviation in {p.name}"
+        assert not re.search(r"\}\} (Features|Stories|Epics)\b", txt), p.name
 
 
 def test_refresh_time_survives_an_unusable_tz():

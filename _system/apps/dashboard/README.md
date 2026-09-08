@@ -23,7 +23,7 @@ start: it builds a `.venv/` here on first run (~20 s) and serves the same app.
 The `wiki/` folder is bind-mounted read-only at `/wiki`, so the dashboard always
 reflects the current state of the vault; just refresh the browser after editing.
 Every page footer shows the data-refresh timestamp (page load time, `%Y-%m-%d`,
-in the `TZ` timezone — default `UTC`).
+in `TZ` if set, else the host's local zone).
 
 The dashboard shuts itself down a few seconds after the last browser tab is
 closed (ADR-0022), so it never lingers as an orphan process or container. The

@@ -175,6 +175,7 @@ h2 { letter-spacing: -.01em; }
   margin: 0 0 var(--space-1); letter-spacing: -.025em; }
 .page-h1 + .maturity { max-width: 22rem; margin-top: var(--space-1); }
 .lead { color: var(--ink-soft); margin: 0 0 var(--space-5); }
+.lead a { color: var(--accent); }
 .count-pill { font-size: .8rem; vertical-align: middle; background: var(--card-2); color: var(--ink-soft);
   padding: var(--space-1) var(--space-2); border-radius: 999px; border: 1px solid var(--line); margin-left: var(--space-1); }
 

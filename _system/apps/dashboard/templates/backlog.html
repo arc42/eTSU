@@ -28,7 +28,7 @@
       <span class="backlog-counter">{{ plural(e.n_stories, 'story', 'stories') }} · {{ plural(e.n_features, 'feature') }}</span>
     </header>
     {% if e.n_features or e.n_stories %}
-    <p class="backlog-card-sub">{{ e.n_features }} Features · {{ e.n_stories }} Stories — View breakdown →</p>
+    <p class="backlog-card-sub">{{ plural(e.n_features, 'feature') }} · {{ plural(e.n_stories, 'story', 'stories') }} — View breakdown →</p>
     {% else %}
     <p class="backlog-card-sub backlog-empty">not broken down yet →</p>
     {% endif %}

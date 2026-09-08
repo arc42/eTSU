@@ -357,17 +357,20 @@ def provenance(page: Page) -> list[dict]:
     return rows
 
 
-def open_issue_counts() -> dict[str, int]:
-    """folder -> number of OPEN issues whose links (frontmatter `related:` or
-    body wikilinks) resolve to a page in that folder. One issue can count for
-    several folders; an issue that links nothing resolvable counts nowhere."""
+def open_issue_counts() -> dict[str, set[str]]:
+    """folder -> ids of OPEN issues whose links (frontmatter `related:` or body
+    wikilinks) resolve to a page in that folder. One issue's id can appear in
+    several folders' sets; an issue that links nothing resolvable appears in
+    none. Sets (not counts) so a caller spanning several folders — e.g. Scope's
+    context + external-interfaces — can union them and count each issue once,
+    even if it links pages in more than one of those folders."""
     links = link_index()
-    out: dict[str, int] = {}
+    out: dict[str, set[str]] = {}
     for iss in load_folder("issues"):
         if iss.status in CLOSED_STATUSES:
             continue
         for folder in {links[t][0] for t in iss.link_targets() if t in links}:
-            out[folder] = out.get(folder, 0) + 1
+            out.setdefault(folder, set()).add(iss.id)
     return out
 
 
@@ -1520,8 +1523,9 @@ def index():
         plain("glossary", "Glossary", "08 · Domain Terminology", None, ["glossary"], "term",
               links=[{"label": "Table", "href": "/glossary"},
                      {"label": "Term network", "href": "/graph/glossary"}]),
-        {"key": "issues", "label": "Issues", "eyebrow": "12 · Risks & Assumptions", "href": "/issues",
-         "folders": ["issues"], "count": len(open_issues),
+        {"key": "issues", "label": "Issues", "eyebrow": "12 · Risks & Assumptions",
+         "href": "/issues?filter=open" if open_issues else "/issues",
+         "folders": ["issues"], "count": len(open_issues), "total": len(issues),
          # "open" is the adjective, not a noun: it never takes an -s
          "unit": "open", "unit_many": "open", "active": True,
          "sub": f"{len(issues)} in total",
@@ -1545,7 +1549,10 @@ def index():
             t["maturity"] = maturity(
                 p.status for f in t["folders"] for p in load_folder(f))
         if t["key"] not in ("issues", "changes"):
-            t["open_issues"] = sum(flags.get(f, 0) for f in t.get("folders", []))
+            # union, not sum: an issue linking pages in two of this tile's
+            # folders (e.g. Scope's context + external-interfaces) must count
+            # once, not twice.
+            t["open_issues"] = len(set().union(*(flags.get(f, set()) for f in t.get("folders", []))))
     join_url = public_url()
     return render_template("index.html", tiles=tiles, status=vault_status(),
                             join_url=join_url, join_qr=qr_svg(join_url))

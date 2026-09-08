@@ -23,7 +23,7 @@
 </header>
 
 <p class="vault-status">
-  <span><strong>{{ status.pages }}</strong> pages</span>
+  <span><strong>{{ status.pages }}</strong> {{ noun(status.pages, 'page') }}</span>
   <span><strong>{{ status.open_issues }}</strong> open {{ noun(status.open_issues, 'issue') }}</span>
   <span><strong>{{ status.sources }}</strong> {{ noun(status.sources, 'source') }} ingested</span>
   <span>last change <strong>{{ status.last_change }}</strong></span>
@@ -100,6 +100,7 @@
       {# the empty state names what is missing, so it needs the noun, not the
          counter's label: the Issues tile counts "open", not "issues". #}
       {% if t.key == 'adrs' %}{{ empty_adrs() }}
+      {% elif t.key == 'issues' and t.total %}<p class="empty-state empty-state-tight">No open issues — all {{ t.total }} resolved.</p>
       {% elif t.key == 'issues' %}{{ empty_state("issues") }}
       {% else %}{{ empty_state(noun(0, t.unit, t.unit_many)) }}{% endif %}
     {% endif %}
