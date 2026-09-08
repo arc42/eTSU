@@ -86,6 +86,46 @@ tags: [glossary]
 
 **Definition.** One stop of a tour.
 """, encoding="utf-8")
+# A bare string (not a YAML list) for `sources:` — malformed frontmatter that
+# still names exactly one real source; provenance() must treat it as a
+# one-element list rather than iterating its characters.
+(_wiki / "glossary" / "GLO-003-single.md").write_text("""---
+id: GLO-003
+type: glossary-term
+title: Single
+status: draft
+created: 2026-09-06
+updated: 2026-09-06
+sources: "[[raw/sources/SRC-001-brief]]"
+related: []
+tags: [glossary]
+---
+
+# Single
+
+**Definition.** A page with a bare-string `sources:` field.
+""", encoding="utf-8")
+# A hostile provenance record: source-type/origin carry HTML that must come
+# out escaped, not live, on the /source/<stem> facts table.
+(_src / "SRC-002-hostile.md").write_text("""---
+id: SRC-002
+type: source
+title: Hostile record
+status: ingested
+created: 2026-09-06
+updated: 2026-09-06
+tags: [source]
+source-type: "<img src=x onerror=alert(1)>"
+origin: "raw/<b>x</b>.md"
+captured: 2026-09-06
+sha256: n/a
+ingested-pages: []
+---
+
+# Hostile record
+
+Frontmatter with HTML in it.
+""", encoding="utf-8")
 
 
 def test_provenance_resolves_source_records():
@@ -113,8 +153,27 @@ def test_source_page_renders_and_links_back():
     assert app.app.test_client().get("/source/SRC-999-nope").status_code == 404
 
 
+def test_source_page_escapes_hostile_frontmatter():
+    app._PARSE_CACHE.clear()
+    resp = app.app.test_client().get("/source/SRC-002-hostile")
+    assert resp.status_code == 200
+    body = resp.get_data(as_text=True)
+    assert "&lt;img" in body
+    assert "<img src=x" not in body
+
+
+def test_provenance_accepts_bare_string_sources():
+    app._PARSE_CACHE.clear()
+    page = app._parse(_wiki / "glossary" / "GLO-003-single.md", "glossary")
+    rows = app.provenance(page)
+    assert len(rows) == 1, rows
+    assert rows[0]["url"] == "/source/SRC-001-brief", rows
+
+
 if __name__ == "__main__":
     test_provenance_resolves_source_records()
     test_chips_on_detail_pages()
     test_source_page_renders_and_links_back()
+    test_source_page_escapes_hostile_frontmatter()
+    test_provenance_accepts_bare_string_sources()
     print("OK: provenance")

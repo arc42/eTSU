@@ -25,6 +25,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import markdown as md
 import yaml
 from flask import Flask, abort, g, has_request_context, redirect, render_template, request
+from markupsafe import escape
 
 # some slim base images lack a webp entry in their mime.types
 mimetypes.add_type("image/webp", ".webp")
@@ -337,8 +338,13 @@ def provenance(page: Page) -> list[dict]:
     entries are kept (url=None) so the chip can say so instead of vanishing."""
     idx = source_index()
     rows = []
-    for ref in page.meta.get("sources") or []:
+    refs = page.meta.get("sources") or []
+    if not isinstance(refs, list):
+        refs = [refs]                            # a bare string is one entry, not a list of characters
+    for ref in refs:
         base = _fr_stem_from_ref(ref)           # '[[raw/sources/SRC-001-x]]' -> 'SRC-001-x'
+        if not base:
+            continue                             # None / empty after stripping — nothing to show
         src = idx.get(base)
         if src:
             rows.append({"id": src.id, "title": src.title, "stem": src.stem,
@@ -1727,12 +1733,18 @@ def source_detail(stem):
         abort(404)
     titles = title_index()
     body = re.sub(r"^\s*#\s+.*(?:\n|$)", "", src.body, count=1)
+    # frontmatter values are human-entered and never trusted: escape every one
+    # before it lands in body_html, which the template renders with `| safe`.
     facts = [("Type", str(src.meta.get("source-type") or "—")),
              ("Origin", str(src.meta.get("origin") or "—")),
              ("Captured", str(src.meta.get("captured") or "—")),
              ("Checksum", str(src.meta.get("sha256") or "—")[:16])]
-    facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
-    ingested = ", ".join(render_wikilinks(str(r), titles, link_index()) for r in (src.meta.get("ingested-pages") or [])) or "—"
+    facts_html = "".join(f"<dt>{k}</dt><dd>{escape(v)}</dd>" for k, v in facts)
+    # each ref is escaped before render_wikilinks sees it — confirmed this does
+    # not break [[…]] matching (brackets/pipes aren't HTML-special, so a clean
+    # wikilink round-trips untouched; a hostile one comes out as inert entities
+    # whether or not it resolves to a real page).
+    ingested = ", ".join(render_wikilinks(str(escape(str(r))), titles, link_index()) for r in (src.meta.get("ingested-pages") or [])) or "—"
     body_html = f'<dl class="source-facts">{facts_html}<dt>Ingested pages</dt><dd>{ingested}</dd></dl>' + render_markdown(body, titles)
     return render_template("detail.html", kind="Source", id=src.id, title=src.title, status=src.status,
                            created=str(src.meta.get("created", "")), updated=str(src.meta.get("updated", "")),
