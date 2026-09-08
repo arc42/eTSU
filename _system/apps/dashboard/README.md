@@ -52,9 +52,9 @@ req42 reading order:
 |------|-------------|---------|
 | **Vision** | 01 Business Goals | the claim line from the vision goal page plus every objective with its covering-epic count; links to `/goals`. Before a vision exists it shows an empty state pointing at the bootstrap workflow. Spans two columns. |
 | **Stakeholders** | 02 Stakeholders | persona count + scrollable list; profile, influence and interest at `/stakeholders` |
-| **Scope** | 03 Scope | external-interface count, whether a context page exists, and the interfaces by relation count; system boundary and context diagram at `/req42/scope` |
+| **Scope** | 03 Scope | external-interface count (the context page is not counted, only reported: “context described” / “no context page yet”) and the interfaces by relation count; system boundary and context diagram at `/req42/scope` |
 | **Product Backlog** | 04 Product Backlog | epic/feature/story counts + per-epic breakdown; story map at `/req42/backlog` |
-| **Supporting models** | 05 Supporting Models | use-case, activity-model and data-model page counts, one row per populated type; `/req42/models` |
+| **Supporting models** | 05 Supporting Models | use-case, activity-model and data-model page counts, one row per populated type with its page count; `/req42/models` |
 | **Quality requirements** | 06 Quality Requirements | scenario count + list; `/req42/quality` |
 | **Constraints** | 07 Constraints | constraint count + list; `/req42/constraints` |
 | **Glossary** | 08 Domain Terminology | term count + a scrollable per-term relation list; rendered glossary table at `/glossary`, term network at `/graph/glossary` |

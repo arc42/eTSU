@@ -1398,13 +1398,17 @@ def index():
         ],
     }
 
-    def plain(key, label, eyebrow, href, folders, unit, rows=None, links=None, sub=""):
+    def plain(key, label, eyebrow, href, folders, unit, rows=None, links=None, sub="",
+              count=None):
         """The default tile: a count over one or more wiki folders plus a
         relation-ranked preview list. Tiles that need a different body (vision,
-        backlog, issues, ADRs, latest changes) are spelled out below."""
+        backlog, issues, ADRs, latest changes) are spelled out below.
+        `count` overrides the page total where the headline number is narrower
+        than `folders` (Scope counts interfaces, not its context page)."""
         pages = [p for f in folders for p in load_folder(f)]
         return {"key": key, "label": label, "eyebrow": eyebrow, "href": href, "folders": folders,
-                "count": len(pages), "unit": unit, "sub": sub, "active": True,
+                "count": len(pages) if count is None else count,
+                "unit": unit, "sub": sub, "active": True,
                 "rows": rows if rows is not None else by_relations(pages), "links": links or []}
 
     context = load_folder("context")
@@ -1413,13 +1417,17 @@ def index():
         vision_tile,
         plain("stakeholders", "Stakeholders", "02 · Stakeholders", "/stakeholders",
               ["stakeholders"], "personas"),
+        # folders carries both (Scope's maturity and issue flags span the context
+        # page too), but the headline number is what the unit says: interfaces.
         plain("scope", "Scope", "03 · Scope", "/req42/scope", ["context", "external-interfaces"],
-              "external interfaces", rows=by_relations(eifs),
+              "external interfaces", rows=by_relations(eifs), count=len(eifs),
               sub=("context described" if context else "no context page yet")),
         {**backlog_tile, "eyebrow": "04 · Product Backlog", "folders": ["functional-requirements"]},
         plain("models", "Supporting models", "05 · Supporting Models", "/req42/models",
               ["use-cases", "activity-models", "data-models"], "model pages",
-              rows=[{"title": m["title"], "relations": m["relations"]}
+              # `relations` there is a page count per model type, not a link
+              # count — carried under its own key so the row says "pages".
+              rows=[{"title": m["title"], "pages": m["relations"]}
                     for m in _supporting_model_entries()]),
         plain("quality", "Quality requirements", "06 · Quality Requirements", "/req42/quality",
               ["quality-requirements"], "scenarios"),

@@ -52,6 +52,21 @@ tags: [quality-requirement]
 
 # Fast checkout
 """
+PAGE = """---
+id: {id}
+type: {type}
+title: {title}
+status: draft
+created: 2026-09-07
+updated: 2026-09-07
+sources: []
+related: []
+tags: [{type}]
+---
+
+# {title}
+"""
+
 ORDER = ["tile-vision", "tile-stakeholders", "tile-scope", "tile-backlog", "tile-models",
          "tile-quality", "tile-constraints", "tile-glossary", "tile-issues", "tile-adrs", "tile-changes"]
 
@@ -106,6 +121,46 @@ def test_recent_changes_shape():
         (_wiki / "glossary" / "GLO-001-x.md").unlink()
 
 
+def _write(folder, stem, **kw):
+    f = _wiki / folder / f"{stem}.md"
+    f.write_text(PAGE.format(**kw), encoding="utf-8")
+    return f
+
+
+def test_scope_tile_counts_interfaces_not_the_context_page():
+    """`folders` spans context + external-interfaces (Scope's maturity and
+    issue flags need both), but the headline number must match its unit."""
+    written = [
+        _write("context", "CTX-001-system", id="CTX-001", type="context", title="System context"),
+        _write("external-interfaces", "EIF-001-a", id="EIF-001",
+               type="external-interface", title="Payment gateway"),
+        _write("external-interfaces", "EIF-002-b", id="EIF-002",
+               type="external-interface", title="Catalog service"),
+    ]
+    try:
+        body = _home()
+        scope = body[body.index("tile-scope"):body.index("tile-backlog")]
+        assert '<span class="num">2</span>' in scope, scope
+        assert "context described" in scope, scope
+    finally:
+        for f in written:
+            f.unlink()
+
+
+def test_supporting_model_rows_say_pages_not_links():
+    """`_supporting_model_entries()` reports pages per model type; only
+    `len(page.link_targets())` may ever be labelled a link."""
+    f = _write("use-cases", "UC-001-borrow", id="UC-001", type="use-case", title="Borrow a book")
+    try:
+        body = _home()
+        tile = body[body.index("tile-models"):body.index("tile-quality")]
+        rows = tile[tile.index("<ul"):tile.index("</ul>")]   # the wrapper is a .tile-link
+        assert "1 page<" in rows, rows
+        assert "link" not in rows, rows
+    finally:
+        f.unlink()
+
+
 def test_vault_status_strip():
     body = _home()
     assert 'class="vault-status"' in body
@@ -117,5 +172,7 @@ if __name__ == "__main__":
     test_every_page_has_the_main_nav()
     test_quality_tile_counts_and_changes_tile_lists_the_page()
     test_recent_changes_shape()
+    test_scope_tile_counts_interfaces_not_the_context_page()
+    test_supporting_model_rows_say_pages_not_links()
     test_vault_status_strip()
     print("OK: home layout, navigation and latest changes")

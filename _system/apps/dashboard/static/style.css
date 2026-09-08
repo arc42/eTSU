@@ -556,7 +556,7 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 }
 .whos-here:hover { color: var(--ink); border-color: var(--accent); }
 
-/* ---- /who — a card per connected participant, refreshed live ---- */
+/* ---- /who — a card per connected client, refreshed live ---- */
 .who-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem; }
 .who-card {

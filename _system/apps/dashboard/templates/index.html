@@ -51,7 +51,7 @@
     {{ empty_bootstrap("vision") }}
     {% elif t.key == 'changes' %}
     {% if t.rows %}
-    <ul class="mini-list mini-list-changes">
+    <ul class="mini-list">
       {% for r in t.rows %}
       <li>
         <a class="ml-hit" href="{{ r.url }}">
@@ -80,6 +80,7 @@
       <li>
         <span class="ml-title">{% if r.id %}<code class="ml-id">{{ r.id }}</code> {% endif %}{{ r.title }}</span>
         {% if r.severity is defined %}<span class="ml-count">{{ r.severity }}</span>
+        {% elif r.pages is defined %}<span class="ml-count" title="pages of this type">{{ r.pages }} page{{ '' if r.pages == 1 else 's' }}</span>
         {% elif r.relations is defined %}<span class="ml-count" title="linked wiki pages">{{ r.relations }} link{{ '' if r.relations == 1 else 's' }}</span>{% endif %}
       </li>
       {% endfor %}
