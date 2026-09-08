@@ -39,10 +39,10 @@ lan_ip() {
   if command -v ipconfig >/dev/null 2>&1; then
     ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true
   elif command -v hostname >/dev/null 2>&1; then
-    hostname -I 2>/dev/null | awk '{print $1}'
+    hostname -I 2>/dev/null | awk '{print $1}' || true
   fi
 }
-LAN_IP="$(lan_ip)"
+LAN_IP="$(lan_ip 2>/dev/null || true)"
 
 # Open a URL in the default browser (a normal tab is fine — the server stops
 # itself when the tab/window is closed, so nothing needs to close the window

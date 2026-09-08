@@ -19,6 +19,7 @@ import zlib
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import markdown as md
@@ -2084,7 +2085,7 @@ def public_url() -> str:
     env = os.environ.get("DASH_PUBLIC_URL", "").strip()
     if env:
         return env.rstrip("/")
-    host, _, port = request.host.partition(":")
+    port = urlsplit(request.host_url).port
     ip = _lan_ip()
     if ip:
         return f"http://{ip}:{port}" if port else f"http://{ip}"

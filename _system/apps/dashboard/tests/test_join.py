@@ -60,8 +60,21 @@ def test_home_and_join_show_the_code():
     assert "192.0.2.7:8080" in join and "Who" in join
 
 
+def test_public_url_falls_back_when_env_is_unset():
+    saved = os.environ.pop("DASH_PUBLIC_URL")
+    try:
+        with app.app.test_request_context("/", base_url="http://[::1]:8080"):
+            url = app.public_url()
+            assert url.startswith("http://"), url
+            assert url.endswith(":8080"), url
+            assert "]" not in url.split("//", 1)[1].split(":8080")[0] or url.startswith("http://[::1]"), url
+    finally:
+        os.environ["DASH_PUBLIC_URL"] = saved
+
+
 if __name__ == "__main__":
     test_public_url_prefers_env_and_strips_slash()
     test_qr_svg_is_inline_and_theme_aware()
     test_home_and_join_show_the_code()
+    test_public_url_falls_back_when_env_is_unset()
     print("OK: QR join code")
