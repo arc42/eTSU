@@ -43,3 +43,8 @@ bump the version above.
   → cytoscape-cola. **Name bridge:** webcola sets `window.cola` but cytoscape-cola's UMD
   expects `window.webcola`; `graph.html` runs `window.webcola = window.cola` between the two
   `<script>` tags so the plugin gets the real module. If cola is absent, fcose/cose apply.
+
+## fonts/ (Bricolage Grotesque, JetBrains Mono)
+- **Bricolage Grotesque** (variable, opsz 12–96, wght 300–800; latin subset) — <https://github.com/ateliertriay/bricolage>, SIL Open Font License 1.1. Text, headings and numbers.
+- **JetBrains Mono** 400 + 600 (latin subset) — <https://github.com/JetBrains/JetBrainsMono>, SIL Open Font License 1.1. IDs, code, eyebrows.
+- **Source:** latin-subset woff2 files as served by the Google Fonts CSS API (`fonts.googleapis.com/css2?family=…`), fetched once and vendored; nothing is loaded from Google at runtime.

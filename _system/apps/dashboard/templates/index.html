@@ -25,7 +25,7 @@
   {% set inner %}
     {% if t.key == 'vision' and t.active %}
     <div class="tile-head">
-      <h2>{{ t.label }}</h2>
+      <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     <p class="tile-vision-claim">{{ t.claim }}</p>
     <div class="tile-head tile-head-second">
@@ -48,14 +48,12 @@
     {# day one: no vision page yet. Same shape as every other empty tile —
        heading + next step, no "Demo" chip, no placeholder counter. #}
     <div class="tile-head">
-      <span class="tile-icon">{{ t.icon }}</span>
-      <h2>{{ t.label }}</h2>
+      <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     {{ empty_bootstrap("vision") }}
     {% elif t.key == 'data-model' and t.active %}
     <div class="tile-head">
-      <span class="tile-icon">{{ t.icon }}</span>
-      <h2>{{ t.label }}</h2>
+      <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     {% if t.diagram %}
     <figure class="tile-mini-diagram">
@@ -67,8 +65,7 @@
     {% if t.claim %}<p class="tile-dm-claim">{{ t.claim }}</p>{% endif %}
     {% elif t.key == 'backlog' and t.active %}
     <div class="tile-head">
-      <span class="tile-icon">{{ t.icon }}</span>
-      <h2>{{ t.label }}</h2>
+      <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     <div class="tile-count">
       <span class="num">{{ t.count }}</span>
@@ -89,8 +86,7 @@
     <div class="tile-subcount">{{ t.count }} {{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</div>
     {% else %}
     <div class="tile-head">
-      <span class="tile-icon">{{ t.icon }}</span>
-      <h2>{{ t.label }}</h2>
+      <h2 class="tile-title">{{ t.label }}</h2>
     </div>
     <div class="tile-count">
       <span class="num">{{ t.count }}</span>
@@ -130,8 +126,7 @@
   {% if t.search %}
     <div class="tile tile-search tile-{{ t.key }}">
       <div class="tile-head">
-        <span class="tile-icon">{{ t.icon }}</span>
-        <h2>{{ t.label }}</h2>
+        <h2 class="tile-title">{{ t.label }}</h2>
       </div>
       <form class="tile-searchform" action="{{ t.href }}" method="get" role="search">
         <input type="search" name="q" id="tile-search-input" class="search-input" placeholder="Search everything…"

@@ -82,7 +82,8 @@ def test_adr_empty_state_does_not_suggest_ingest():
     assert "raw/" not in body, "ADRs are never produced by ingesting raw/"
     home = _client().get("/").get_data(as_text=True)
     start = home.index("tile-adrs")
-    assert "raw/" not in home[start:start + 900]
+    end = home.index("tile-issues", start)
+    assert "raw/" not in home[start:end]
 
 
 def test_vision_without_objectives_has_a_hint():

@@ -585,7 +585,7 @@ def build_req42_blocks(sample: int = 5) -> list[dict]:
 # projected live from the structured edges — each external interface's `flows`
 # and each stakeholder's `provides:`/`receives:` — into a mermaid flowchart.
 # Center = the system (blueish box); systems/organizations = light-grey boxes;
-# human roles = actor symbol (👤). Stakeholders are merged/hidden/shaped per their
+# human roles = actor symbol ("Person"). Stakeholders are merged/hidden/shaped per their
 # `context_role`/`nature` fields (ADR-0014). No node links (not needed yet).
 
 _NID_RE = re.compile(r"[^A-Za-z0-9]")
@@ -683,9 +683,9 @@ def build_context_diagram(center: str | None = None) -> str | None:
 
     lines = ["flowchart LR", f'  {core}["{_clean_label(center)}"]:::core']
     for nid, label, cls in nodes:
-        # persons get the actor symbol (stadium + 👤); systems/organizations are boxes
+        # persons get the actor symbol (stadium + "Person"); systems/organizations are boxes
         if cls == "actor":
-            lines.append(f'  {nid}(["👤 {label}"]):::actor')
+            lines.append(f'  {nid}(["Person · {label}"]):::actor')
         else:
             lines.append(f'  {nid}["{label}"]:::{cls}')
     lines += edges
@@ -998,7 +998,7 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
         # index.html renders the empty state rather than a placeholder dash.
         return {
             "key": "vision", "label": "Vision", "href": "/goals",
-            "icon": "🎯", "rows": [], "active": False,
+            "rows": [], "active": False,
         }
     claim = str(vision.meta.get("tile_claim") or "").strip()
     rows = [{
@@ -1008,7 +1008,7 @@ def build_vision_tile(data: dict, titles: dict[str, str]) -> dict:
     } for o in objectives]
     return {
         "key": "vision", "label": "Vision", "href": "/goals",
-        "icon": "🎯", "active": True,
+        "active": True,
         "claim": claim,
         "objective_rows": rows,
     }
@@ -1344,7 +1344,7 @@ def index():
     backlog = build_backlog()
     backlog_tile = {
         "key": "backlog", "label": "Product Backlog", "href": "/req42/backlog",
-        "count": backlog["total_epics"], "unit": "Epics", "icon": "🗂️",
+        "count": backlog["total_epics"], "unit": "Epics",
         "sub": f'{backlog["total_features"]} Features · {backlog["total_stories"]} Stories',
         "active": True,
         "epic_rows": [
@@ -1365,13 +1365,13 @@ def index():
             "sub": f"{req42_in_scope} of 12 blocks in scope",
         },
         {
-            "key": "search", "label": "Search", "href": "/search", "icon": "🔎",
+            "key": "search", "label": "Search", "href": "/search",
             "rows": [], "active": True, "search": True,
         },
         backlog_tile,
         {
             "key": "glossary", "label": "Glossary",
-            "count": len(glossary), "unit": "terms", "icon": "📖",
+            "count": len(glossary), "unit": "terms",
             "rows": by_relations(glossary), "active": True,
             "links": [
                 {"label": "Table", "href": "/glossary"},
@@ -1380,24 +1380,24 @@ def index():
         },
         {
             "key": "stakeholders", "label": "Stakeholders", "href": "/stakeholders",
-            "count": len(stakeholders), "unit": "personas", "icon": "👥",
+            "count": len(stakeholders), "unit": "personas",
             "rows": by_relations(stakeholders), "active": True,
         },
         {
             "key": "adrs", "label": "ADRs", "href": "/adrs",
-            "count": len(adrs), "unit": "decisions", "icon": "🏛️",
+            "count": len(adrs), "unit": "decisions",
             "rows": [{"id": a["id"], "title": a["title"], "status": a["status"]} for a in adrs],
             "active": True,
         },
         {
             "key": "issues", "label": "Issues", "href": "/issues",
-            "count": len(issues), "unit": "Issues", "icon": "⚠️",
+            "count": len(issues), "unit": "Issues",
             "rows": [], "active": True,
             "sub": f"{len(open_issues)} open",
         },
         {
             "key": "data-model", "label": "Data model", "href": "/data-model",
-            "icon": "🧩", "active": True,
+            "active": True,
             "diagram": build_data_model_kind_diagram(),
             # Empty -> no claim at all: index.html renders the shared empty
             # state, and a second "No entities yet" line under it read as two
