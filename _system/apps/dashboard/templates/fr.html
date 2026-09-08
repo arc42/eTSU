@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_provenance.html" import provenance_chips %}
 {% block title %}{{ fr.id }} · {{ fr.title }}{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="/req42/backlog">Product Backlog</a>{% for a in ancestors %} <span>/</span> <a href="/functional-requirements/{{ a.stem }}">{{ a.id }}</a>{% endfor %} <span>/</span> {{ fr.id }}</nav>{% endblock %}
 {% block content %}
@@ -13,6 +14,7 @@
   <span class="backlog-counter" title="S = Stories, F = Features (below)">{{ fr.n_stories }}S{% if fr.stereotype == 'epic' %} · {{ fr.n_features }}F{% endif %}</span>
   {% endif %}
 </div>
+{% if sources is not none %}{{ provenance_chips(sources) }}{% endif %}
 <h1 class="page-h1">{{ fr.title }}</h1>
 
 {% if diagram %}

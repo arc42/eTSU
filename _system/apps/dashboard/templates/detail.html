@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_provenance.html" import provenance_chips %}
 {% block title %}{{ id }} · {{ title }}{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="{{ crumb_href }}">{{ crumb }}</a> <span>/</span> {{ id }}</nav>{% endblock %}
 {% block content %}
@@ -13,6 +14,7 @@
   {% if updated and updated != '—' %}<span>· updated {{ updated }}</span>{% endif %}
   {% if tags %}<span>· {% for t in tags %}<span class="tag-chip">{{ t }}</span>{% endfor %}</span>{% endif %}
 </p>
+{% if sources is not none %}{{ provenance_chips(sources) }}{% endif %}
 
 {% if context_diagram %}
 <figure class="ctx-diagram">

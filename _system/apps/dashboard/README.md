@@ -111,6 +111,19 @@ block in a page body, so extra diagrams can go straight into the markdown. The
 glossary term network at `/graph/glossary` uses the vendored cytoscape bundle
 plus `static/glossary-graph.js`.
 
+## Provenance
+
+Every wiki page's frontmatter `sources:` list is resolved and rendered as
+chips right under the page header (`provenance_chips()` in
+`templates/_provenance.html`) — one chip per source, linking to `/source/<stem>`,
+or a dashed "unresolved" chip if the record is missing; a page with no
+`sources:` at all shows an amber "unsourced" chip instead. `/source/<stem>`
+renders one `raw/sources/` provenance record (type, origin, captured date,
+checksum) plus the wiki pages it fed (`ingested-pages:`, resolved to real
+links). The records themselves come from `raw/sources/` (`RAW_SOURCES_DIR`,
+mounted read-only at `/sources` in Docker) — the same folder the home page's
+status-strip source count already reads.
+
 ## Layout
 
 ```

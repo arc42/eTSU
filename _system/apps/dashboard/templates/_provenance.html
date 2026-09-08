@@ -1,0 +1,10 @@
+{% macro provenance_chips(sources) %}
+<div class="provenance" aria-label="Provenance">
+  <span class="provenance-label">Sources</span>
+  {% if sources %}{% for s in sources %}
+    {% if s.url %}<a class="chip chip-src" href="{{ s.url }}" title="{{ s.type }}{% if s.origin %} · {{ s.origin }}{% endif %}"><code>{{ s.id }}</code> {{ s.title }}</a>
+    {% else %}<span class="chip chip-src chip-unresolved" title="No matching record in raw/sources/"><code>{{ s.id }}</code></span>{% endif %}
+  {% endfor %}
+  {% else %}<span class="chip chip-unsourced" title="No source recorded — treat as an assumption">unsourced</span>{% endif %}
+</div>
+{% endmacro %}

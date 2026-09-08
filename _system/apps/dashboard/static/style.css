@@ -388,6 +388,18 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
 .tag-chip { background: var(--card-2); border: 1px solid var(--line); border-radius: 999px; padding: .05rem .5rem; color: var(--ink-soft); font-size: .76rem; }
 .fbar-label { color: var(--ink-soft); font-size: .85rem; align-self: center; margin-right: .1rem; }
 
+/* ---- provenance chips (Sources) ---- */
+.provenance { display:flex; flex-wrap:wrap; align-items:center; gap:.4rem; margin: -.6rem 0 var(--space-4); }
+.provenance-label { font: 600 .7rem/1.4 var(--font-mono); letter-spacing:.08em; text-transform:uppercase; color: var(--ink-dim); margin-right:.2rem; }
+.chip { display:inline-flex; align-items:center; gap:.35rem; font-size:.78rem; padding:.1rem .6rem; border-radius:999px; border:1px solid var(--line); color: var(--ink-soft); text-decoration:none; }
+.chip code { font-size:.9em; }
+.chip-src:hover { border-color: var(--accent); color: var(--ink); }
+.chip-unresolved { border-style: dashed; }
+.chip-unsourced { color: var(--warn); border-color: rgba(255,180,84,.4); background: rgba(255,180,84,.1); }
+.source-facts { display:grid; grid-template-columns: max-content 1fr; gap:.3rem 1rem; margin: 1rem 0; }
+.source-facts dt { color: var(--ink-dim); font: 600 .7rem/1.8 var(--font-mono); letter-spacing:.08em; text-transform:uppercase; }
+.source-facts dd { margin:0; }
+
 .detail-pane { margin-top: 1.5rem; background: var(--card); border: 1px solid var(--line);
   border-radius: var(--radius); padding: .4rem 1.6rem 1.4rem; color: var(--ink-soft); }
 .detail-placeholder { color: var(--ink-dim); font-style: italic; padding: 1rem 0; margin: 0; }

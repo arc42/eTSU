@@ -320,6 +320,37 @@ def link_index() -> dict[str, tuple[str, str]]:
     return idx
 
 
+@_request_cached
+def source_index() -> dict[str, Page]:
+    """Map each raw/sources/ record's stem and id -> its Page, so a page's
+    `sources:` wikilinks (and the /source/<stem> route) can resolve either
+    form."""
+    idx: dict[str, Page] = {}
+    for p in load_sources():
+        idx.setdefault(p.stem, p)
+        idx.setdefault(p.id, p)
+    return idx
+
+
+def provenance(page: Page) -> list[dict]:
+    """Resolve a page's `sources:` wikilinks to provenance records. Unresolved
+    entries are kept (url=None) so the chip can say so instead of vanishing."""
+    idx = source_index()
+    rows = []
+    for ref in page.meta.get("sources") or []:
+        base = _fr_stem_from_ref(ref)           # '[[raw/sources/SRC-001-x]]' -> 'SRC-001-x'
+        src = idx.get(base)
+        if src:
+            rows.append({"id": src.id, "title": src.title, "stem": src.stem,
+                         "type": str(src.meta.get("source-type") or ""),
+                         "origin": str(src.meta.get("origin") or ""),
+                         "captured": str(src.meta.get("captured") or ""),
+                         "url": f"/source/{src.stem}"})
+        else:
+            rows.append({"id": base, "title": base, "stem": base, "type": "", "origin": "", "captured": "", "url": None})
+    return rows
+
+
 def open_issue_counts() -> dict[str, int]:
     """folder -> number of OPEN issues whose links (frontmatter `related:` or
     body wikilinks) resolve to a page in that folder. One issue can count for
@@ -1643,6 +1674,7 @@ def page_detail(folder, stem):
                     status=a["status"], created="", updated=a["date"],
                     tags=[], body_html=body_html, crumb="ADRs", crumb_href="/adrs",
                     context_diagram=None, needs_mermaid="language-mermaid" in body_html,
+                    sources=None,  # ADRs carry no provenance
                 )
         abort(404)
 
@@ -1680,7 +1712,33 @@ def page_detail(folder, stem):
         context_diagram=context_diagram, relations=build_relations_panel(stem),
         ego_graph=ego_graph, ego_layers=ego_layers,
         needs_mermaid=bool(context_diagram) or "language-mermaid" in body_html,
+        sources=provenance(page),
     )
+
+
+@app.route("/source/<stem>")
+def source_detail(stem):
+    """Detail page for one raw/sources/ provenance record: what it is, where it
+    came from, and which wiki pages it fed (`ingested-pages:`). Reached from a
+    provenance chip on any sourced page; no standalone sources list exists yet,
+    so its breadcrumb goes straight back to the home page."""
+    src = source_index().get(stem)
+    if not src:
+        abort(404)
+    titles = title_index()
+    body = re.sub(r"^\s*#\s+.*(?:\n|$)", "", src.body, count=1)
+    facts = [("Type", str(src.meta.get("source-type") or "—")),
+             ("Origin", str(src.meta.get("origin") or "—")),
+             ("Captured", str(src.meta.get("captured") or "—")),
+             ("Checksum", str(src.meta.get("sha256") or "—")[:16])]
+    facts_html = "".join(f"<dt>{k}</dt><dd>{v}</dd>" for k, v in facts)
+    ingested = ", ".join(render_wikilinks(str(r), titles, link_index()) for r in (src.meta.get("ingested-pages") or [])) or "—"
+    body_html = f'<dl class="source-facts">{facts_html}<dt>Ingested pages</dt><dd>{ingested}</dd></dl>' + render_markdown(body, titles)
+    return render_template("detail.html", kind="Source", id=src.id, title=src.title, status=src.status,
+                           created=str(src.meta.get("created", "")), updated=str(src.meta.get("updated", "")),
+                           tags=src.meta.get("tags") or [], body_html=body_html, crumb="Sources", crumb_href="/",
+                           context_diagram=None, relations=None, ego_graph=None, ego_layers=None,
+                           needs_mermaid=False, sources=None)
 
 
 @app.route("/search")
@@ -2037,6 +2095,7 @@ def fr_view(stem):
         "fr.html", fr=fr, body_html=body_html, diagram=diagram,
         ancestors=_fr_ancestors(stem),
         needs_mermaid=bool(diagram) or "language-mermaid" in body_html,
+        sources=provenance(page),
     )
 
 

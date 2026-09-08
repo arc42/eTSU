@@ -45,6 +45,7 @@ GET_ROUTES = [
 NOT_FOUND_ROUTES = [
     "/page/glossary/GLO-001-nothing",
     "/functional-requirements/FR-001-nothing",
+    "/source/SRC-001-nothing",
 ]
 
 
