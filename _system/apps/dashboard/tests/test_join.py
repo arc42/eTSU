@@ -1,0 +1,67 @@
+"""QR "scan to join" contract: `public_url()`, `qr_svg()`, and the `/join`
+page that projects the code full-size. No pytest.
+
+Run from the dashboard dir:
+    .venv/bin/python tests/test_join.py
+"""
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+WIKI_FOLDERS = [
+    "glossary", "goals", "stakeholders", "context", "external-interfaces",
+    "data-models", "activity-models", "use-cases", "functional-requirements",
+    "quality-requirements", "constraints", "issues",
+]
+
+_tmp = Path(tempfile.mkdtemp())
+_wiki = _tmp / "wiki"
+for _f in WIKI_FOLDERS:
+    (_wiki / _f).mkdir(parents=True)
+(_tmp / "adr").mkdir()
+os.environ["WIKI_DIR"] = str(_wiki)
+os.environ["ADR_DIR"] = str(_tmp / "adr")
+os.environ["WIKI_CONFIG"] = str(_tmp / "wiki.yaml")
+os.environ["DASH_STARTUP_GRACE"] = "3600"
+os.environ["DASH_HEARTBEAT_GRACE"] = "3600"
+# DASH_PUBLIC_URL must be set before `import app` — public_url() reads it via
+# os.environ.get() at call time, but setting it here matches how dashboard.sh
+# actually launches the process (env fixed before the app ever starts).
+os.environ["DASH_PUBLIC_URL"] = "http://192.0.2.7:8080/"
+
+HERE = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(HERE))
+
+import app  # noqa: E402
+
+
+def test_public_url_prefers_env_and_strips_slash():
+    with app.app.test_request_context("/"):
+        assert app.public_url() == "http://192.0.2.7:8080"
+
+
+def test_qr_svg_is_inline_and_theme_aware():
+    svg = app.qr_svg("http://192.0.2.7:8080")
+    assert svg.startswith("<svg") and "currentColor" in svg
+
+
+def test_home_and_join_show_the_code():
+    c = app.app.test_client()
+    home = c.get("/").get_data(as_text=True)
+    assert 'class="hero-join"' in home and "<svg" in home and "192.0.2.7:8080" in home
+    join = c.get("/join").get_data(as_text=True)
+    # Exactly one <svg> inside .join-qr — the page-wide count is 2 because
+    # base.html's footer carries its own unrelated "Python/Flask" badge icon
+    # on every page.
+    qr_start = join.index('class="join-qr"')
+    qr_section = join[qr_start:join.index("</div>", qr_start)]
+    assert qr_section.count("<svg") == 1
+    assert "192.0.2.7:8080" in join and "Who" in join
+
+
+if __name__ == "__main__":
+    test_public_url_prefers_env_and_strips_slash()
+    test_qr_svg_is_inline_and_theme_aware()
+    test_home_and_join_show_the_code()
+    print("OK: QR join code")

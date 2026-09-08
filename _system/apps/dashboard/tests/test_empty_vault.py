@@ -40,6 +40,7 @@ GET_ROUTES = [
     "/", "/glossary", "/graph/glossary", "/issues", "/stakeholders", "/adrs",
     "/search", "/goals", "/data-model", "/req42", "/req42/backlog",
     "/req42/scope", "/req42/models", "/req42/quality", "/req42/constraints",
+    "/join",
 ]
 NOT_FOUND_ROUTES = [
     "/page/glossary/GLO-001-nothing",

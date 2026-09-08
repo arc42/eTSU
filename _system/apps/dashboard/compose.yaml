@@ -12,6 +12,8 @@ services:
       # timezone for the "last refreshed" footer
       TZ: "${TZ:-UTC}"
       WIKI_CONFIG: "/config/wiki.yaml"
+      # LAN address the QR code / /join page point at; dashboard.sh exports it
+      DASH_PUBLIC_URL: "${DASH_PUBLIC_URL:-}"
     ports:
       - "8080:8000"
     volumes:

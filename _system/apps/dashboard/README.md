@@ -33,6 +33,17 @@ one who sees the "Disconnect all" button, which ends the session for
 everyone; if their tab disappears, the role passes to whoever's left with the
 next-earliest connection.
 
+## Join code
+
+The hero on the home page carries a QR code plus its plain-text address —
+scan it (or type it) to open the dashboard on your own device. `/join`
+renders the same code full-size for projecting, linked from "Who's here?".
+The address defaults to the host's LAN IP (`dashboard.sh`'s `lan_ip()`,
+port 8080 in Docker / 8000 for `local`); set `DASH_PUBLIC_URL` to override it
+when the room has DNS or a tunnel, e.g. `DASH_PUBLIC_URL=http://name.local:8080
+./dashboard.sh`. The QR is generated offline (`segno`, pure Python, no
+network at runtime) and rendered inline as SVG so it follows the theme.
+
 ## Navigation
 
 Every page carries the same topbar: the vault name (back to the home page), a

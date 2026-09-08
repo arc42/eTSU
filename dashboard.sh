@@ -33,6 +33,17 @@ if [ -z "${TZ:-}" ] && [ -L /etc/localtime ]; then
 fi
 export TZ="${TZ:-UTC}"
 
+# Address the QR code points at: the host's LAN IP, not localhost. Override with
+# DASH_PUBLIC_URL=http://name.local:8080 when the room has DNS or a tunnel.
+lan_ip() {
+  if command -v ipconfig >/dev/null 2>&1; then
+    ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || true
+  elif command -v hostname >/dev/null 2>&1; then
+    hostname -I 2>/dev/null | awk '{print $1}'
+  fi
+}
+LAN_IP="$(lan_ip)"
+
 # Open a URL in the default browser (a normal tab is fine — the server stops
 # itself when the tab/window is closed, so nothing needs to close the window
 # programmatically). See ADR-0022. Shared by every mode below.
@@ -68,16 +79,20 @@ fi
 
 case "$cmd" in
   up)
+    export DASH_PUBLIC_URL="${DASH_PUBLIC_URL:-http://${LAN_IP:-localhost}:8080}"
     docker compose -f "$COMPOSE_FILE" up --build -d
     wait_for_url "$URL" || echo "… still starting; reload the page if it does not answer."
     echo "✓ Dashboard running at $URL"
+    echo "✓ Others in the room: $DASH_PUBLIC_URL (QR on the home page, /join to project it)"
     open_browser_at "$URL"
     ;;
   rebuild)
+    export DASH_PUBLIC_URL="${DASH_PUBLIC_URL:-http://${LAN_IP:-localhost}:8080}"
     docker compose -f "$COMPOSE_FILE" build --no-cache
     docker compose -f "$COMPOSE_FILE" up -d
     wait_for_url "$URL" || echo "… still starting; reload the page if it does not answer."
     echo "✓ Dashboard rebuilt, running at $URL"
+    echo "✓ Others in the room: $DASH_PUBLIC_URL (QR on the home page, /join to project it)"
     open_browser_at "$URL"
     ;;
   down)
@@ -97,11 +112,13 @@ case "$cmd" in
     export WIKI_DIR ADR_DIR SOURCES_DIR CONFIG_FILE
     export WIKI_CONFIG="$CONFIG_FILE"
     export RAW_SOURCES_DIR="$SOURCES_DIR"
+    export DASH_PUBLIC_URL="${DASH_PUBLIC_URL:-http://${LAN_IP:-localhost}:8000}"
     # Start the server first, then open the browser once it actually answers.
     .venv/bin/python app.py &
     server_pid=$!
     wait_for_url "$LOCAL_URL" || echo "… server did not answer yet; reload if the page fails."
     echo "✓ Dashboard (local, no Docker) on $LOCAL_URL"
+    echo "✓ Others in the room: $DASH_PUBLIC_URL (QR on the home page, /join to project it)"
     open_browser_at "$LOCAL_URL"
     wait "$server_pid" || true
     ;;

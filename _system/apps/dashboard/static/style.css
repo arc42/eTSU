@@ -41,6 +41,8 @@
   --graph-bg: #0c1424;         /* cytoscape / mermaid canvas ground */
   --graph-glow: #16223d;
   --plate: #e8eef9;            /* backing behind the eTSU mark (see .hero-mark) */
+  --on-plate: #0e1726;         /* the plate is white in both themes, so the QR
+                                  code stays navy-on-white and scannable */
   --logo-filter: none;         /* req42-logo-white.png is white-on-transparent */
   --hairline: rgba(255,255,255,.02);
   --chip-bg: rgba(255,255,255,.08);
@@ -81,6 +83,8 @@
   --graph-glow: #dfeaf8;
   --plate: #ffffff;            /* the mark is navy-on-white artwork: on a light
                                   page it needs no plate, just a flush ground */
+  --on-plate: #0e1726;         /* the plate is white in both themes, so the QR
+                                  code stays navy-on-white and scannable */
   --logo-filter: invert(1);    /* the req42 mark is white artwork and vanishes on a
                                   white card. It is bilevel white-on-transparent, so
                                   a straight invert lands on black and keeps the
@@ -886,6 +890,18 @@ html.etsu-disconnected {
   background: var(--plate);
 }
 @media (max-width: 640px) { .hero-row { flex-direction: column; align-items: flex-start; gap: .7rem; } }
+
+/* scan-to-join: the hero's QR link, and the /join page it opens onto */
+.hero-join { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--ink); }
+.hero-qr { display: block; width: 5.2rem; height: 5.2rem; padding: .3rem; background: var(--plate); color: var(--on-plate); border-radius: 6px; }
+.hero-qr svg { width: 100%; height: 100%; display: block; }
+.hero-join-text { display: flex; flex-direction: column; gap: .15rem; font-size: var(--step--1); }
+.hero-join-text code { color: var(--ink-soft); }
+.join { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: center; padding: var(--space-5) 0; }
+.join-qr { padding: var(--space-3); background: var(--plate); color: var(--on-plate); border-radius: var(--radius); }
+.join-qr svg { width: 100%; height: auto; display: block; }
+.join-url code { font-size: var(--step-2); }
+@media (max-width: 780px) { .join { grid-template-columns: 1fr; } .hero-join { margin-left: 0; } }
 
 /* Theme switch. It lives in the footer because the topbar carries breadcrumbs
    only and is absent entirely on the home page — there is no header nav to

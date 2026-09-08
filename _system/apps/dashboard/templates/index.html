@@ -10,6 +10,10 @@
       <h1 class="hero-title">{{ system_name }}</h1>
       {% if tagline %}<p class="lead">{{ tagline }}</p>{% endif %}
     </div>
+    <a class="hero-join" href="/join" title="Show a big code to project">
+      <span class="hero-qr" aria-hidden="true">{{ join_qr | safe }}</span>
+      <span class="hero-join-text"><strong>Scan to open on your device</strong><code>{{ join_url }}</code></span>
+    </a>
   </div>
   {% if not system_name_set %}
   <p class="lead empty-hint">This vault has no name yet — run the bootstrap

@@ -12,6 +12,7 @@ import mimetypes
 import os
 import re
 import signal
+import socket
 import threading
 import time
 import zlib
@@ -1500,7 +1501,9 @@ def index():
                 p.status for f in t["folders"] for p in load_folder(f))
         if t["key"] not in ("issues", "changes"):
             t["open_issues"] = sum(flags.get(f, 0) for f in t.get("folders", []))
-    return render_template("index.html", tiles=tiles, status=vault_status())
+    join_url = public_url()
+    return render_template("index.html", tiles=tiles, status=vault_status(),
+                            join_url=join_url, join_qr=qr_svg(join_url))
 
 
 @app.route("/glossary")
@@ -2054,6 +2057,56 @@ def req42_block_view(slug):
         context_diagram=context_diagram, needs_mermaid=bool(context_diagram),
         maturity=maturity(r["status"] for r in rows),
     )
+
+
+# --- scan-to-join: QR code + /join page -------------------------------------
+
+
+def _lan_ip() -> str | None:
+    """This host's LAN address, best effort. Connecting a UDP socket sends no
+    packet; it only makes the OS pick the outbound interface."""
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("10.255.255.255", 1))
+            return s.getsockname()[0]
+        finally:
+            s.close()
+    except OSError:
+        return None
+
+
+def public_url() -> str:
+    """The address other devices in the room should open. DASH_PUBLIC_URL wins
+    (dashboard.sh sets it from the host's LAN address — inside Docker the
+    container only knows its own bridge address); else the request's port on
+    this host's LAN IP; else the request's own origin."""
+    env = os.environ.get("DASH_PUBLIC_URL", "").strip()
+    if env:
+        return env.rstrip("/")
+    host, _, port = request.host.partition(":")
+    ip = _lan_ip()
+    if ip:
+        return f"http://{ip}:{port}" if port else f"http://{ip}"
+    return request.host_url.rstrip("/")
+
+
+def qr_svg(url: str, scale: int = 4) -> str:
+    """Inline SVG QR code. Segno's SVG writer validates `dark` against a
+    strict colour table and rejects the CSS keyword `currentColor` outright,
+    so the code is rendered in a throwaway colour and swapped for
+    `currentColor` in the markup afterwards — that lets CSS `color` set the
+    module colour, so it follows the theme; no background rectangle."""
+    import segno
+    svg = segno.make(url, error="m").svg_inline(
+        scale=scale, border=1, dark="black", light=None, omitsize=True)
+    return re.sub(r'stroke="[^"]*"', 'stroke="currentColor"', svg, count=1)
+
+
+@app.route("/join")
+def join_page():
+    url = public_url()
+    return render_template("join.html", join_url=url, join_qr=qr_svg(url, scale=10))
 
 
 # ---------------------------------------------------------------------------

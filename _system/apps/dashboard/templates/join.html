@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Join{% endblock %}
+{% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Join</nav>{% endblock %}
+{% block content %}
+<section class="join">
+  <div class="join-qr" aria-label="QR code for {{ join_url }}">{{ join_qr | safe }}</div>
+  <div class="join-text">
+    <h1 class="page-h1">Open this on your own device</h1>
+    <p class="lead">Point your camera at the code, or type the address. You get your own nickname and appear on <a href="/who">Who's here</a>.</p>
+    <p class="join-url"><code>{{ join_url }}</code></p>
+  </div>
+</section>
+{% endblock %}
