@@ -609,6 +609,15 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 .whos-here:hover { color: var(--ink); border-color: var(--accent); }
 
 /* ---- /who — a card per connected client, refreshed live ---- */
+/* "Who's here" header: the Yoda portrait beside the title. Sized in rem so
+   it scales with a projector's zoom; the portrait is square-ish, cropped
+   to a rounded tile so it reads as a mark, not a photo. */
+.who-hero { display: flex; align-items: center; gap: var(--space-4); margin: var(--space-1) 0 var(--space-5); }
+.who-mark { flex: none; width: 7rem; height: 7rem; object-fit: cover; border-radius: var(--radius);
+  border: 1px solid var(--line); }
+.who-hero-text { min-width: 0; }
+.who-hero-text .page-h1 { margin-bottom: var(--space-2); }
+.who-hero-text p { margin: 0; }
 .who-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 1rem; }
 .who-card {

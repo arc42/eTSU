@@ -2,9 +2,13 @@
 {% block title %}Who's here{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> Who's here</nav>{% endblock %}
 {% block content %}
-<h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 clients</span></h1>
-<p class="lead">Everyone with this dashboard open right now, you included — a fun nickname, not a real name; the facilitator is always Yoda. Updates live; close the tab and you drop off the list.</p>
-<p><a class="whos-here" href="/join">Show the join code →</a></p>
+<div class="who-hero">
+  <img class="who-mark" src="{{ url_for('static', filename='yoda.jpg') }}" alt="Yoda, the facilitator" width="480" height="468">
+  <div class="who-hero-text">
+    <h1 class="page-h1">Who's here <span class="count-pill" id="who-count">0 clients</span></h1>
+    <p><a class="whos-here" href="/join">Show the join code →</a></p>
+  </div>
+</div>
 
 <p class="empty-state" id="who-empty" hidden>Nobody yet — the list fills in with the first heartbeat, a few seconds after a page opens.</p>
 <div class="who-grid" id="who-grid"></div>
