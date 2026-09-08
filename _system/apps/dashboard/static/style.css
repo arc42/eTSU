@@ -20,6 +20,12 @@
   --font-text: "Bricolage Grotesque", "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --radius: 8px;
+  /* the rendered height of .topbar, measured in a headless browser at
+     >=781px (48.33px); the sticky table headers hang off it. Below 781px
+     the bar wraps and is 106-142px tall depending on the viewport, so no
+     single number is right — the headers stop sticking there instead
+     (see the media query next to .table-card thead th). */
+  --topbar-h: 48px;
   --space-1: .25rem; --space-2: .5rem; --space-3: .85rem; --space-4: 1.25rem; --space-5: 2rem; --space-6: 3.25rem;
   --step--1: .86rem; --step-0: 1rem; --step-1: 1.2rem; --step-2: 1.55rem; --step-3: clamp(2rem, 1.4rem + 1.8vw, 2.7rem);
   --bg: #0e1726;
@@ -61,6 +67,7 @@
   --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
   --space-1: .25rem; --space-2: .5rem; --space-3: .85rem; --space-4: 1.25rem; --space-5: 2rem; --space-6: 3.25rem;
   --step--1: .86rem; --step-0: 1rem; --step-1: 1.2rem; --step-2: 1.55rem; --step-3: clamp(2rem, 1.4rem + 1.8vw, 2.7rem);
+  --topbar-h: 48px;
   --bg: #f5f8fd;
   --bg-soft: #eaf1fa;
   --card: #ffffff;
@@ -125,24 +132,24 @@ h2 { letter-spacing: -.01em; }
    `.table-card thead` sticky offset below is measured against its height. */
 .topbar {
   display: flex; align-items: center; gap: var(--space-4);
-  padding: .55rem var(--space-5); border-bottom: 1px solid var(--line);
+  padding: var(--space-2) var(--space-5); border-bottom: 1px solid var(--line);
   background: var(--topbar-bg); backdrop-filter: blur(8px);
   position: sticky; top: 0; z-index: 10;
 }
-.brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700;
+.brand { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700;
   color: var(--ink); text-decoration: none; white-space: nowrap; }
 .brand-mark { width: 1.35rem; height: 1.35rem; border-radius: 4px; }
-.mainnav { display: flex; gap: .15rem; overflow-x: auto; scrollbar-width: none; }
+.mainnav { display: flex; gap: var(--space-1); overflow-x: auto; scrollbar-width: none; }
 /* `scrollbar-width: none` is Firefox-only; without this the global
    ::-webkit-scrollbar rule draws an 11px channel under the nav in Chrome
    the moment the links overflow. */
 .mainnav::-webkit-scrollbar { display: none; }
-.mainnav a { padding: .35rem .6rem; border-radius: 6px; color: var(--ink-soft);
+.mainnav a { padding: var(--space-1) var(--space-2); border-radius: 6px; color: var(--ink-soft);
   text-decoration: none; font-size: var(--step--1); white-space: nowrap; }
 .mainnav a:hover { color: var(--ink); background: var(--chip-bg); }
 .mainnav a[aria-current="page"] { color: var(--ink); background: var(--chip-bg); font-weight: 600; }
 .nav-search { margin-left: auto; }
-.nav-search .search-input { width: 13rem; min-width: 0; padding: .35rem .8rem; font-size: var(--step--1); }
+.nav-search .search-input { width: 13rem; min-width: 0; padding: var(--space-1) var(--space-3); font-size: var(--step--1); }
 @media (max-width: 780px) {
   .topbar { flex-wrap: wrap; }
   .nav-search { margin-left: 0; flex: 1 1 100%; }
@@ -153,7 +160,7 @@ h2 { letter-spacing: -.01em; }
 .crumbs-row { margin: 0 0 var(--space-3); }
 .crumbs { color: var(--ink-soft); font-size: .92rem; }
 .crumbs a { color: var(--accent); text-decoration: none; }
-.crumbs span { color: var(--ink-dim); margin: 0 .35rem; }
+.crumbs span { color: var(--ink-dim); margin: 0 var(--space-1); }
 
 /* This tab's own name — "Welcome, Yoda" for the facilitator, "You are
    <nickname>" for everyone else (see /who). Last item in the topbar on
@@ -161,12 +168,15 @@ h2 { letter-spacing: -.01em; }
 .my-nickname { color: var(--ink-soft); font-size: .85rem; white-space: nowrap; }
 .my-nickname strong { color: var(--ink); }
 
-.wrap { max-width: 1100px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
-.page-h1 { font-size: var(--step-3); font-weight: 700; margin: 0 0 .25rem; letter-spacing: -.025em; }
-.page-h1 + .maturity { max-width: 22rem; margin-top: .2rem; }
-.lead { color: var(--ink-soft); margin: 0 0 2rem; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: var(--space-5) var(--space-5) var(--space-6); }
+/* headings set their own leading: body's 1.55 opens a 43px h1 into two very
+   loosely spaced lines. */
+.page-h1 { font-size: var(--step-3); font-weight: 700; line-height: 1.15;
+  margin: 0 0 var(--space-1); letter-spacing: -.025em; }
+.page-h1 + .maturity { max-width: 22rem; margin-top: var(--space-1); }
+.lead { color: var(--ink-soft); margin: 0 0 var(--space-5); }
 .count-pill { font-size: .8rem; vertical-align: middle; background: var(--card-2); color: var(--ink-soft);
-  padding: .2rem .6rem; border-radius: 999px; border: 1px solid var(--line); margin-left: .4rem; }
+  padding: var(--space-1) var(--space-2); border-radius: 999px; border: 1px solid var(--line); margin-left: var(--space-1); }
 
 /* One line of vault vitals under the hero: how much is captured, what is
    still open, how much material it rests on, how fresh it is. */
@@ -185,26 +195,30 @@ h2 { letter-spacing: -.01em; }
 .tile-link:hover, .tile:focus-within { border-color: var(--accent); }
 .tile-span-2 { grid-column: span 2; }
 @media (max-width: 640px) { .tile-span-2 { grid-column: span 1; } }
-.tile-head { display: flex; flex-direction: column; gap: .15rem; margin-bottom: var(--space-2); }
+.tile-head { display: flex; flex-direction: column; gap: var(--space-1); margin-bottom: var(--space-2); }
 .tile-eyebrow { font: 600 .7rem/1.4 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-dim); }
 .tile-title { font-size: var(--step-1); font-weight: 650; margin: 0; letter-spacing: -.01em; }
-.tile-flag { display: inline-flex; align-self: flex-start; margin-top: .25rem; font: 600 .72rem/1.6 var(--font-mono);
+.tile-flag { display: inline-flex; align-self: flex-start; margin-top: var(--space-1); font: 600 .72rem/1.6 var(--font-mono);
   color: var(--warn); border: 1px solid rgba(255,180,84,.4); background: rgba(255,180,84,.1); border-radius: 999px;
-  padding: 0 .55rem; white-space: nowrap; }
-.tile-count { display: flex; align-items: baseline; gap: .5rem; margin: 0 0 .15rem; }
+  padding: 0 var(--space-2); white-space: nowrap; }
+.tile-count { display: flex; align-items: baseline; gap: var(--space-2); margin: 0 0 var(--space-1); }
 .tile-count .num { font-size: 2.3rem; font-weight: 500; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
 .tile-count .unit { color: var(--ink-soft); font-size: var(--step--1); }
 
 /* Maturity bar: a thin stacked strip showing the four-step lifecycle mix
    (accepted / review / draft / deprecated) for a tile or list page. */
-.maturity { display: flex; gap: 2px; height: 4px; margin: .45rem 0 var(--space-3); }
+/* the 2px between segments is a hairline inside a 4px-tall bar, not page
+   rhythm — the --space-* scale starts at twice that. */
+.maturity { display: flex; gap: 2px; height: 4px; margin: var(--space-2) 0 var(--space-3); }
 .maturity-seg { display: block; flex: 0 0 auto; border-radius: 2px; min-width: 3px; }
 .maturity-accepted { background: var(--accent-2); }
 .maturity-review { background: var(--accent); }
 .maturity-draft { background: var(--ink-dim); }
 .maturity-deprecated { background: var(--line); }
-.maturity-legend { display: flex; flex-wrap: wrap; gap: .3rem 1rem; font-size: .76rem; color: var(--ink-dim); margin: 0; }
-.maturity-key { display: inline-block; width: .9rem; height: 4px; border-radius: 2px; margin-right: .35rem; vertical-align: middle; }
+.maturity-legend { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4);
+  font-size: .76rem; color: var(--ink-dim); margin: 0 0 var(--space-4); }
+.maturity-legend-item { display: inline-flex; align-items: center; gap: .35rem; }
+.maturity-key { display: block; flex: none; width: .9rem; height: 4px; border-radius: 2px; }
 
 .tile-cta { display: inline-block; margin-top: auto; padding-top: var(--space-2); color: var(--accent); font-size: var(--step--1); font-weight: 600; }
 .tile-ctas { display: flex; gap: var(--space-4); margin-top: auto; }
@@ -212,19 +226,19 @@ h2 { letter-spacing: -.01em; }
 .tile-ctas .tile-cta:hover { text-decoration: underline; }
 
 /* in-tile list: ~4.5 rows visible, the rest scrolls */
-.mini-list { list-style: none; margin: .1rem 0 .2rem; padding: 0; max-height: 9.5rem; overflow-y: auto; }
-.mini-list li { display: flex; justify-content: space-between; align-items: center; gap: .5rem;
-  padding: .25rem 0; border-bottom: 1px dashed var(--line); font-size: .88rem; }
+.mini-list { list-style: none; margin: var(--space-1) 0; padding: 0; max-height: 9.5rem; overflow-y: auto; }
+.mini-list li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
+  padding: var(--space-1) 0; border-bottom: 1px dashed var(--line); font-size: .88rem; }
 .mini-list li:last-child { border-bottom: 0; }
 .ml-title { color: var(--ink); }
-.ml-count { color: var(--ink-soft); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: .25rem; }
+.ml-count { color: var(--ink-soft); font-variant-numeric: tabular-nums; display: inline-flex; align-items: center; gap: var(--space-1); }
 /* a whole mini-list row as one link (latest changes) */
-.ml-hit { display: flex; align-items: baseline; gap: .4rem; width: 100%;
+.ml-hit { display: flex; align-items: baseline; gap: var(--space-2); width: 100%;
   text-decoration: none; color: var(--ink); }
 .ml-hit:hover .ml-title { color: var(--accent); }
 .ml-hit .ml-id { flex: none; }   /* the id never wraps mid-token */
 .ml-when { color: var(--ink-dim); font-size: .78rem; white-space: nowrap; margin-left: auto; }
-.ml-id { color: var(--violet); font-size: .8em; margin-right: .15rem; }
+.ml-id { color: var(--violet); font-size: .8em; margin-right: var(--space-1); }
 .ml-out { color: var(--ink-dim); }
 
 /* ---- req42 schema overview (/req42) ---- */
@@ -301,7 +315,18 @@ h2 { letter-spacing: -.01em; }
 .table-card table { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .table-card thead th { text-align: left; padding: .9rem 1rem; background: var(--bg-soft);
   color: var(--ink-soft); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em;
-  border-bottom: 1px solid var(--line); position: sticky; top: 53px; }
+  border-bottom: 1px solid var(--line); position: sticky; top: var(--topbar-h); }
+/* Below 781px the topbar wraps (brand+nav, then the full-width search, then
+   the nickname): it is 106-142px tall depending on the viewport, so no fixed
+   `top` is right — a header pinned at 48px there slides in behind the bar.
+   Short tables on a phone scroll with the page instead; and with nothing
+   sticky left to resolve against the card, the card may become a scroll
+   container, so a phone-width glossary keeps its last column reachable
+   rather than losing it to `overflow: clip`. */
+@media (max-width: 780px) {
+  .table-card thead th { position: static; }
+  .table-card { overflow-x: auto; }
+}
 .table-card tbody td { padding: .85rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top; }
 .table-card tbody tr:last-child td { border-bottom: 0; }
 .table-card tbody tr:hover { background: rgba(62,166,255,.05); }
@@ -339,7 +364,7 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
 .bz-more { color: var(--ink-dim); }
 
 /* ---- search + filter toolbar ---- */
-.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; margin: 0 0 1.2rem; }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: 0 0 var(--space-4); }
 .toolbar .filterbar { margin: 0; }
 .search-input { flex: 1 1 240px; min-width: 200px; font: inherit; font-size: .9rem;
   color: var(--ink); background: var(--card); border: 1px solid var(--line);
@@ -348,7 +373,7 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
 .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(62,166,255,.15); }
 
 /* ---- issues filter ---- */
-.filterbar { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0 0 1.2rem; }
+.filterbar { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: 0 0 var(--space-4); }
 .fbtn { font: inherit; font-size: .85rem; cursor: pointer; color: var(--ink-soft);
   background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: .4rem .9rem;
   display: inline-flex; align-items: center; gap: .4rem; transition: all .12s ease; }
@@ -425,9 +450,9 @@ pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 
 /* ---- vision tile: the claim line, then the objectives with their epic
         counts. Spans two grid columns — it is the page's opening statement. */
-.tile-vision-claim { margin: .15rem 0 .9rem; color: var(--ink);
+.tile-vision-claim { margin: var(--space-1) 0 var(--space-3); color: var(--ink);
   font-style: italic; font-weight: 500; line-height: 1.45;
-  padding-bottom: .7rem; border-bottom: 1px dashed var(--line); }
+  padding-bottom: var(--space-3); border-bottom: 1px dashed var(--line); }
 /* goal list: allow titles to wrap (some are long), keep the epic counter pinned */
 .mini-list-vision { max-height: 9.5rem; }
 .mini-list-vision li { align-items: flex-start; line-height: 1.35; }
@@ -727,7 +752,7 @@ html.etsu-disconnected {
 .dm-note-block > .dm-section-body { padding: .35rem 0 .25rem 1.1rem; }
 
 @media (max-width: 640px) {
-  .wrap { padding: 1.5rem 1rem 3rem; }
+  .wrap { padding: var(--space-4) var(--space-3) var(--space-5); }
   .c-def { max-width: none; }
 }
 
@@ -877,13 +902,13 @@ html.etsu-disconnected {
 .lg-state-assume { background: #2f6fb3; border-color: #9fb0cc; border-style: dashed; }
 
 /* text hero — replaces the artwork banner in the neutral starter */
-.hero { margin: .2rem 0 1.4rem; }
+.hero { margin: var(--space-1) 0 var(--space-4); }
 /* Mark + title/tagline side by side rather than stacked — shorter hero,
    less scrolling before the tiles on a projector. */
-.hero-row { display: flex; align-items: center; gap: 1.1rem; }
+.hero-row { display: flex; align-items: center; gap: var(--space-4); }
 .hero-text { min-width: 0; }
-.hero-title { font-size: 2.2rem; margin: 0; letter-spacing: -0.01em; }
-.hero-text .lead { margin: .2rem 0 0; }
+.hero-title { font-size: var(--step-3); line-height: 1.15; margin: 0; letter-spacing: -0.01em; }
+.hero-text .lead { margin: var(--space-1) 0 0; }
 /* eTSU mark. The artwork is drawn for light grounds and its linework is a navy
    close to the dark theme's --bg, so it sits on a --plate backing rather than
    on the raw background. In the light theme --plate is white, which makes the
@@ -892,16 +917,16 @@ html.etsu-disconnected {
    Sized in rem so it scales with a projector's zoom. */
 .hero-mark {
   display: block; flex: none; width: auto; height: 5.2rem; margin: 0;
-  padding: .55rem .8rem; border-radius: var(--radius);
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius);
   background: var(--plate);
 }
-@media (max-width: 640px) { .hero-row { flex-direction: column; align-items: flex-start; gap: .7rem; } }
+@media (max-width: 640px) { .hero-row { flex-direction: column; align-items: flex-start; gap: var(--space-3); } }
 
 /* scan-to-join: the hero's QR link, and the /join page it opens onto */
 .hero-join { margin-left: auto; display: flex; align-items: center; gap: var(--space-3); text-decoration: none; color: var(--ink); }
-.hero-qr { display: block; width: 5.2rem; height: 5.2rem; padding: .3rem; background: var(--plate); color: var(--on-plate); border-radius: 6px; }
+.hero-qr { display: block; width: 5.2rem; height: 5.2rem; padding: var(--space-1); background: var(--plate); color: var(--on-plate); border-radius: 6px; }
 .hero-qr svg { width: 100%; height: 100%; display: block; }
-.hero-join-text { display: flex; flex-direction: column; gap: .15rem; font-size: var(--step--1); }
+.hero-join-text { display: flex; flex-direction: column; gap: var(--space-1); font-size: var(--step--1); }
 .hero-join-text code { color: var(--ink-soft); }
 .join { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: center; padding: var(--space-5) 0; }
 .join-qr { padding: var(--space-3); background: var(--plate); color: var(--on-plate); border-radius: var(--radius); }

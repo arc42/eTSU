@@ -122,11 +122,30 @@ def test_req42_block_leads_are_populated():
         assert f"{title} — req42 block {num}." in body, (slug, body[:400])
 
 
+def test_tile_unit_lines_agree_with_their_numbers():
+    """The fixture vault holds 2 epics, 1 feature and 3 stories — the exact
+    shape that used to render as "2 Epics · 1 Features · 3 Stories". Units are
+    lowercase nouns pluralised against their own count, so a count of 1 must
+    never be followed by a plural."""
+    body = _bodies()["/"]
+    units = re.findall(r'<span class="unit">(.*?)</span>', body, re.S)
+    assert units, body[:400]
+    joined = " | ".join(u.strip() for u in units)
+    assert "1 feature ·" in joined or joined.endswith("1 feature"), joined
+    assert "3 stories" in joined, joined
+    for bad in ("Epics", "Features", "Stories"):
+        assert bad not in joined, (bad, joined)
+    # a count of 1 followed by a word ending in -s is the bug, whichever tile
+    wrong = re.findall(r"\b1 ([a-z]+(?<!s)s)\b", joined)
+    assert not wrong, (wrong, joined)
+
+
 if __name__ == "__main__":
     test_all_get_routes_render_populated()
     test_no_empty_label_spans()
     test_no_dangling_lead_paragraphs()
     test_req42_lists_all_twelve_block_titles_nonempty()
     test_req42_block_leads_are_populated()
+    test_tile_unit_lines_agree_with_their_numbers()
     print(f"OK: {len(GET_ROUTES)} routes render on the populated fixture vault; "
           f"no empty labels, no dangling leads, all 12 req42 block titles present")

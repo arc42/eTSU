@@ -72,9 +72,24 @@ def test_public_url_falls_back_when_env_is_unset():
         os.environ["DASH_PUBLIC_URL"] = saved
 
 
+def test_public_url_falls_back_to_the_request_origin_without_a_lan_ip():
+    """No routable interface (an offline laptop, a locked-down container):
+    the QR must still encode a working address — the request's own origin."""
+    saved_env = os.environ.pop("DASH_PUBLIC_URL")
+    saved_ip = app._lan_ip
+    app._lan_ip = lambda: None
+    try:
+        with app.app.test_request_context("/", base_url="http://127.0.0.1:8000"):
+            assert app.public_url() == "http://127.0.0.1:8000"
+    finally:
+        app._lan_ip = saved_ip
+        os.environ["DASH_PUBLIC_URL"] = saved_env
+
+
 if __name__ == "__main__":
     test_public_url_prefers_env_and_strips_slash()
     test_qr_svg_is_inline_and_theme_aware()
     test_home_and_join_show_the_code()
     test_public_url_falls_back_when_env_is_unset()
+    test_public_url_falls_back_to_the_request_origin_without_a_lan_ip()
     print("OK: QR join code")

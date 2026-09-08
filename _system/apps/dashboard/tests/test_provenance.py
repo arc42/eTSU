@@ -162,6 +162,18 @@ def test_source_page_escapes_hostile_frontmatter():
     assert "<img src=x" not in body
 
 
+def test_unresolved_and_empty_source_refs():
+    """A `sources:` entry with no record behind it must still produce a chip
+    (dashed, url=None) rather than vanish; a None/blank entry must produce
+    nothing at all rather than an empty chip."""
+    app._PARSE_CACHE.clear()
+    page = app._parse(_wiki / "glossary" / "GLO-001-tour.md", "glossary")
+    page.meta["sources"] = ["[[raw/sources/SRC-404-ghost]]", None, "", "   "]
+    rows = app.provenance(page)
+    assert len(rows) == 1, rows
+    assert rows[0]["id"] == "SRC-404-ghost" and rows[0]["url"] is None, rows
+
+
 def test_provenance_accepts_bare_string_sources():
     app._PARSE_CACHE.clear()
     page = app._parse(_wiki / "glossary" / "GLO-003-single.md", "glossary")
@@ -176,4 +188,5 @@ if __name__ == "__main__":
     test_source_page_renders_and_links_back()
     test_source_page_escapes_hostile_frontmatter()
     test_provenance_accepts_bare_string_sources()
+    test_unresolved_and_empty_source_refs()
     print("OK: provenance")

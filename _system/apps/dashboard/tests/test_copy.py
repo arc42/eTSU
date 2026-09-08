@@ -118,6 +118,19 @@ def test_no_bare_glyph_abbreviations():
         assert not re.search(r"\}\}S\b|\}\}F\b|n_stories \}\}S", txt), f"S/F abbreviation in {p.name}"
 
 
+def test_refresh_time_survives_an_unusable_tz():
+    """TZ is whatever the host exports. An unknown zone must fall back to the
+    host's own local time, not blow up every render with a 500."""
+    saved = app.DISPLAY_TZ
+    try:
+        for tz in ("Not/AZone", "", "Europe/Berlin"):
+            app.DISPLAY_TZ = tz
+            stamp = app.inject_refresh_time()["refreshed_at"]
+            assert re.match(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", stamp), (tz, stamp)
+    finally:
+        app.DISPLAY_TZ = saved
+
+
 def test_adr_0025_is_indexed():
     # HERE is the dashboard dir itself (tests/test_copy.py's parent.parent),
     # so parents[1] is _system/ (parents[0] is apps/).
@@ -134,5 +147,6 @@ if __name__ == "__main__":
     test_vision_without_objectives_has_a_hint()
     test_search_counts_are_live()
     test_no_bare_glyph_abbreviations()
+    test_refresh_time_survives_an_unusable_tz()
     test_adr_0025_is_indexed()
     print("OK: copy contract")

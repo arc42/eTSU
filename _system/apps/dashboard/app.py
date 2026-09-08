@@ -1467,8 +1467,11 @@ def index():
     backlog = build_backlog()
     backlog_tile = {
         "key": "backlog", "label": "Product Backlog", "href": "/req42/backlog",
-        "count": backlog["total_epics"], "unit": "Epics",
-        "sub": f'{backlog["total_features"]} Features · {backlog["total_stories"]} Stories',
+        "count": backlog["total_epics"], "unit": "epic",
+        # counted nouns, not a pre-built string: index.html runs each through
+        # the `plural` macro, so one feature reads "1 feature".
+        "sub_units": [{"n": backlog["total_features"], "one": "feature", "many": None},
+                      {"n": backlog["total_stories"], "one": "story", "many": "stories"}],
         "active": True,
         "epic_rows": [
             {"id": e["id"], "title": e["title"],
@@ -1478,16 +1481,18 @@ def index():
     }
 
     def plain(key, label, eyebrow, href, folders, unit, rows=None, links=None, sub="",
-              count=None):
+              count=None, unit_many=None):
         """The default tile: a count over one or more wiki folders plus a
         relation-ranked preview list. Tiles that need a different body (vision,
         backlog, issues, ADRs, latest changes) are spelled out below.
         `count` overrides the page total where the headline number is narrower
-        than `folders` (Scope counts interfaces, not its context page)."""
+        than `folders` (Scope counts interfaces, not its context page).
+        `unit` is the *singular* noun — the template pluralises it against
+        `count`; pass `unit_many` where adding an -s is wrong."""
         pages = [p for f in folders for p in load_folder(f)]
         return {"key": key, "label": label, "eyebrow": eyebrow, "href": href, "folders": folders,
                 "count": len(pages) if count is None else count,
-                "unit": unit, "sub": sub, "active": True,
+                "unit": unit, "unit_many": unit_many, "sub": sub, "active": True,
                 "rows": rows if rows is not None else by_relations(pages), "links": links or []}
 
     context = load_folder("context")
@@ -1495,35 +1500,37 @@ def index():
     tiles = [
         vision_tile,
         plain("stakeholders", "Stakeholders", "02 · Stakeholders", "/stakeholders",
-              ["stakeholders"], "personas"),
+              ["stakeholders"], "persona"),
         # folders carries both (Scope's maturity and issue flags span the context
         # page too), but the headline number is what the unit says: interfaces.
         plain("scope", "Scope", "03 · Scope", "/req42/scope", ["context", "external-interfaces"],
-              "external interfaces", rows=by_relations(eifs), count=len(eifs),
+              "external interface", rows=by_relations(eifs), count=len(eifs),
               sub=("context described" if context else "no context page yet")),
         {**backlog_tile, "eyebrow": "04 · Product Backlog", "folders": ["functional-requirements"]},
         plain("models", "Supporting models", "05 · Supporting Models", "/req42/models",
-              ["use-cases", "activity-models", "data-models"], "model pages",
+              ["use-cases", "activity-models", "data-models"], "model page",
               # `relations` there is a page count per model type, not a link
               # count — carried under its own key so the row says "pages".
               rows=[{"title": m["title"], "pages": m["relations"]}
                     for m in _supporting_model_entries()]),
         plain("quality", "Quality requirements", "06 · Quality Requirements", "/req42/quality",
-              ["quality-requirements"], "scenarios"),
+              ["quality-requirements"], "scenario"),
         plain("constraints", "Constraints", "07 · Constraints", "/req42/constraints",
-              ["constraints"], "constraints"),
-        plain("glossary", "Glossary", "08 · Domain Terminology", None, ["glossary"], "terms",
+              ["constraints"], "constraint"),
+        plain("glossary", "Glossary", "08 · Domain Terminology", None, ["glossary"], "term",
               links=[{"label": "Table", "href": "/glossary"},
                      {"label": "Term network", "href": "/graph/glossary"}]),
         {"key": "issues", "label": "Issues", "eyebrow": "12 · Risks & Assumptions", "href": "/issues",
-         "folders": ["issues"], "count": len(open_issues), "unit": "open", "active": True,
+         "folders": ["issues"], "count": len(open_issues),
+         # "open" is the adjective, not a noun: it never takes an -s
+         "unit": "open", "unit_many": "open", "active": True,
          "sub": f"{len(issues)} in total",
          "rows": [{"id": i.id, "title": i.title, "severity": str(i.meta.get("severity") or "")}
                   for i in sorted(open_issues,
                                   key=lambda i: ({"blocker": 0, "major": 1, "minor": 2}
                                                  .get(str(i.meta.get("severity") or ""), 3), i.id))][:5]},
         {"key": "adrs", "label": "Architecture decisions", "eyebrow": "ADR · method decisions",
-         "href": "/adrs", "folders": [], "count": len(adrs), "unit": "decisions", "active": True,
+         "href": "/adrs", "folders": [], "count": len(adrs), "unit": "decision", "active": True,
          "rows": [{"id": a["id"], "title": a["title"], "status": a["status"]} for a in adrs]},
         {"key": "changes", "label": "Latest changes", "eyebrow": "Recently modified", "href": None,
          "folders": [], "active": True, "rows": recent_changes(5)},

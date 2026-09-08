@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_empty.html" import empty_state, empty_bootstrap, empty_adrs %}
 {% from "_maturity.html" import maturity_bar, maturity_legend %}
-{% from "_macros.html" import plural %}
+{% from "_macros.html" import plural, noun %}
 {% block content %}
 <header class="hero">
   <div class="hero-row">
@@ -24,8 +24,8 @@
 
 <p class="vault-status">
   <span><strong>{{ status.pages }}</strong> pages</span>
-  <span><strong>{{ status.open_issues }}</strong> open issue{{ '' if status.open_issues == 1 else 's' }}</span>
-  <span><strong>{{ status.sources }}</strong> source{{ '' if status.sources == 1 else 's' }} ingested</span>
+  <span><strong>{{ status.open_issues }}</strong> open {{ noun(status.open_issues, 'issue') }}</span>
+  <span><strong>{{ status.sources }}</strong> {{ noun(status.sources, 'source') }} ingested</span>
   <span>last change <strong>{{ status.last_change }}</strong></span>
 </p>
 {{ maturity_legend() }}
@@ -36,7 +36,7 @@
     <div class="tile-head">
       <span class="tile-eyebrow">{{ t.eyebrow }}</span>
       <h2 class="tile-title">{{ t.label }}</h2>
-      {% if t.open_issues %}<span class="tile-flag" title="Open issues that point at pages of this type">{{ t.open_issues }} open issue{{ '' if t.open_issues == 1 else 's' }}</span>{% endif %}
+      {% if t.open_issues %}<span class="tile-flag" title="Open issues that point at pages of this type">{{ t.open_issues }} open {{ noun(t.open_issues, 'issue') }}</span>{% endif %}
     </div>
     {% if t.key == 'vision' and t.active %}
     {{ maturity_bar(t.maturity) }}
@@ -74,7 +74,7 @@
     </ul>
     {% else %}{{ empty_state("pages") }}{% endif %}
     {% else %}
-    <div class="tile-count"><span class="num">{{ t.count }}</span><span class="unit">{{ t.unit }}{% if t.sub %} · {{ t.sub }}{% endif %}</span></div>
+    <div class="tile-count"><span class="num">{{ t.count }}</span><span class="unit">{{ noun(t.count, t.unit, t.unit_many) }}{% for u in t.sub_units or [] %} · {{ plural(u.n, u.one, u.many) }}{% endfor %}{% if t.sub %} · {{ t.sub }}{% endif %}</span></div>
     {{ maturity_bar(t.maturity) }}
     {% if t.key == 'backlog' and t.epic_rows %}
     <ul class="mini-list">
@@ -101,7 +101,7 @@
          counter's label: the Issues tile counts "open", not "issues". #}
       {% if t.key == 'adrs' %}{{ empty_adrs() }}
       {% elif t.key == 'issues' %}{{ empty_state("issues") }}
-      {% else %}{{ empty_state(t.unit|lower) }}{% endif %}
+      {% else %}{{ empty_state(noun(0, t.unit, t.unit_many)) }}{% endif %}
     {% endif %}
     {% endif %}
     {% if t.links %}

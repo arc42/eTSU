@@ -6,10 +6,13 @@
 {% endif %}
 {% endmacro %}
 {% macro maturity_legend() %}
+{# Each swatch and its word are one inline-flex item: the gap between them is
+   then a fixed .35rem, not whatever the template's own whitespace collapses
+   to next to the wider gap that separates the four keys from each other. #}
 <p class="maturity-legend" aria-hidden="true">
-  <span class="maturity-key maturity-accepted"></span>accepted
-  <span class="maturity-key maturity-review"></span>in review
-  <span class="maturity-key maturity-draft"></span>draft
-  <span class="maturity-key maturity-deprecated"></span>deprecated
+  {% for cls, label in [('accepted', 'accepted'), ('review', 'in review'),
+                        ('draft', 'draft'), ('deprecated', 'deprecated')] %}
+  <span class="maturity-legend-item"><span class="maturity-key maturity-{{ cls }}"></span>{{ label }}</span>
+  {% endfor %}
 </p>
 {% endmacro %}

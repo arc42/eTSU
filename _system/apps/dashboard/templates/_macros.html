@@ -1,1 +1,5 @@
-{% macro plural(n, word, words=None) %}{{ n }} {{ word if n == 1 else (words or word ~ 's') }}{% endmacro %}
+{# `noun` is the word alone, `plural` the number and the word. Two macros, one
+   rule: nothing in a template may spell a plural with an inline ternary, so
+   "1 Features" cannot happen again. `words` overrides the default -s. #}
+{% macro noun(n, word, words=None) %}{{ word if n == 1 else (words or word ~ 's') }}{% endmacro %}
+{% macro plural(n, word, words=None) %}{{ n }} {{ noun(n, word, words) }}{% endmacro %}
