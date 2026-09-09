@@ -71,7 +71,10 @@ never block or silently rewrite. The human decides.
   `_system/anchors/` (method, not domain) are English too.
 - **Grill before ingest**: Every ingest is gated by a grilling pass. Before writing
   any page from a new source you **must** activate the `grill-requirements` skill
-  to stress-test the material first. See `_system/workflows/ingest.md`.
+  to stress-test the material first. A second, different grill closes the ingest:
+  the `grilling` skill, aimed at the **human**, to answer the questions the
+  writing threw up before any of them become Issues. See
+  `_system/workflows/ingest.md`.
 - **IDs**: `TYPE-NNN`, e.g. `GLO-001`, `STK-003`, `UC-012`, `QR-004`, `ISS-009`.
   IDs are stable and never reused. Filenames: `TYPE-NNN-kebab-title.md`.
 - **Links**: use Obsidian wikilinks `[[FEAT-002-checkout]]`. Every cross-reference
@@ -86,9 +89,11 @@ never block or silently rewrite. The human decides.
 - **Contradictions are not silently resolved.** When a new source conflicts with
   an existing page, raise an Issue (`ISS-NNN`), link both sides, and present the
   options to the human. Never pick a side on your own.
-- **Issues are first-class.** Any time you encounter an open question, ambiguity,
-  missing stakeholder, untestable quality requirement, or orphaned reference,
-  create or update an Issue. Issues are content units in `wiki/issues/` like any
+- **Issues are first-class, but ask before you file.** Any time you encounter an
+  open question, ambiguity, missing stakeholder, untestable quality requirement,
+  or orphaned reference, put it to the human first (`grilling`); an Issue is
+  where a question goes when the human has *not* answered it, not the first
+  place you take it. Issues are content units in `wiki/issues/` like any
   other type; there is no standing dashboard — ask for an open-issues report when
   you want the current view.
 

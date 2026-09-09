@@ -12,6 +12,12 @@ gaps, and let decisions crystallise. Only once the grilling has settled the shar
 understanding do you proceed to the steps below. Do not skip this gate, even for
 sources that look obvious.
 
+**Two grills, and they are not the same one.** `grill-requirements` (this gate)
+stress-tests the *material* against the wiki before you write anything.
+**`grilling`** (step 5) interviews the *human* to settle the questions that
+survive the writing. The first gates starting an ingest; the second gates filing
+an Issue.
+
 **Language:** The ubiquitous language is English
 ([[0005-ubiquitous-language-english|ADR-0005]]). You may grill and ask in any
 language, but every page you write below is captured **in English.**
@@ -37,9 +43,27 @@ language, but every page you write below is captured **in English.**
    in `sources:` and add the page to the source's `ingested-pages:`. Apply the relevant
    `_system/anchors/` standard (goal frame, story format/quality, priority) and
    cite it; flag conformance gaps as Issues per step 5.
-5. **Flag, don't resolve.** Every contradiction with existing content → new
-   `ISS-NNN` linking both sides. Every gap, ambiguity, untestable quality goal,
-   or missing stakeholder → an Issue. Never silently overwrite a conflicting claim.
+5. **Ask first, then flag.** Every contradiction with existing content, gap,
+   ambiguity, untestable quality goal or missing stakeholder is a **question
+   before it is an Issue.** Collect them all, then activate the **grilling**
+   skill (Skill tool, `grilling`; the human starts the same interview with
+   `/grill-me`) and put the whole frontier to the human in one numbered round,
+   each question carrying your recommended answer. Look up anything the wiki
+   can already answer yourself — finding facts is your job, deciding is theirs.
+
+   Write whatever the human settles straight into the pages. Whatever they
+   decline, defer, or cannot answer becomes an `ISS-NNN` linking both sides,
+   exactly as before. **The gate is *try*, not *succeed*:** one round the human
+   leaves unanswered is enough to fall back to Issues, so an ingest never
+   blocks on an open question.
+
+   The skill ships with this repo, in `.agents/skills/grilling/`. If it is not
+   among your available skills anyway, **say so plainly** and file the Issues
+   without it. A missing skill is a loud fallback, never a silent one.
+
+   Never silently overwrite a conflicting claim, and never pick a side on your
+   own. A grilled answer is the human deciding; an ungrilled one is you
+   guessing.
 6. **Update index.** Add/adjust entries in `_system/index.md` under the right type heading.
    If the session produced an ADR, also add its one-line entry to the
    **Architecture Decisions (ADR)** section (link via filename, displayed as `ADR-NNNN`).
@@ -53,4 +77,5 @@ language, but every page you write below is captured **in English.**
 
 ## Quality bar
 A single ingest commonly touches 8–15 pages. If it touched only the source record,
-you under-extracted. If you created duplicates, you skipped step 3.
+you under-extracted. If you created duplicates, you skipped step 3. If every open
+question became an Issue without the human ever being asked, you skipped step 5.
