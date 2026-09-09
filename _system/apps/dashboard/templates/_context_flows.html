@@ -1,0 +1,43 @@
+{# The context diagram carries one line per neighbour with a two-word label
+   (ADR-0026). The detail that used to crowd the arrows lives here instead:
+   both directions, spelled out, per neighbour. #}
+{% macro context_flow_table(groups) %}
+{% if groups %}
+<div class="table-card ctx-flows">
+<table>
+  <thead>
+    <tr>
+      <th class="c-rel">Neighbour</th>
+      <th class="c-status">Tier</th>
+      <th class="c-dir">Direction</th>
+      <th>Data</th>
+      <th class="c-status">Format</th>
+      <th class="c-trigger">Trigger</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for g in groups %}
+      {% for r in g.rows %}
+      <tr>
+        {% if loop.first %}
+        <th class="ctx-neighbour" scope="rowgroup" rowspan="{{ g.rows|length }}">
+          <a href="/page/external-interfaces/{{ g.stem }}">{{ g.name }}</a>
+          <span class="ctx-eid">{{ g.id }}</span>
+        </th>
+        <td class="ctx-tier" rowspan="{{ g.rows|length }}">{{ g.tier or '—' }}</td>
+        {% endif %}
+        <td class="ctx-dir">
+          {% if r.direction == 'in' %}<span class="dir-in">→ in</span>
+          {% else %}<span class="dir-out">out →</span>{% endif %}
+        </td>
+        <td>{{ r.data }}</td>
+        <td class="ctx-dim">{{ r.format or '—' }}</td>
+        <td class="ctx-dim">{{ r.trigger or '—' }}</td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endmacro %}

@@ -750,38 +750,97 @@ def _clean_label(s: object, drop_parenthetical: bool = True) -> str:
     t = re.sub(r"\[\[([^\]]+)\]\]", lambda m: m.group(1).split("/")[-1], t)  # [[a]]   -> a
     if drop_parenthetical:
         t = re.sub(r"\s*\([^)]*\)\s*$", "", t)                               # trailing (…)
-    t = re.sub(r'[<>"&|\[\]]', "", t)
+    t = t.replace("&", " and ")          # never silently delete: "A & B" -> "A and B"
+    t = re.sub(r'[<>"|\[\]]', "", t)
     return re.sub(r"\s+", " ", t).strip()
+
+
+# Layout bands (ADR-0026 `tier:`). Neighbours that feed the system are ranked
+# BEFORE the centre, those it serves AFTER it, so mermaid's LR layout puts
+# supply/support on the left and demand/operations on the right instead of
+# scattering fourteen nodes around one box.
+_TIER_BANDS = [
+    ("supply", "Supply", "left"),
+    ("support", "Support", "left"),
+    ("demand", "Demand", "right"),
+    ("core-operations", "Core operations", "right"),
+]
+_TIER_LABEL = {k: lbl for k, lbl, _ in _TIER_BANDS}
+
+
+def _eif_node_label(p) -> str:
+    """Short label for a diagram node: `short_title` wins, then `title`, and
+    `partner` only as a last resort — `partner` is a full sentence by design and
+    is what made the projection unreadable at fourteen nodes."""
+    return _clean_label(p.meta.get("short_title") or p.title or p.meta.get("partner"))
+
+
+def _flow_edge_label(flows: list[dict]) -> str:
+    """One label for one line. Each flow's `label:` is a word or two; duplicates
+    collapse (a round trip about the same thing reads once), and a flow with no
+    label falls back to its `data`, clipped."""
+    seen: list[str] = []
+    for f in flows:
+        lab = _clean_label(f.get("label") or "")
+        if not lab:
+            lab = _clean_label(f.get("data") or "")
+            if len(lab) > 24:
+                lab = lab[:23].rstrip() + "…"
+        if lab and lab not in seen:
+            seen.append(lab)
+    return " · ".join(seen)
+
+
+def _eif_flows(p) -> tuple[list[dict], list[dict], list[dict]]:
+    """(inbound, outbound, all-in-document-order) flow dicts for one interface.
+    The third is what labels the edge, so the label reads in the order the author
+    wrote the flows rather than in-then-out."""
+    flows = [f for f in (p.meta.get("flows") or []) if isinstance(f, dict)]
+    d = lambda f: str(f.get("direction", "")).lower()
+    return ([f for f in flows if d(f) in ("inbound", "bidirectional")],
+            [f for f in flows if d(f) in ("outbound", "bidirectional")],
+            flows)
 
 
 def build_context_diagram(center: str | None = None) -> str | None:
     """Project a mermaid context diagram from EIF.flows + STK.provides/receives.
 
-    Returns None when no edges exist yet. Pure and string-only, so the planned
-    audit-loop (ISS-010) can reuse it outside the request cycle."""
+    One line per neighbour, not one per direction: an interface with both an
+    inbound and an outbound flow draws a single `<-->` edge carrying a single
+    label, and the two directions are spelled out in the flow table beneath
+    (build_context_flows). Returns None when no edges exist yet. Pure and
+    string-only, so it can be reused outside the request cycle."""
     center = center or _clean_label(wiki_config()["system_name"], drop_parenthetical=False)
     core = "CORE"
-    nodes: list[tuple[str, str, str]] = []   # (node_id, label, css_class)
+    bands: dict[str, list[tuple[str, str, str]]] = {}   # tier -> [(nid, label, cls)]
+    loose: list[tuple[str, str, str]] = []
     edges: list[str] = []
 
-    def edge(src: str, items, dst: str) -> None:
-        labels = [l for l in (_clean_label(i) for i in (items or [])) if l]
-        if labels:
-            edges.append(f'  {src} -->|"{", ".join(labels)}"| {dst}')
+    def add_edge(nid: str, ins: list, outs: list, side: str, ordered: list | None = None) -> None:
+        """`side` decides which end of the edge the neighbour sits on, which is
+        what actually positions it: mermaid ranks the source before the target."""
+        if ins and outs:
+            lab = _flow_edge_label(ordered if ordered is not None else ins + outs)
+            src, arrow, dst = (nid, "<-->", core) if side == "left" else (core, "<-->", nid)
+        elif ins:
+            lab, src, arrow, dst = _flow_edge_label(ins), nid, "-->", core
+        elif outs:
+            lab, src, arrow, dst = _flow_edge_label(outs), core, "-->", nid
+        else:
+            return
+        edges.append(f'  {src} {arrow}|"{lab}"| {dst}' if lab else f"  {src} {arrow} {dst}")
 
-    # real external systems — one node each (ADR-0013), flows grouped per direction
+    # real external systems — one node each (ADR-0013), one line each (ADR-0026)
     for p in load_folder("external-interfaces"):
-        flows = [f for f in (p.meta.get("flows") or []) if isinstance(f, dict)]
-        ins = [f.get("data") for f in flows
-               if str(f.get("direction", "")).lower() in ("inbound", "bidirectional")]
-        outs = [f.get("data") for f in flows
-                if str(f.get("direction", "")).lower() in ("outbound", "bidirectional")]
+        ins, outs, ordered = _eif_flows(p)
         if not (ins or outs):
             continue
         nid = _diagram_node_id(p.id)
-        nodes.append((nid, _clean_label(p.meta.get("partner") or p.title), "system"))
-        edge(nid, ins, core)
-        edge(core, outs, nid)
+        tier = str(p.meta.get("tier") or "").strip().lower()
+        side = next((s for k, _, s in _TIER_BANDS if k == tier), "left")
+        (bands.setdefault(tier, []) if tier in _TIER_LABEL else loose).append(
+            (nid, _eif_node_label(p), "system"))
+        add_edge(nid, ins, outs, side, ordered)
 
     # user roles — flows live on the stakeholder, not as EIF nodes. ADR-0014:
     # several stakeholders sharing a `context_role` merge into ONE node (union of
@@ -812,20 +871,29 @@ def build_context_diagram(center: str | None = None) -> str | None:
 
     for label, g in sorted(groups.items(), key=lambda kv: kv[1]["order"]):
         nid = _diagram_node_id(label)
-        nodes.append((nid, label, g["cls"]))
-        edge(nid, g["prov"], core)
-        edge(core, g["recv"], nid)
+        loose.append((nid, label, g["cls"]))
+        ins = [{"data": x} for x in g["prov"]]
+        outs = [{"data": x} for x in g["recv"]]
+        add_edge(nid, ins, outs, "left")
 
     if not edges:
         return None
 
-    lines = ["flowchart LR", f'  {core}["{_clean_label(center)}"]:::core']
-    for nid, label, cls in nodes:
-        # persons get the actor symbol (stadium + "Person"); systems/organizations are boxes
-        if cls == "actor":
-            lines.append(f'  {nid}(["Person · {label}"]):::actor')
-        else:
-            lines.append(f'  {nid}["{label}"]:::{cls}')
+    def node_line(nid: str, label: str, cls: str) -> str:
+        # persons get the actor symbol (stadium + "Person"); systems/orgs are boxes
+        return (f'  {nid}(["Person · {label}"]):::actor' if cls == "actor"
+                else f'  {nid}["{label}"]:::{cls}')
+
+    lines = ["flowchart LR"]
+    for tier, tier_label, _ in _TIER_BANDS:
+        if not bands.get(tier):
+            continue
+        lines.append(f'  subgraph {_diagram_node_id(tier)}["{tier_label}"]')
+        lines.append("    direction TB")
+        lines += ["  " + node_line(*n) for n in bands[tier]]
+        lines.append("  end")
+    lines.append(f'  {core}["{_clean_label(center)}"]:::core')
+    lines += [node_line(*n) for n in loose]
     lines += edges
     lines += [
         "  classDef core fill:#2f6fb3,stroke:#7fc0ff,stroke-width:2px,color:#ffffff,font-weight:bold;",
@@ -833,6 +901,33 @@ def build_context_diagram(center: str | None = None) -> str | None:
         "  classDef actor fill:#f3f6fb,stroke:#aeb8c9,color:#15202e;",
     ]
     return "\n".join(lines)
+
+
+def build_context_flows() -> list[dict]:
+    """The diagram's edges, spelled out. One group per neighbour, both
+    directions listed — this is where the detail that was removed from the
+    node and edge labels goes (ADR-0026). `unknown`/empty cells come back as
+    None so the template can render a dash instead of the word."""
+    def cell(v) -> str | None:
+        s = _clean_label(v or "")
+        return None if not s or s.lower() in ("unknown", "n/a", "none") else s
+
+    groups: list[dict] = []
+    for p in load_folder("external-interfaces"):
+        ins, outs, ordered = _eif_flows(p)
+        if not (ins or outs):
+            continue
+        rows = []
+        for f, direction in [(f, "in") for f in ins] + [(f, "out") for f in outs]:
+            rows.append({"direction": direction, "data": cell(f.get("data")) or "—",
+                         "format": cell(f.get("format")), "trigger": cell(f.get("trigger"))})
+        groups.append({
+            "id": p.id, "stem": p.stem, "name": _eif_node_label(p),
+            "partner": _clean_label(p.meta.get("partner") or ""),
+            "tier": _TIER_LABEL.get(str(p.meta.get("tier") or "").strip().lower(), ""),
+            "label": _flow_edge_label(ordered), "rows": rows,
+        })
+    return groups
 
 
 # --- glossary term network (ADR-0023) --------------------------------------
@@ -1693,7 +1788,8 @@ def page_detail(folder, stem):
                     "detail.html", kind="ADR", id=a["id"], title=a["title"],
                     status=a["status"], created="", updated=a["date"],
                     tags=[], body_html=body_html, crumb="ADRs", crumb_href="/adrs",
-                    context_diagram=None, needs_mermaid="language-mermaid" in body_html,
+                    context_diagram=None, context_flows=None,
+                    needs_mermaid="language-mermaid" in body_html,
                     sources=None,  # ADRs carry no provenance
                 )
         abort(404)
@@ -1714,6 +1810,7 @@ def page_detail(folder, stem):
     body_html = render_markdown(body, titles)
     # context pages carry the system-context diagram, projected live (ADR-0013)
     context_diagram = build_context_diagram() if folder == "context" else None
+    context_flows = build_context_flows() if folder == "context" else None
     # glossary pages carry a focused ego-graph snippet above the definition (ADR-0023)
     ego_graph = build_glossary_ego_graph(stem) if folder == "glossary" else None
     ego_layers = None
@@ -1729,7 +1826,8 @@ def page_detail(folder, stem):
         status=page.status, created=str(page.meta.get("created", "")),
         updated=str(page.meta.get("updated", "")), tags=page.meta.get("tags") or [],
         body_html=body_html, crumb="Search", crumb_href="/search",
-        context_diagram=context_diagram, relations=build_relations_panel(stem),
+        context_diagram=context_diagram, context_flows=context_flows,
+        relations=build_relations_panel(stem),
         ego_graph=ego_graph, ego_layers=ego_layers,
         needs_mermaid=bool(context_diagram) or "language-mermaid" in body_html,
         sources=provenance(page),
@@ -1763,7 +1861,8 @@ def source_detail(stem):
     return render_template("detail.html", kind="Source", id=src.id, title=src.title, status=src.status,
                            created=str(src.meta.get("created", "")), updated=str(src.meta.get("updated", "")),
                            tags=src.meta.get("tags") or [], body_html=body_html, crumb="Sources", crumb_href="/",
-                           context_diagram=None, relations=None, ego_graph=None, ego_layers=None,
+                           context_diagram=None, context_flows=None,
+                           relations=None, ego_graph=None, ego_layers=None,
                            needs_mermaid=False, sources=None)
 
 
@@ -2132,9 +2231,11 @@ def req42_block_view(slug):
     ]
     # the Scope block (03) shows the same live-projected system-context diagram
     context_diagram = build_context_diagram() if slug == "scope" else None
+    context_flows = build_context_flows() if slug == "scope" else None
     return render_template(
         "req42_block.html", block=block, rows=rows, total=len(rows),
-        context_diagram=context_diagram, needs_mermaid=bool(context_diagram),
+        context_diagram=context_diagram, context_flows=context_flows,
+        needs_mermaid=bool(context_diagram),
         maturity=maturity(r["status"] for r in rows),
     )
 

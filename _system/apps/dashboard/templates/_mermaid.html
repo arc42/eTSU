@@ -19,10 +19,20 @@
     var nodes = Array.prototype.slice.call(document.querySelectorAll("pre.mermaid"));
     nodes.forEach(function (n) { n.dataset.mermaidSrc = n.textContent; });
 
+    // Tier subgraphs in the context diagram (ADR-0026) default to mermaid's
+    // yellow cluster fill, which belongs to no palette on this dashboard.
+    // Repaint them with the same soft card tokens style.css uses.
+    var CLUSTER = {
+      light: { clusterBkg: "#eaf1fa", clusterBorder: "#d2ddec", titleColor: "#4c5c7a" },
+      dark:  { clusterBkg: "#14203a", clusterBorder: "#25345a", titleColor: "#9fb0cc" }
+    };
+
     function render(theme) {
+      var light = theme === "light";
       mermaid.initialize({
         startOnLoad: false,
-        theme: theme === "light" ? "default" : "dark",
+        theme: light ? "default" : "dark",
+        themeVariables: light ? CLUSTER.light : CLUSTER.dark,
         flowchart: { useMaxWidth: true, curve: "basis" }
       });
       nodes.forEach(function (n) {

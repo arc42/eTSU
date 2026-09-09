@@ -446,6 +446,26 @@ a.wl:hover { border-bottom-style: solid; border-bottom-color: var(--accent); }
   letter-spacing: .02em; margin-bottom: .7rem; }
 .ctx-diagram pre.mermaid { margin: 0; padding: 0; background: none; border: 0; text-align: center; }
 .ctx-diagram pre.mermaid svg { max-width: 100%; height: auto; }
+
+/* The diagram carries one labelled line per neighbour; this table carries the
+   detail that used to crowd the arrows (ADR-0026). */
+.ctx-diagram > figcaption.ctx-legend { margin: .7rem 0 0; font-weight: 500; text-transform: none;
+  letter-spacing: 0; }
+.ctx-flows { margin: 0 0 1.6rem; }
+.ctx-flows th.ctx-neighbour { text-align: left; padding: .55rem 1rem; vertical-align: top;
+  font-weight: 600; border-right: 1px solid var(--line); }
+.ctx-flows th.ctx-neighbour a { text-decoration: none; }
+.ctx-flows .ctx-eid { display: block; font-family: var(--mono, ui-monospace, monospace);
+  font-size: .72rem; color: var(--ink-soft); font-weight: 400; margin-top: .15rem; }
+.ctx-flows .ctx-tier { vertical-align: top; color: var(--ink-soft); white-space: nowrap; }
+.ctx-flows .ctx-dim { color: var(--ink-soft); }
+.ctx-flows .c-dir { width: 6.5rem; }
+.ctx-flows .ctx-dir { white-space: nowrap; }
+.ctx-flows .c-trigger { width: 18%; }
+.ctx-flows .dir-in, .ctx-flows .dir-out { font-size: .78rem; font-weight: 600; white-space: nowrap; }
+.ctx-flows .dir-in { color: var(--accent, #2f6fb3); }
+.ctx-flows .dir-out { color: var(--ink-soft); }
+.ctx-flows tbody tr + tr th.ctx-neighbour { border-top: 1px solid var(--line); }
 /* hide the raw mermaid source until mermaid has rendered it (no FOUC) */
 pre.mermaid:not([data-processed]) { color: transparent; min-height: 2rem; }
 

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_context_flows.html" import context_flow_table %}
 {% from "_provenance.html" import provenance_chips %}
 {% block title %}{{ id }} · {{ title }}{% endblock %}
 {% block crumbs %}<nav class="crumbs"><a href="/">Overview</a> <span>/</span> <a href="{{ crumb_href }}">{{ crumb }}</a> <span>/</span> {{ id }}</nav>{% endblock %}
@@ -20,7 +21,9 @@
 <figure class="ctx-diagram">
   <figcaption>System context · projected live from interfaces &amp; data flows (ADR-0013)</figcaption>
   <pre class="mermaid">{{ context_diagram }}</pre>
+  <figcaption class="ctx-legend">One line per neighbour; both directions are listed below.</figcaption>
 </figure>
+{{ context_flow_table(context_flows) }}
 {% endif %}
 
 {% if ego_graph %}
