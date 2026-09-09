@@ -980,6 +980,24 @@ html.etsu-disconnected {
 }
 .theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
 .theme-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Re-read the vault from disk. Deliberately quiet and shaped like the theme
+   switch beside it: it is a neutral, repeatable action on a read-only view,
+   not a sibling of the danger-toned "Disconnect all". */
+.reload-data {
+  display: inline-flex; align-items: center;
+  margin: 0; padding: .3rem .8rem;
+  font: inherit; font-size: .8rem; color: var(--ink-soft);
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 999px; cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+.reload-data:hover { color: var(--ink); border-color: var(--accent); }
+.reload-data:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.reload-data:disabled {
+  color: var(--ink-dim); border-color: var(--line);
+  cursor: not-allowed; opacity: .7;
+}
 @media (max-width: 640px) { .hero-mark { height: 3.8rem; } }
 
 /* empty states — the first thing a workshop audience sees */

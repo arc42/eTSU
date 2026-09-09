@@ -17,7 +17,9 @@
     } catch (e) {}   // private mode or blocked storage: fall through to dark
   })();
   </script>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {# static_url stamps the file's mtime into the query string, so an edited
+     stylesheet arrives on the next load instead of out of the browser cache. #}
+  <link rel="stylesheet" href="{{ static_url('style.css') }}">
 </head>
 <body>
   {# One persistent topbar on every page: brand, the req42 reading order as a
@@ -56,6 +58,8 @@
       <a class="whos-here" href="/who">Who's here?</a>
       {% endif %}
       <button type="button" class="disconnect-all" id="disconnect-all" hidden>Disconnect all</button>
+      <button type="button" class="reload-data" id="reload-data"
+              title="Re-read the wiki from disk and refresh this page">Reload</button>
       <button type="button" class="theme-toggle" id="theme-toggle">
         <span class="theme-toggle-label">Light theme</span>
       </button>
@@ -242,6 +246,33 @@
         var box = document.getElementById("nav-search");
         if (box) { e.preventDefault(); box.focus(); }
       }
+    });
+  })();
+
+  // Footer "Reload": clears the server's parsed-page and compiled-template
+  // caches, then reloads this tab. Ordinary wiki edits do not need it (pages
+  // are re-parsed whenever their mtime changes); it is here for the two cases
+  // that survive a refresh — a rewrite landing on the same mtime, and an
+  // edited template — so a fresh ingest never means restarting the server.
+  // See /reload in app.py. Own tab only: nobody else's view moves.
+  (function () {
+    var btn = document.getElementById("reload-data");
+    if (!btn) { return; }
+    btn.addEventListener("click", function () {
+      // Disabled the instant it's actioned, so a second click can't fire
+      // while the POST is in flight and the label says what is happening.
+      btn.disabled = true;
+      btn.textContent = "Reloading…";
+      fetch("/reload", { method: "POST" }).then(function (r) {
+        if (!r.ok) { throw new Error(r.status); }
+        // Reload only after the server confirms the caches are gone —
+        // refreshing first would just re-render the stale copy.
+        window.location.reload();
+      }).catch(function () {
+        btn.disabled = false;
+        btn.textContent = "Reload";
+        window.alert("Could not reach the dashboard server — nothing was reloaded.");
+      });
     });
   })();
 

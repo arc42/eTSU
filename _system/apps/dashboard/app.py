@@ -24,7 +24,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import markdown as md
 import yaml
-from flask import Flask, abort, g, has_request_context, redirect, render_template, request
+from flask import (Flask, abort, g, has_request_context, redirect,
+                   render_template, request, url_for)
 from markupsafe import escape
 
 # some slim base images lack a webp entry in their mime.types
@@ -108,6 +109,26 @@ def wiki_config() -> dict:
 def inject_identity():
     """Make the project identity available to every template."""
     return wiki_config()
+
+
+def static_url(filename: str) -> str:
+    """`url_for('static', ...)` with the file's own mtime as a cache buster.
+
+    Flask serves static files with a long-lived cache header, so an edited
+    stylesheet or script keeps rendering from the browser's cache until
+    someone thinks to hard-refresh — the one kind of staleness a server-side
+    cache flush cannot reach. Stamping the mtime makes the URL change exactly
+    when the file does. A missing file falls back to the plain URL: a 404 is
+    the honest answer there, not a crash mid-render."""
+    url = url_for("static", filename=filename)
+    try:
+        mtime = int((Path(app.static_folder) / filename).stat().st_mtime)
+    except OSError:
+        return url
+    return f"{url}?v={mtime}"
+
+
+app.jinja_env.globals["static_url"] = static_url
 
 
 # [[target]] | [[target|alias]] | [[target#heading]] | [[path/target|alias]]
@@ -2615,6 +2636,35 @@ def who_page():
     """The "who's here" page itself — a live list rendered client-side from
     /presence/list (see who.html)."""
     return render_template("who.html")
+
+
+# --- Reload ---------------------------------------------------------------
+@app.route("/reload", methods=["POST"])
+def reload_caches():
+    """Drop every server-side cache, so the next render re-reads the vault
+    and recompiles the templates from disk. The footer button behind this
+    posts here and then reloads the page.
+
+    Most of the time nothing here is needed: `_parse` is keyed by (path,
+    mtime) and the folder listings are re-globbed per request, so a fresh
+    ingest's new, edited and deleted pages already show up on an ordinary
+    browser refresh. Two things do not, and they are why the button exists —
+    a rewrite that lands on the same mtime (a restored file, a checkout, a
+    timestamp-preserving copy) stays a cache hit forever, and Jinja compiles
+    each template once per worker, so an edited template otherwise needs the
+    process restarted. Clearing both costs one re-parse of the vault, which
+    is milliseconds at workshop scale.
+
+    Open to every viewer, unlike the facilitator-only controls below: it
+    reads the same read-only files any page render already reads, and the
+    worst a stranger can do with it is make one render slower.
+
+    POST-only on purpose. A GET would let a prefetch or a crawler flush the
+    cache on someone else's behalf."""
+    _PARSE_CACHE.clear()
+    if app.jinja_env.cache is not None:
+        app.jinja_env.cache.clear()
+    return {"ok": True}
 
 
 # --- Facilitator-only controls -------------------------------------------
