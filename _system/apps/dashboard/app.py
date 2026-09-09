@@ -851,8 +851,12 @@ def build_context_diagram(center: str | None = None) -> str | None:
             return
         edges.append(f'  {src} {arrow}|"{lab}"| {dst}' if lab else f"  {src} {arrow} {dst}")
 
-    # real external systems — one node each (ADR-0013), one line each (ADR-0026)
+    # real external systems — one node each (ADR-0013), one line each (ADR-0026).
+    # A deprecated interface is one the boundary decision moved *inside* the
+    # system (ISS-010), so it is no longer a neighbour and must not be drawn.
     for p in load_folder("external-interfaces"):
+        if p.status == "deprecated":
+            continue
         ins, outs, ordered = _eif_flows(p)
         if not (ins or outs):
             continue
@@ -935,6 +939,8 @@ def build_context_flows() -> list[dict]:
 
     groups: list[dict] = []
     for p in load_folder("external-interfaces"):
+        if p.status == "deprecated":
+            continue
         ins, outs, ordered = _eif_flows(p)
         if not (ins or outs):
             continue

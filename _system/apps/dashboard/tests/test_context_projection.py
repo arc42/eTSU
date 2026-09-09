@@ -13,7 +13,10 @@ The rules that replaced it (ADR-0026):
   * node labels prefer `short_title`, then `title`, and only fall back to
     `partner`;
   * `tier:` groups nodes into subgraphs, and decides which side of the centre a
-    neighbour is ranked on, so mermaid stops scattering them.
+    neighbour is ranked on, so mermaid stops scattering them;
+  * a `status: deprecated` interface is one the boundary decision moved inside
+    the system (ISS-010) — it keeps its page and its flows, but it is no longer
+    a neighbour and is drawn nowhere.
 
 Run from the dashboard dir:
     .venv/bin/python tests/test_context_projection.py
@@ -48,10 +51,10 @@ import app  # noqa: E402
 _EIF = _wiki / "external-interfaces"
 
 
-def _eif(num, title, tier, flows, short_title=None, partner=None):
+def _eif(num, title, tier, flows, short_title=None, partner=None, status="draft"):
     front = [
         "---", f"id: EIF-{num}", "type: external-interface", f"title: {title}",
-        "status: draft", "created: 2026-09-09", "updated: 2026-09-09",
+        f"status: {status}", "created: 2026-09-09", "updated: 2026-09-09",
         "sources: []", "related: []", "tags: [external-interface]",
         f"partner: {partner or title}", f"tier: {tier}",
     ]
@@ -82,6 +85,13 @@ _eif("003", "Regulator", "core-operations", [
 _eif("004", "Analytics", "support", [
     "data: an extremely long payload description that would wreck the layout, direction: inbound",
 ])
+# deprecated: the boundary decision moved this one INSIDE the system (ISS-010),
+# so it is no longer a neighbour. Flows and all, it must not be drawn — and the
+# edge/node counts asserted above stay at four because of it.
+_eif("005", "Payments", "core-operations", [
+    "data: card authorisations, direction: outbound, label: payments",
+    "data: settlement reports, direction: inbound, label: settlement",
+], short_title="Payments", status="deprecated")
 
 
 def _diagram():
@@ -142,7 +152,8 @@ def test_tiers_become_subgraphs_and_rank_nodes_around_the_centre():
 def test_the_table_carries_the_detail_the_diagram_dropped():
     flows = app.build_context_flows()
     by_id = {g["id"]: g for g in flows}
-    assert len(flows) == 4, f"every interface with flows needs a table group, got {len(flows)}"
+    assert len(flows) == 4, \
+        f"every live interface with flows needs a table group, got {len(flows)}"
     assert len(by_id["EIF-001"]["rows"]) == 2, "both directions must be listed for EIF-001"
     assert [r["direction"] for r in by_id["EIF-001"]["rows"]] == ["in", "out"], \
         "table lists inbound then outbound"
@@ -153,6 +164,25 @@ def test_the_table_carries_the_detail_the_diagram_dropped():
     assert by_id["EIF-003"]["tier"] == "Core operations", "tier is shown in words"
     assert by_id["EIF-001"]["rows"][0]["format"] is None, \
         "absent format must be None, not the word 'unknown'"
+
+
+def test_a_deprecated_neighbour_is_not_drawn():
+    """ISS-010: `status: deprecated` on an interface means the boundary moved
+    and it is now internal. It keeps its flows on the page — that history is
+    worth having — so the diagram has to filter on status, not on emptiness."""
+    d = _diagram()
+    assert "Payments" not in d, \
+        f"a deprecated interface must not appear as a node:\n{d}"
+    assert not any("payments" in x or "settlement" in x for x in _edges(d)), \
+        f"a deprecated interface must draw no edge: {_edges(d)}"
+
+
+def test_a_deprecated_neighbour_has_no_flow_table_group():
+    """The table beneath the diagram is the same projection in prose; leaving
+    the row in would contradict the picture it explains."""
+    ids = [g["id"] for g in app.build_context_flows()]
+    assert "EIF-005" not in ids, ids
+    assert "EIF-001" in ids, f"the live interfaces must still be listed: {ids}"
 
 
 def test_an_ampersand_is_never_silently_deleted():
