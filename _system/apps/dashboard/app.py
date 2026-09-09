@@ -1327,7 +1327,12 @@ def build_backlog() -> dict:
       orphans        — feature/story pages whose parent does not resolve to a
                        known FR (normally empty; surfaced for visibility).
     """
-    pages = load_folder("functional-requirements")
+    # A deprecated item has been retired — split, superseded or withdrawn — so it
+    # is not part of the live backlog and must not be counted, drawn, or listed as
+    # an orphan. Same rule as the context projection applies to a deprecated
+    # interface. A live child of a retired parent correctly becomes an orphan.
+    pages = [p for p in load_folder("functional-requirements")
+             if p.status != "deprecated"]
     by_stem = {p.stem: p for p in pages}
 
     def parent_stem(p: "Page") -> str | None:
@@ -1935,15 +1940,196 @@ def _mermaid_goal_tree(vision: Page, objectives: list[Page]) -> str | None:
     return "\n".join(lines)
 
 
-def build_data_model_full_diagram() -> str | None:
-    """Full class diagram of every modelled entity.
+# --- data model projection (ADR-0027) --------------------------------------
+#
+# Two carriers, one diagram. A `DM-` page is the carrier of record: identity,
+# attributes, and a `relationships:` list in frontmatter, which is where the
+# edges come from. Body prose is for humans; frontmatter is for the projection,
+# the same split that makes the context diagram work (`flows:`, ADR-0026).
+#
+# A glossary term marked `stereotype: entity` (or `value-object`) is promoted
+# into the diagram as a STUB: named, empty, annotated `<<term>>`. That is the
+# pragmatic half. During a workshop nobody writes fifteen DM pages, but marking
+# a term costs one line — and an unmodelled entity then shows up as visible work
+# outstanding rather than as nothing at all. Write the DM page later and it
+# supersedes the stub, so the concept is never drawn twice.
 
-    Projection from `wiki/data-models/` is not implemented yet; until it is,
-    the view renders its empty state rather than a stale hardcoded model.
-    `data_model.html` guards on `entities`, not on this diagram, so returning
-    None unconditionally is the whole contract — do not "fix" the guard.
+DM_MARKED_STEREOTYPES = {"entity", "value-object"}
+
+# `kind:` -> (mermaid arrow, cardinalities are meaningful). Inheritance is the
+# odd one out: mermaid wants `Base <|-- Derived`, i.e. the edge is emitted
+# backwards from how the page states it, and a multiplicity on it is nonsense.
+_DM_ARROWS = {
+    "association": ("-->", True),
+    "aggregation": ("o--", True),
+    "composition": ("*--", True),
+    "inheritance": ("<|--", False),
+}
+
+
+def _dm_class_name(label: str, taken: set) -> str:
+    """A mermaid-safe class name that still reads like the entity. Collisions
+    are resolved rather than silently merged — two entities sharing a sanitised
+    name would otherwise become one box."""
+    base = re.sub(r"[^A-Za-z0-9]", "", _clean_label(label)) or "Entity"
+    if base[0].isdigit():
+        base = "E" + base
+    name, n = base, 2
+    while name in taken:
+        name, n = f"{base}{n}", n + 1
+    taken.add(name)
+    return name
+
+
+@_request_cached
+def data_model_nodes() -> list[dict]:
+    """Every class in the model: DM pages first, then the glossary terms marked
+    as data that no DM page has claimed yet.
+
+    A DM page claims a term by linking it in `related:`, or by carrying the same
+    title. Title matching is the forgiving half — during a workshop the term is
+    written first and the DM page often forgets the back-link."""
+    dm_pages = sorted(load_folder("data-models"), key=lambda p: p.id)
+
+    claimed: set[str] = set()
+    for p in dm_pages:
+        claimed.add(p.title.strip().lower())
+        for raw in (p.meta.get("related") or []):
+            stem = _stem_of_link(raw)
+            if stem:
+                claimed.add(stem)
+
+    nodes = [{
+        "key": p.stem,
+        "id": p.id,
+        "label": p.title,
+        "context": str(p.meta.get("bounded-context") or "").strip(),
+        "stereotype": str(p.meta.get("stereotype") or "").strip().lower(),
+        "attributes": _extract_dm_attribute_names(p),
+        "stub": False,
+        "url": f"/page/data-models/{p.stem}",
+    } for p in dm_pages]
+
+    for p in sorted(load_folder("glossary"), key=lambda p: p.id):
+        stereotype = str(p.meta.get("stereotype") or "").strip().lower()
+        if stereotype not in DM_MARKED_STEREOTYPES:
+            continue                       # an ordinary term is not data
+        if p.stem in claimed or p.title.strip().lower() in claimed:
+            continue                       # a DM page already models this
+        nodes.append({
+            "key": p.stem,
+            "id": p.id,
+            "label": p.title,
+            "context": str(p.meta.get("bounded-context") or "").strip(),
+            "stereotype": stereotype,
+            "attributes": [],
+            "stub": True,
+            "url": f"/page/glossary/{p.stem}",
+        })
+    return nodes
+
+
+@_request_cached
+def data_model_edges() -> list[dict]:
+    """Relationships, read from `relationships:` frontmatter on DM pages. An
+    entry pointing at a page that does not exist is dropped, not drawn as a
+    dangling stub — a typo should leave a gap you notice, not a ghost class."""
+    by_stem = {n["key"] for n in data_model_nodes()}
+    out = []
+    for p in sorted(load_folder("data-models"), key=lambda p: p.id):
+        for entry in (p.meta.get("relationships") or []):
+            if not isinstance(entry, dict):
+                continue
+            tgt = _stem_of_link(entry.get("target"))
+            if not tgt or tgt not in by_stem or tgt == p.stem:
+                continue
+            kind = str(entry.get("kind") or "association").strip().lower()
+            out.append({
+                "source": p.stem,
+                "target": tgt,
+                "verb": _clean_label(str(entry.get("verb") or "")),
+                "cardinality": str(entry.get("cardinality") or "").strip(),
+                "kind": kind if kind in _DM_ARROWS else "association",
+            })
+    return out
+
+
+@_request_cached
+def data_model_contexts() -> list[str]:
+    """The bounded contexts present in the model, for the filter control."""
+    return sorted({n["context"] for n in data_model_nodes() if n["context"]})
+
+
+def build_data_model_full_diagram(context: str | None = None,
+                                  focus: str | None = None) -> str | None:
+    """Project a mermaid class diagram of the model (ADR-0027).
+
+    `context` narrows to one bounded context; `focus` narrows to one entity and
+    its direct neighbours, which is what makes this readable in a room — the
+    context diagram's own regression was fourteen nodes drawn at once (ADR-0026)
+    and this model will get larger than that.
+
+    Returns None when nothing survives the filter. `data_model.html` guards on
+    `entities`, not on this diagram, so None stays a valid answer.
     """
-    return None  # placeholder — a real projection is future work (ADR-0018 style)
+    nodes = data_model_nodes()
+    edges = data_model_edges()
+    if context:
+        keep = {n["key"] for n in nodes if n["context"] == context}
+    else:
+        keep = {n["key"] for n in nodes}
+    if focus:
+        if focus not in keep:
+            return None
+        neighbours = {focus}
+        for e in edges:
+            if e["source"] == focus:
+                neighbours.add(e["target"])
+            elif e["target"] == focus:
+                neighbours.add(e["source"])
+        keep &= neighbours
+    nodes = [n for n in nodes if n["key"] in keep]
+    if not nodes:
+        return None
+
+    taken: set[str] = set()
+    name_of = {n["key"]: _dm_class_name(n["label"], taken) for n in nodes}
+
+    lines = ["classDiagram"]
+    for n in nodes:
+        body = []
+        if n["stub"]:
+            body.append("    <<term>>")
+        elif n["stereotype"] and n["stereotype"] != "entity":
+            body.append(f"    <<{n['stereotype']}>>")
+        body += [f"    +{a}" for a in n["attributes"]]
+        if body:
+            lines.append(f"  class {name_of[n['key']]} {{")
+            lines += ["  " + b for b in body]
+            lines.append("  }")
+        else:
+            lines.append(f"  class {name_of[n['key']]}")
+
+    for e in edges:
+        if e["source"] not in keep or e["target"] not in keep:
+            continue
+        arrow, carded = _DM_ARROWS[e["kind"]]
+        src, dst = name_of[e["source"]], name_of[e["target"]]
+        if e["kind"] == "inheritance":
+            # mermaid draws `Base <|-- Derived`; the page says "Derived is-a Base"
+            src, dst = dst, src
+        # `cardinality:` describes the TARGET end only. Deriving a source
+        # multiplicity from it looked tidier and was wrong: "0..*" would have
+        # drawn a zero on the owning side, which means nothing.
+        if carded and e["cardinality"]:
+            line = f'  {src} {arrow} "{e["cardinality"]}" {dst}'
+        else:
+            line = f"  {src} {arrow} {dst}"
+        if e["verb"]:
+            line += f" : {e['verb']}"
+        lines.append(line)
+
+    return "\n".join(lines)
 
 
 # Section/callout extractors for the /data-model catalog: each DM page is
@@ -2171,10 +2357,20 @@ def data_model_view():
     (not yet implemented — see build_data_model_full_diagram()) plus the
     per-entity catalog below — every section + callout block from every DM
     page, so the full data-model documentation lives on one page."""
-    diagram = build_data_model_full_diagram()
-    entities = data_model_entities()
+    contexts = data_model_contexts()
+    context = request.args.get("context") or None
+    if context not in contexts:
+        context = None                     # an unknown filter shows everything
+    nodes = data_model_nodes()
+    focus = request.args.get("focus") or None
+    if focus not in {n["key"] for n in nodes}:
+        focus = None
+    diagram = build_data_model_full_diagram(context=context, focus=focus)
     return render_template("data_model.html", diagram=diagram,
-                           entities=entities, needs_mermaid=True)
+                           entities=data_model_entities(), nodes=nodes,
+                           contexts=contexts, context=context, focus=focus,
+                           stubs=[n for n in nodes if n["stub"]],
+                           needs_mermaid=True)
 
 
 @app.route("/req42")

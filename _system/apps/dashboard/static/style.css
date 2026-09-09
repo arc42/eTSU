@@ -692,6 +692,25 @@ html.etsu-disconnected {
 /* ---- /data-model page (test-stage projection) -------------------------- */
 .dm-diagram { padding: 1.2rem 1.1rem 1.4rem; }
 .dm-diagram pre.mermaid svg { max-width: 100%; height: auto; }
+.dm-diagram figcaption { margin-top: .7rem; color: var(--ink-soft); font-size: .82rem; }
+
+/* Diagram filters: bounded context, and focus on one entity. A whole model is
+   unreadable on a projector past a dozen classes — the context diagram learned
+   that the hard way (ADR-0026) — so narrowing is a control, not a preference. */
+.dm-filters { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem;
+  margin: 0 0 1rem; }
+.dm-filter-label { margin-right: .2rem; color: var(--ink-dim); font-size: .75rem;
+  font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.dm-filter-label + .dm-chip { margin-right: .1rem; }
+.dm-filters .dm-filter-label:not(:first-child) { margin-left: .9rem; }
+.dm-chip {
+  padding: .22rem .7rem; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--card); color: var(--ink-soft); font-size: .8rem;
+  text-decoration: none; transition: color .15s ease, border-color .15s ease;
+}
+.dm-chip:hover { color: var(--ink); border-color: var(--accent); }
+.dm-chip.is-on { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+.dm-chip.is-stub { font-style: italic; }   /* a term marked as data, not yet modelled */
 .dm-note { color: var(--ink-soft); font-size: .82rem; font-style: italic;
   margin-top: 1.2rem; }
 

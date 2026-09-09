@@ -4,19 +4,43 @@
 {% from "_empty.html" import empty_state %}
 {% block content %}
 <h1 class="page-h1">Data model</h1>
-<p class="lead">A class diagram of every modelled entity. Cardinalities sit at the line
-  ends; an arrow points to the "1" side of an n:1 relationship, and bidirectional
-  lines mean m:n. Source:
-  <code>wiki/data-models/</code> ({{ entities|length }} entities).</p>
+<p class="lead">A class diagram projected from <code>wiki/data-models/</code>
+  ({{ entities|length }} entities), plus any glossary term marked as data that
+  no DM page models yet. A multiplicity sits at the end it describes; a hollow
+  diamond is aggregation, a filled one composition, a hollow triangle
+  inheritance. Relationships come from each page's <code>relationships:</code>
+  frontmatter (ADR-0027).</p>
+
+{% if nodes %}
+<nav class="dm-filters" aria-label="Diagram filters">
+  <span class="dm-filter-label">Context</span>
+  <a class="dm-chip{% if not context %} is-on{% endif %}"
+     href="/data-model{% if focus %}?focus={{ focus }}{% endif %}">All</a>
+  {% for c in contexts %}
+  <a class="dm-chip{% if context == c %} is-on{% endif %}"
+     href="/data-model?context={{ c }}{% if focus %}&amp;focus={{ focus }}{% endif %}">{{ c }}</a>
+  {% endfor %}
+
+  <span class="dm-filter-label">Focus</span>
+  <a class="dm-chip{% if not focus %} is-on{% endif %}"
+     href="/data-model{% if context %}?context={{ context }}{% endif %}">Whole model</a>
+  {% for n in nodes %}
+  <a class="dm-chip{% if focus == n.key %} is-on{% endif %}{% if n.stub %} is-stub{% endif %}"
+     href="/data-model?focus={{ n.key }}{% if context %}&amp;context={{ context }}{% endif %}">{{ n.label }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
 
 {% if diagram %}
 <figure class="goals-diagram dm-diagram">
   <pre class="mermaid">{{ diagram }}</pre>
+  <figcaption>
+    {% if focus %}{{ nodes | selectattr("key", "equalto", focus) | map(attribute="label") | first }}
+      and its direct neighbours{% elif context %}Bounded context: {{ context }}{% else %}The whole model{% endif %}.
+    {% if stubs %}A <code>&lt;&lt;term&gt;&gt;</code> box is a glossary term marked as data with no DM page yet
+      ({{ stubs | length }}){% endif %}
+  </figcaption>
 </figure>
-
-<p class="dm-note">Test stage: relationships are currently maintained as a constant
-  list in <code>app.py</code>. Once the relationship syntax in DM page bodies
-  stabilizes, a live extractor will replace this list.</p>
 {% endif %}
 
 {% if entities %}

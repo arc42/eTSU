@@ -11,6 +11,9 @@ tags: [glossary]
 aliases: []          # synonyms; helps Obsidian link resolution
 bounded-context: <context name>   # DDD: where this meaning holds
 agreed: false        # true once stakeholders confirm the definition
+stereotype:          # optional: entity | value-object — marks this term as DATA, so it
+                     # appears in the projected class diagram as a `<<term>>` stub until a
+                     # DM- page models it properly (ADR-0027). Leave empty for ordinary terms.
 ---
 
 # {{title}}

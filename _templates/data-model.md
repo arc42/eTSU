@@ -12,6 +12,11 @@ stereotype: entity    # entity | value-object | sum-type   (product types vs. ta
 parent: []            # [[DM-...]] — used by sum-type variants to point at their sum-type; empty for top-level
 bounded-context: <context name>
 source-of-truth: <system/owner of this data>
+relationships:        # the projected class diagram reads THESE, not the prose below (ADR-0027)
+  - { verb: <contains>, target: "[[DM-...]]", cardinality: <1..*>, kind: association, mandatory: true }
+# `kind:` is association | aggregation | composition | inheritance. `cardinality:`
+# is the multiplicity at the TARGET end only, and is ignored for inheritance.
+# A target that resolves to no page is dropped from the diagram, not drawn dangling.
 ---
 
 # {{title}}

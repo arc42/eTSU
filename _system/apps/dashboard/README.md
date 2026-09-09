@@ -180,7 +180,9 @@ still exits 0.
 They cover the empty vault (every route must render on day one), a populated
 fixture vault, the backlog and goal projections, the glossary graphs, the
 context diagram projection (one line per neighbour, short labels, `tier:` bands,
-and deprecated interfaces drawn nowhere), `wiki_config()`, the ADR metadata in
+and deprecated interfaces drawn nowhere), the data-model class diagram (DM pages
+plus marked glossary terms as `<<term>>` stubs, context and focus filters),
+`wiki_config()`, the ADR metadata in
 `_system/adr/`, presence and the "Yoda" facilitator, the light/dark theme
 contract, the `/reload` control (server-side caches cleared, `static_url`
 versioning), the copy contract (client wording with correct plurals, no glyph
