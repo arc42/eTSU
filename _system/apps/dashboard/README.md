@@ -164,14 +164,29 @@ Plain Python scripts with bare `assert`s — no pytest, no runner. From this
 directory, inside the venv `./dashboard.sh local` builds:
 
 ```sh
-for t in tests/test_*.py; do .venv/bin/python "$t"; done
+for t in tests/test_*.py; do .venv/bin/python "$t" || echo "FAILED: $t"; done
 ```
 
+Each script also runs on its own, which is what you want while working on one:
+
+```sh
+.venv/bin/python tests/test_reload.py
+```
+
+The `|| echo` is not decoration. A `for` loop reports only its last iteration's
+status, so without it a test failing in the middle scrolls past and the shell
+still exits 0.
+
 They cover the empty vault (every route must render on day one), a populated
-fixture vault, the backlog and goal projections, the glossary graphs,
-`wiki_config()`, the ADR metadata in `_system/adr/`, the contract between
-`_templates/` and `app.py`'s parser, and the copy contract (client wording
-with correct plurals, no glyph abbreviations, ADR-0025 is indexed).
+fixture vault, the backlog and goal projections, the glossary graphs, the
+context diagram projection (one line per neighbour, short labels, `tier:` bands,
+and deprecated interfaces drawn nowhere), `wiki_config()`, the ADR metadata in
+`_system/adr/`, presence and the "Yoda" facilitator, the light/dark theme
+contract, the `/reload` control (server-side caches cleared, `static_url`
+versioning), the copy contract (client wording with correct plurals, no glyph
+abbreviations, ADR-0025 is indexed), and two contracts that would otherwise
+drift in silence — `_templates/` against `app.py`'s parser, and the skills the
+workflows name against the ones vendored under `.agents/skills/`.
 
 ## Obsidian
 
