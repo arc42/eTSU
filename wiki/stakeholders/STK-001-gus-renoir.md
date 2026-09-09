@@ -4,12 +4,17 @@ type: stakeholder
 title: Gus Renoir
 status: draft
 created: 2026-09-06
-updated: 2026-09-06
-sources: []
+updated: 2026-09-09
+sources:
+  - "[[SRC-002-georg-mayrhauser-vision-goals-stakeholders]]"
 related:
   - "[[GOAL-001-eTSU-vision]]"
+  - "[[GOAL-002-global-market-expansion]]"
+  - "[[GOAL-003-operational-excellence]]"
+  - "[[GOAL-005-frictionless-global-art-trade]]"
+  - "[[STK-012-creative-genius]]"
 tags: [stakeholder]
-aliases: [Head Office]
+aliases: [Head Office, CEO, TSU management]
 role: Business owner / Head Office
 influence: high
 interest: high
@@ -42,4 +47,12 @@ every gallery on a tour. Commissioned this digitization effort.
 - Coordinating one shipper and one insurer across an entire multi-stop tour.
 
 **Interactions.** No [[UC-...]] or [[FR-...]] captured yet — pending the
-first `ingest.md` pass over `raw/TSU-brief.md.md`.
+`ingest.md` pass over `raw/TSU-brief.md.md`.
+
+> [!note] Also listed as "CEO / TSU management"
+> The Req4Arc Linz workshop
+> ([[SRC-002-georg-mayrhauser-vision-goals-stakeholders]]) opened its stakeholder
+> list with "CEO / TSU management" rather than a name. Merged here as aliases
+> rather than duplicated — but note the workshop framing is *organizational*
+> (a management layer) while the brief's framing is one named owner. If TSU has
+> a management team distinct from Gus Renoir, this page needs to split.
