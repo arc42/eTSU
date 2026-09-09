@@ -49,12 +49,12 @@ _GLO = _wiki / "glossary"
 
 
 def _dm(num, title, context, attributes=(), relationships=(), related=(),
-        stereotype="entity"):
+        stereotype="entity", parent=()):
     front = [
         "---", f"id: DM-{num}", "type: data-model", f"title: {title}",
         "status: draft", "created: 2026-09-09", "updated: 2026-09-09",
         "sources: []", f"related: [{', '.join(related)}]", "tags: [data-model]",
-        f"stereotype: {stereotype}", "parent: []",
+        f"stereotype: {stereotype}", f"parent: [{', '.join(parent)}]",
         f"bounded-context: {context}", "source-of-truth: System X",
         "relationships:",
     ]
@@ -86,10 +86,13 @@ _dm("001", "Artwork", "Catalog", attributes=["id", "title"], relationships=[
     "verb: is a, target: \"[[DM-004-asset]]\", kind: inheritance",
     "verb: dangles, target: \"[[DM-999-nowhere]]\", kind: association",
 ], related=['"[[GLO-002-artwork]]"'])
-_dm("002", "Lot", "Catalog", attributes=["id"])
+_dm("002", "Lot", "Catalog", attributes=["id", "lot-number"])
 _dm("004", "Asset", "Catalog", attributes=["id"])
 # a second bounded context, so the filter has something to exclude
 _dm("003", "Payment", "Billing", attributes=["amount"])
+# a sum-type variant: `parent:` alone must draw the inheritance (ADR-0019)
+_dm("005", "Sold Artwork", "Catalog", stereotype="entity",
+    parent=['"[[DM-001-artwork]]"'])
 
 # marked, and NOT modelled anywhere -> a stub class
 _glo("001", "Provenance", "Catalog", stereotype="entity")
@@ -110,6 +113,18 @@ def test_a_dm_page_becomes_a_class_with_its_attributes():
     assert "classDiagram" in d, d
     assert "class Artwork" in d, d
     assert "+id" in d and "+title" in d, d
+
+
+def test_a_multi_word_entity_keeps_its_word_boundaries():
+    """"Sold Artwork" must read as SoldArtwork, not Soldartwork. Both are legal
+    mermaid; only one is legible on a projector."""
+    assert "class SoldArtwork" in _diagram(), _diagram()
+
+
+def test_a_hyphenated_attribute_name_survives():
+    """`lot-number` is an ordinary field name. Dropping it was silent — the
+    attribute just stopped existing in the box and in the table."""
+    assert "+lot-number" in _diagram(), _diagram()
 
 
 def test_a_marked_glossary_term_becomes_an_empty_stub_class():
@@ -137,6 +152,13 @@ def test_relationships_carry_verb_cardinality_and_kind():
     owning side of any `0..*`."""
     d = _diagram()
     assert any('Artwork *-- "1..*" Lot : contains' in l for l in d.splitlines()), d
+
+
+def test_a_parent_link_draws_inheritance_without_repeating_it():
+    """A variant names its sum type in `parent:` and nowhere else. Making the
+    author restate that as a relationship entry would be one fact in two
+    places, and the two would drift."""
+    assert any("Artwork <|-- SoldArtwork" in l for l in _diagram().splitlines()), _diagram()
 
 
 def test_inheritance_points_from_the_base_class():

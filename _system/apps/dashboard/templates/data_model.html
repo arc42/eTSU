@@ -18,15 +18,15 @@
      href="/data-model{% if focus %}?focus={{ focus }}{% endif %}">All</a>
   {% for c in contexts %}
   <a class="dm-chip{% if context == c %} is-on{% endif %}"
-     href="/data-model?context={{ c }}{% if focus %}&amp;focus={{ focus }}{% endif %}">{{ c }}</a>
+     href="/data-model?context={{ c | urlencode }}{% if focus %}&amp;focus={{ focus }}{% endif %}">{{ c }}</a>
   {% endfor %}
 
   <span class="dm-filter-label">Focus</span>
   <a class="dm-chip{% if not focus %} is-on{% endif %}"
-     href="/data-model{% if context %}?context={{ context }}{% endif %}">Whole model</a>
+     href="/data-model{% if context %}?context={{ context | urlencode }}{% endif %}">Whole model</a>
   {% for n in nodes %}
   <a class="dm-chip{% if focus == n.key %} is-on{% endif %}{% if n.stub %} is-stub{% endif %}"
-     href="/data-model?focus={{ n.key }}{% if context %}&amp;context={{ context }}{% endif %}">{{ n.label }}</a>
+     href="/data-model?focus={{ n.key }}{% if context %}&amp;context={{ context | urlencode }}{% endif %}">{{ n.label }}</a>
   {% endfor %}
 </nav>
 {% endif %}

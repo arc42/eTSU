@@ -1971,7 +1971,10 @@ def _dm_class_name(label: str, taken: set) -> str:
     """A mermaid-safe class name that still reads like the entity. Collisions
     are resolved rather than silently merged — two entities sharing a sanitised
     name would otherwise become one box."""
-    base = re.sub(r"[^A-Za-z0-9]", "", _clean_label(label)) or "Entity"
+    # Capitalise each word BEFORE stripping separators, or "Piece for sale"
+    # becomes "Pieceforsale" — legal mermaid, unreadable on a wall.
+    words = re.split(r"[^A-Za-z0-9]+", _clean_label(label))
+    base = "".join(w[:1].upper() + w[1:] for w in words if w) or "Entity"
     if base[0].isdigit():
         base = "E" + base
     name, n = base, 2
@@ -2037,6 +2040,14 @@ def data_model_edges() -> list[dict]:
     by_stem = {n["key"] for n in data_model_nodes()}
     out = []
     for p in sorted(load_folder("data-models"), key=lambda p: p.id):
+        # A sum-type variant already names its sum type in `parent:` (ADR-0019).
+        # Draw that as the inheritance it is, rather than make the author repeat
+        # it as a relationship entry — one fact, one place.
+        for raw in (p.meta.get("parent") or []):
+            tgt = _stem_of_link(raw)
+            if tgt and tgt in by_stem and tgt != p.stem:
+                out.append({"source": p.stem, "target": tgt, "verb": "",
+                            "cardinality": "", "kind": "inheritance"})
         for entry in (p.meta.get("relationships") or []):
             if not isinstance(entry, dict):
                 continue
@@ -2154,8 +2165,12 @@ _DM_ATTRIBUTES_BLOCK_RE = re.compile(
     r"(?=^\*\*[A-Za-z][^*\n]+?\.\*\*|^>\s*\[!|^##\s|\Z)",
     re.DOTALL | re.MULTILINE,
 )
+# Hyphens belong here. `minimum-sale-price` is an ordinary field name, and
+# excluding it did not fail loudly — the attribute simply vanished from the
+# table and from the class box, which is the "looks merely empty" failure this
+# whole area keeps producing.
 _DM_ATTR_BULLET_RE = re.compile(
-    r"^\s*-\s+`(?P<name>[a-zA-Z][a-zA-Z0-9_]*)`", re.MULTILINE,
+    r"^\s*-\s+`(?P<name>[a-zA-Z][a-zA-Z0-9_-]*)`", re.MULTILINE,
 )
 
 
