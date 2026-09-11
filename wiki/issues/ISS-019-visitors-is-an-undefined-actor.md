@@ -13,6 +13,8 @@ related:
   - "[[ISS-006-buyer-versus-art-collector]]"
   - "[[STK-004-buyer]]"
   - "[[GLO-002-show]]"
+  - "[[CTX-001-etsu-system-context]]"
+  - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
 tags: [issue]
 severity: major
 kind: ambiguity

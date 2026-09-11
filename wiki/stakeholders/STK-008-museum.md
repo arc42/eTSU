@@ -14,6 +14,14 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[STK-004-buyer]]"
   - "[[STK-013-private-owner]]"
+  - "[[GLO-008-lender]]"
+  - "[[EIF-010-institutional-buyers]]"
+  - "[[GLO-003-provenance]]"
+  - "[[GLO-014-museum]]"
+  - "[[ISS-006-buyer-versus-art-collector]]"
+  - "[[ISS-013-three-way-buyer-segmentation]]"
+  - "[[STK-009-conservator]]"
+  - "[[DM-008-museum]]"
 tags: [stakeholder]
 aliases: [institutional buyer]
 role: Lends pieces to a Tour and buys pieces at the museum price

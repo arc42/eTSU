@@ -11,6 +11,9 @@ related:
   - "[[GOAL-003-operational-excellence]]"
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GLO-002-show]]"
+  - "[[EIF-014-regulatory-and-compliance]]"
+  - "[[GLO-015-gallery]]"
+  - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
 tags: [stakeholder]
 aliases: [customs]
 role: Clears the Tour's pieces across each border

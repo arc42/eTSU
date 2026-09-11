@@ -17,6 +17,13 @@ related:
   - "[[EIF-008-individual-buyers]]"
   - "[[EIF-009-global-online-buyers]]"
   - "[[EIF-010-institutional-buyers]]"
+  - "[[GLO-013-buyer]]"
+  - "[[GLO-014-museum]]"
+  - "[[GLO-018-minimum-museum-sale-price]]"
+  - "[[ISS-017-twelve-candidate-capabilities-undefined]]"
+  - "[[ISS-019-visitors-is-an-undefined-actor]]"
+  - "[[DM-008-museum]]"
+  - "[[DM-009-buyer]]"
 tags: [issue]
 severity: major
 kind: contradiction

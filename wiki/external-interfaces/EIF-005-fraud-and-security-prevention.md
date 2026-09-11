@@ -12,6 +12,8 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[EIF-014-regulatory-and-compliance]]"
   - "[[ISS-010-system-boundary-undefined]]"
+  - "[[GLO-010-aml-screening]]"
+  - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
 tags: [external-interface]
 partner: Fraud detection and AML screening capability
 tier: support

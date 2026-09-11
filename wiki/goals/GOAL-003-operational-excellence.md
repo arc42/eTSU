@@ -11,6 +11,22 @@ related:
   - "[[GOAL-001-eTSU-vision]]"
   - "[[ISS-002-unsourced-objective-baselines]]"
   - "[[ISS-003-year-one-vs-2029-target-divergence]]"
+  - "[[GOAL-005-frictionless-global-art-trade]]"
+  - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
+  - "[[ISS-009-real-time-metric-untestable]]"
+  - "[[ISS-017-twelve-candidate-capabilities-undefined]]"
+  - "[[STK-001-gus-renoir]]"
+  - "[[STK-002-artist]]"
+  - "[[STK-003-gallery-manager]]"
+  - "[[STK-005-shipper]]"
+  - "[[STK-007-customs-authority]]"
+  - "[[STK-010-legal-and-accounting]]"
+  - "[[GOAL-006-settlement-correct-and-on-time]]"
+  - "[[GOAL-007-artist-self-service]]"
+  - "[[FR-014-contract-management]]"
+  - "[[FR-015-tour-scheduling]]"
+  - "[[FR-026-sign-the-artist-contract]]"
+  - "[[FR-027-reserve-gallery-space-for-a-piece]]"
 tags: [goal]
 stereotype: objective
 parent:

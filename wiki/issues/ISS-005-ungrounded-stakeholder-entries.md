@@ -10,6 +10,7 @@ sources:
 related:
   - "[[STK-004-buyer]]"
   - "[[STK-009-conservator]]"
+  - "[[ISS-007-cleaner-versus-restorer]]"
 tags: [issue]
 severity: minor
 kind: question

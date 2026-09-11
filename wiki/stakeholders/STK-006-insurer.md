@@ -13,6 +13,12 @@ related:
   - "[[GLO-001-tour]]"
   - "[[STK-005-shipper]]"
   - "[[STK-013-private-owner]]"
+  - "[[GLO-009-logistics-partner]]"
+  - "[[GLO-021-lending-agreement]]"
+  - "[[FR-012-settle-a-loss-claim-on-a-sold-piece]]"
+  - "[[FR-016-piece-protection]]"
+  - "[[FR-028-insure-a-piece-against-damage]]"
+  - "[[GOAL-008-pieces-come-home-intact]]"
 tags: [stakeholder]
 aliases: [insurance company]
 role: Insures the Tour's pieces for the duration of the Tour

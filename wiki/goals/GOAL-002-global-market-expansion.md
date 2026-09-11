@@ -12,6 +12,14 @@ related:
   - "[[ISS-002-unsourced-objective-baselines]]"
   - "[[ISS-003-year-one-vs-2029-target-divergence]]"
   - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
+  - "[[EIF-009-global-online-buyers]]"
+  - "[[GOAL-005-frictionless-global-art-trade]]"
+  - "[[ISS-009-real-time-metric-untestable]]"
+  - "[[STK-001-gus-renoir]]"
+  - "[[STK-002-artist]]"
+  - "[[STK-004-buyer]]"
+  - "[[STK-008-museum]]"
+  - "[[GOAL-007-artist-self-service]]"
 tags: [goal]
 stereotype: objective
 parent:

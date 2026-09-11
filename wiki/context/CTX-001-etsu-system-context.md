@@ -27,6 +27,7 @@ related:
   - "[[ISS-018-competing-context-diagrams]]"
   - "[[ISS-019-visitors-is-an-undefined-actor]]"
   - "[[ISS-020-sketch-boxes-untyped]]"
+  - "[[ISS-011-context-flows-inferred-not-sourced]]"
 tags: [context]
 kind: business
 diagram: generated

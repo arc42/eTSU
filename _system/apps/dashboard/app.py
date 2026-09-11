@@ -1637,12 +1637,17 @@ def index():
               "external interface", rows=by_relations(eifs), count=len(eifs),
               sub=("context described" if context else "no context page yet")),
         {**backlog_tile, "eyebrow": "04 · Product Backlog", "folders": ["functional-requirements"]},
+        # two CTAs rather than one whole-tile link: the class diagram is the
+        # thing people come to this block for, and burying it one click deeper
+        # than the page list made it unfindable (same shape as the glossary tile).
         plain("models", "Supporting models", "05 · Supporting Models", "/req42/models",
               ["use-cases", "activity-models", "data-models"], "model page",
               # `relations` there is a page count per model type, not a link
               # count — carried under its own key so the row says "pages".
               rows=[{"title": m["title"], "pages": m["relations"]}
-                    for m in _supporting_model_entries()]),
+                    for m in _supporting_model_entries()],
+              links=[{"label": "Model pages", "href": "/req42/models"},
+                     {"label": "Data model diagram", "href": "/data-model"}]),
         plain("quality", "Quality requirements", "06 · Quality Requirements", "/req42/quality",
               ["quality-requirements"], "scenario"),
         plain("constraints", "Constraints", "07 · Constraints", "/req42/constraints",
@@ -1843,6 +1848,11 @@ def page_detail(folder, stem):
     # context pages carry the system-context diagram, projected live (ADR-0013)
     context_diagram = build_context_diagram() if folder == "context" else None
     context_flows = build_context_flows() if folder == "context" else None
+    # a data-model page carries its own 1-hop slice of the class diagram, the
+    # same projection as /data-model with `focus` set (ADR-0027). Drawing all 22
+    # classes on one entity's page would be the ADR-0026 regression again.
+    dm_diagram = (build_data_model_full_diagram(focus=stem)
+                  if folder == "data-models" else None)
     # glossary pages carry a focused ego-graph snippet above the definition (ADR-0023)
     ego_graph = build_glossary_ego_graph(stem) if folder == "glossary" else None
     ego_layers = None
@@ -1859,9 +1869,11 @@ def page_detail(folder, stem):
         updated=str(page.meta.get("updated", "")), tags=page.meta.get("tags") or [],
         body_html=body_html, crumb="Search", crumb_href="/search",
         context_diagram=context_diagram, context_flows=context_flows,
+        dm_diagram=dm_diagram,
         relations=build_relations_panel(stem),
         ego_graph=ego_graph, ego_layers=ego_layers,
-        needs_mermaid=bool(context_diagram) or "language-mermaid" in body_html,
+        needs_mermaid=bool(context_diagram) or bool(dm_diagram)
+                      or "language-mermaid" in body_html,
         sources=provenance(page),
     )
 
@@ -2470,10 +2482,14 @@ def req42_block_view(slug):
     # the Scope block (03) shows the same live-projected system-context diagram
     context_diagram = build_context_diagram() if slug == "scope" else None
     context_flows = build_context_flows() if slug == "scope" else None
+    # Supporting Models (05) does the same for the class diagram (ADR-0027). The
+    # whole model, unfiltered: /data-model is where it gets narrowed by context.
+    dm_diagram = build_data_model_full_diagram() if slug == "models" else None
     return render_template(
         "req42_block.html", block=block, rows=rows, total=len(rows),
         context_diagram=context_diagram, context_flows=context_flows,
-        needs_mermaid=bool(context_diagram),
+        dm_diagram=dm_diagram,
+        needs_mermaid=bool(context_diagram) or bool(dm_diagram),
         maturity=maturity(r["status"] for r in rows),
     )
 

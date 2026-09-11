@@ -11,6 +11,9 @@ related:
   - "[[CTX-001-etsu-system-context]]"
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GLO-003-provenance]]"
+  - "[[GLO-007-appraiser]]"
+  - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
+  - "[[ISS-021-authentication-card-ambiguous]]"
 tags: [external-interface]
 partner: Independent appraisers and authentication bodies
 tier: supply

@@ -14,6 +14,22 @@ related:
   - "[[GOAL-003-operational-excellence]]"
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GLO-001-tour]]"
+  - "[[GLO-012-artist]]"
+  - "[[ISS-015-a-new-picasso-is-undefined]]"
+  - "[[STK-012-creative-genius]]"
+  - "[[FR-003-upload-piece-information]]"
+  - "[[FR-004-track-piece-status]]"
+  - "[[FR-005-piece-management]]"
+  - "[[FR-006-tour-visibility]]"
+  - "[[GOAL-006-settlement-correct-and-on-time]]"
+  - "[[GOAL-007-artist-self-service]]"
+  - "[[FR-011-pay-artist-commission]]"
+  - "[[FR-013-artist-management]]"
+  - "[[FR-014-contract-management]]"
+  - "[[FR-025-register-as-an-artist]]"
+  - "[[FR-028-insure-a-piece-against-damage]]"
+  - "[[GOAL-008-pieces-come-home-intact]]"
+  - "[[DM-004-artist]]"
 tags: [stakeholder]
 aliases: [up-and-coming artist]
 role: Creator whose work is shown and sold on a Tour

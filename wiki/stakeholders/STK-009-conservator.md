@@ -14,6 +14,9 @@ related:
   - "[[STK-013-private-owner]]"
   - "[[STK-008-museum]]"
   - "[[ISS-007-cleaner-versus-restorer]]"
+  - "[[GLO-009-logistics-partner]]"
+  - "[[GLO-008-lender]]"
+  - "[[ISS-005-ungrounded-stakeholder-entries]]"
 tags: [stakeholder]
 aliases: [cleaner, restorator, restorer, professional cleaner]
 role: Cleans and conserves borrowed pieces when a Tour closes

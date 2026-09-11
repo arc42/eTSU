@@ -11,6 +11,7 @@ related:
   - "[[GOAL-001-eTSU-vision]]"
   - "[[ISS-015-a-new-picasso-is-undefined]]"
   - "[[ISS-016-moore-format-cited-without-an-anchor]]"
+  - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
 tags: [issue]
 severity: major
 kind: contradiction

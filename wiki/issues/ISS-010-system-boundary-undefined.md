@@ -16,6 +16,8 @@ related:
   - "[[EIF-013-technology-and-infrastructure]]"
   - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
   - "[[ISS-018-competing-context-diagrams]]"
+  - "[[EIF-005-fraud-and-security-prevention]]"
+  - "[[ISS-014-legacy-issue-ids-referenced-by-starter-adrs]]"
 tags: [issue]
 severity: blocker
 kind: ambiguity

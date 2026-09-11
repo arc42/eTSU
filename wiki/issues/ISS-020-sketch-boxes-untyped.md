@@ -12,6 +12,7 @@ related:
   - "[[ISS-011-context-flows-inferred-not-sourced]]"
   - "[[EIF-012-logistics-and-fulfillment]]"
   - "[[EIF-013-technology-and-infrastructure]]"
+  - "[[CTX-001-etsu-system-context]]"
 tags: [issue]
 severity: minor
 kind: ambiguity

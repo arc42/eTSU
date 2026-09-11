@@ -15,6 +15,17 @@ related:
   - "[[GLO-003-provenance]]"
   - "[[STK-014-art-collector]]"
   - "[[ISS-013-three-way-buyer-segmentation]]"
+  - "[[EIF-009-global-online-buyers]]"
+  - "[[GLO-013-buyer]]"
+  - "[[ISS-005-ungrounded-stakeholder-entries]]"
+  - "[[ISS-006-buyer-versus-art-collector]]"
+  - "[[ISS-019-visitors-is-an-undefined-actor]]"
+  - "[[ISS-022-tsu-brief-only-partially-ingested]]"
+  - "[[STK-008-museum]]"
+  - "[[GOAL-006-settlement-correct-and-on-time]]"
+  - "[[FR-029-keep-a-bought-piece-safe-until-handover]]"
+  - "[[GOAL-008-pieces-come-home-intact]]"
+  - "[[DM-009-buyer]]"
 tags: [stakeholder]
 aliases: [customer]
 role: Purchases a piece from a Show

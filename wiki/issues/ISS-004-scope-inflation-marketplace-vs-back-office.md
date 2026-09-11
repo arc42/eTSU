@@ -11,6 +11,7 @@ sources:
   - "[[SRC-004-ulrich-stuerzlinger-context-diagram]]"
   - "[[SRC-005-workshop-capability-card-wall]]"
   - "[[SRC-006-workshop-etsu-context-sketch]]"
+  - "[[SRC-008-sandra-mayer-beneficiary-stories]]"
 related:
   - "[[GLO-005-etsu]]"
   - "[[CTX-001-etsu-system-context]]"
@@ -23,6 +24,13 @@ related:
   - "[[ISS-017-twelve-candidate-capabilities-undefined]]"
   - "[[ISS-018-competing-context-diagrams]]"
   - "[[ISS-019-visitors-is-an-undefined-actor]]"
+  - "[[FR-003-upload-piece-information]]"
+  - "[[FR-004-track-piece-status]]"
+  - "[[EIF-009-global-online-buyers]]"
+  - "[[ISS-022-tsu-brief-only-partially-ingested]]"
+  - "[[GOAL-007-artist-self-service]]"
+  - "[[FR-013-artist-management]]"
+  - "[[FR-025-register-as-an-artist]]"
 tags: [issue]
 severity: blocker
 kind: risk
@@ -105,6 +113,18 @@ this does, and roughly half of `wiki/external-interfaces/` depends on that.
 >
 > The disagreement is therefore not between sources of different vintage. It is
 > inside one workshop, on one day, between two artefacts made side by side.
+
+> [!note] New evidence 2026-09-09 — the first artist-facing surface
+> [[SRC-008-sandra-mayer-beneficiary-stories]] contributes two stories in which
+> **the artist is the user, not the counterparty**: uploading information about
+> their own pieces ([[FR-003-upload-piece-information]]) and tracking their
+> status ([[FR-004-track-piece-status]]). Every earlier source has artists on the
+> far side of a negotiation, and the card wall's "Artist Management" means TSU
+> managing artists. These reverse the direction.
+>
+> A pure back-office tool does not give artists accounts. This is the third
+> distinct piece of evidence for Reading B, after the sketch's Visitors and
+> Social Media, and it comes from a fourth contributor.
 
 **Resolution.** *Open.* Note that option 2 is what the sources themselves imply
 if the 2029 narrative is read as a roadmap — but no source states it as a

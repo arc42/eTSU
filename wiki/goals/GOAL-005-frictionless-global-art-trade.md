@@ -12,6 +12,9 @@ related:
   - "[[GOAL-002-global-market-expansion]]"
   - "[[GOAL-003-operational-excellence]]"
   - "[[ISS-009-real-time-metric-untestable]]"
+  - "[[STK-001-gus-renoir]]"
+  - "[[STK-003-gallery-manager]]"
+  - "[[GOAL-007-artist-self-service]]"
 tags: [goal]
 stereotype: objective
 parent:
@@ -45,7 +48,9 @@ tile_claim:
 ## Impact
 
 - **Addressed stakeholders:** see `beneficiary:`.
-- **Served by:** projected from **FR backlinks** (ADR-0018) — none captured yet.
+- **Served by:** projected from **FR backlinks** (ADR-0018) —
+  [[FR-006-tour-visibility]], [[FR-001-view-piece-inventory-and-status]],
+  [[FR-004-track-piece-status]].
 
 > [!note] Open points
 > - **The metric is not testable as stated.** "Real time" carries no number.

@@ -13,6 +13,14 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GOAL-005-frictionless-global-art-trade]]"
   - "[[ISS-001-competing-vision-statements]]"
+  - "[[GLO-005-etsu]]"
+  - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
+  - "[[ISS-015-a-new-picasso-is-undefined]]"
+  - "[[ISS-016-moore-format-cited-without-an-anchor]]"
+  - "[[STK-011-development-team]]"
+  - "[[GOAL-006-settlement-correct-and-on-time]]"
+  - "[[GOAL-007-artist-self-service]]"
+  - "[[GOAL-008-pieces-come-home-intact]]"
 tags: [goal]
 stereotype: vision
 parent: []

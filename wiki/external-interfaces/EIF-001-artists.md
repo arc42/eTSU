@@ -11,6 +11,9 @@ related:
   - "[[CTX-001-etsu-system-context]]"
   - "[[STK-002-artist]]"
   - "[[ISS-011-context-flows-inferred-not-sourced]]"
+  - "[[FR-003-upload-piece-information]]"
+  - "[[GOAL-007-artist-self-service]]"
+  - "[[FR-013-artist-management]]"
 tags: [external-interface]
 partner: Artists — individual creators who submit work
 tier: supply

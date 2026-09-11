@@ -10,6 +10,7 @@ sources:
 related:
   - "[[CTX-001-etsu-system-context]]"
   - "[[ISS-010-system-boundary-undefined]]"
+  - "[[FR-021-upload-piece-images]]"
 tags: [external-interface]
 partner: Content production — photography and 3D capture
 tier: support

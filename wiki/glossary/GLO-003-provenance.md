@@ -11,10 +11,17 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[STK-008-museum]]"
   - "[[STK-004-buyer]]"
+  - "[[EIF-003-appraisers-and-authenticators]]"
+  - "[[GLO-007-appraiser]]"
+  - "[[GLO-011-piece]]"
+  - "[[ISS-021-authentication-card-ambiguous]]"
+  - "[[FR-003-upload-piece-information]]"
+  - "[[FR-005-piece-management]]"
 tags: [glossary]
 aliases: [chain of ownership, verification coverage]
 bounded-context: Gallery Touring
 agreed: false
+stereotype: value-object
 ---
 
 # Provenance

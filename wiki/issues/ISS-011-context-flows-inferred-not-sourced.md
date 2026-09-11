@@ -11,6 +11,7 @@ related:
   - "[[CTX-001-etsu-system-context]]"
   - "[[EIF-001-artists]]"
   - "[[EIF-013-technology-and-infrastructure]]"
+  - "[[ISS-020-sketch-boxes-untyped]]"
 tags: [issue]
 severity: major
 kind: gap

@@ -11,6 +11,12 @@ related:
   - "[[GOAL-005-frictionless-global-art-trade]]"
   - "[[GOAL-002-global-market-expansion]]"
   - "[[GOAL-003-operational-excellence]]"
+  - "[[ISS-014-legacy-issue-ids-referenced-by-starter-adrs]]"
+  - "[[FR-001-view-piece-inventory-and-status]]"
+  - "[[FR-004-track-piece-status]]"
+  - "[[FR-006-tour-visibility]]"
+  - "[[FR-018-artwork-tracking]]"
+  - "[[FR-022-display-current-piece-information]]"
 tags: [issue]
 severity: major
 kind: ambiguity

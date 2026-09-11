@@ -12,6 +12,7 @@ related:
   - "[[STK-004-buyer]]"
   - "[[STK-014-art-collector]]"
   - "[[STK-008-museum]]"
+  - "[[ISS-019-visitors-is-an-undefined-actor]]"
 tags: [issue]
 severity: minor
 kind: ambiguity

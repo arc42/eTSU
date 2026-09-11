@@ -11,6 +11,9 @@ related:
   - "[[GLO-005-etsu]]"
   - "[[STK-001-gus-renoir]]"
   - "[[GLO-001-tour]]"
+  - "[[EIF-011-gallery-operations]]"
+  - "[[GLO-015-gallery]]"
+  - "[[ISS-018-competing-context-diagrams]]"
 tags: [glossary]
 aliases: [TSU management]
 bounded-context: Gallery Touring

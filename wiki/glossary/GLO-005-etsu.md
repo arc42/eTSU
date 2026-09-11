@@ -12,6 +12,8 @@ related:
   - "[[GLO-004-tsu]]"
   - "[[GOAL-001-eTSU-vision]]"
   - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
+  - "[[ISS-018-competing-context-diagrams]]"
+  - "[[FR-025-register-as-an-artist]]"
 tags: [glossary]
 aliases: [the Platform, the platform]
 bounded-context: Gallery Touring

@@ -11,6 +11,8 @@ related:
   - "[[CTX-001-etsu-system-context]]"
   - "[[ISS-010-system-boundary-undefined]]"
   - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
+  - "[[ISS-011-context-flows-inferred-not-sourced]]"
+  - "[[ISS-020-sketch-boxes-untyped]]"
 tags: [external-interface]
 partner: Payment service provider
 tier: core-operations

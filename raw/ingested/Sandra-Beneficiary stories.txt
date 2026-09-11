@@ -1,0 +1,24 @@
+Von: Sandra Mayer <sandra.mayer@netcetera.com>
+Betreff: Beneficiary stories
+Datum: 9. September 2026 um 13:51:12 MESZ
+An: "info@arc42.de" <info@arc42.de>
+
+As Gus I want an overview of an inventory and status of each item.
+
+Event: When the exhibition ends
+Send art to cleaners and restorers 
+Check what art can be sent to buyers 
+... 
+
+As Gus I want finances and legals taken care of
+
+As an artist I want to upload information about my artwork
+
+As artist I want an updated status of my artwork
+
+-- 
+G+D Netcetera | 30 years of driving progress together
+
+Sandra Mayer | sandra.mayer@netcetera.com | T +43 664 60 411 124 |
+Netcetera GmbH | Austria | Website | LinkedIn
+Sitz der Gesellschaft: Europaplatz 4, 4020 Linz | Firmenbuchgericht: Landesgericht Linz, FN 302032 s

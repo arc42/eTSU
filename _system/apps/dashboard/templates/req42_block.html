@@ -17,6 +17,14 @@
 {{ context_flow_table(context_flows) }}
 {% endif %}
 
+{% if dm_diagram %}
+<figure class="ctx-diagram">
+  <figcaption>Data model · projected live from entity <code>relationships:</code> (ADR-0027)</figcaption>
+  <pre class="mermaid">{{ dm_diagram }}</pre>
+  <figcaption class="ctx-legend">The whole model. <a href="/data-model">Filter by bounded context, or open one entity →</a></figcaption>
+</figure>
+{% endif %}
+
 <div class="table-card">
 <table>
   <thead>

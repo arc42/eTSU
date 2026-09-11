@@ -11,10 +11,17 @@ related:
   - "[[STK-009-conservator]]"
   - "[[GLO-001-tour]]"
   - "[[ISS-007-cleaner-versus-restorer]]"
+  - "[[GLO-011-piece]]"
+  - "[[GLO-021-lending-agreement]]"
+  - "[[FR-001-view-piece-inventory-and-status]]"
+  - "[[ISS-024-close-out-timing-show-versus-tour]]"
+  - "[[FR-016-piece-protection]]"
+  - "[[GOAL-008-pieces-come-home-intact]]"
 tags: [glossary]
 aliases: [cleaner, restorator, restorer]
 bounded-context: Gallery Touring
 agreed: true
+stereotype: entity
 ---
 
 # Conservator

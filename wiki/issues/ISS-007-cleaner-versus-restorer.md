@@ -11,6 +11,7 @@ related:
   - "[[STK-009-conservator]]"
   - "[[GLO-006-conservator]]"
   - "[[ISS-005-ungrounded-stakeholder-entries]]"
+  - "[[ISS-017-twelve-candidate-capabilities-undefined]]"
 tags: [issue]
 severity: minor
 kind: ambiguity

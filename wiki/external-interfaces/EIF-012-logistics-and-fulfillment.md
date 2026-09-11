@@ -13,6 +13,9 @@ related:
   - "[[STK-006-insurer]]"
   - "[[STK-009-conservator]]"
   - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
+  - "[[GLO-009-logistics-partner]]"
+  - "[[ISS-020-sketch-boxes-untyped]]"
+  - "[[FR-023-modify-piece-location]]"
 tags: [external-interface]
 partner: Shipping, insurance and restoration providers
 tier: core-operations

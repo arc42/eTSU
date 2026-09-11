@@ -188,6 +188,39 @@ def test_a_filter_that_matches_nothing_projects_nothing():
     assert app.build_data_model_full_diagram(context="No Such Context") is None
 
 
+def test_an_entity_page_carries_its_own_slice_of_the_diagram():
+    """Entities are one aspect of a data model; seeing them is another. The
+    /data-model page draws the whole thing, and a single entity's page draws its
+    own hop of it — otherwise the entity is described in words and never shown."""
+    h = app.app.test_client().get("/page/data-models/DM-001-artwork").get_data(as_text=True)
+    assert 'class="mermaid"' in h, "the entity page must render a diagram, not just prose"
+    assert "classDiagram" in h and "class Artwork" in h, h[:400]
+    assert "class Lot" in h, "the entity's direct neighbours belong on it"
+    assert "Payment" not in h, "one hop only — the whole model lives at /data-model"
+
+
+def test_a_non_data_model_page_draws_no_class_diagram():
+    h = app.app.test_client().get("/page/glossary/GLO-001-artwork").get_data(as_text=True)
+    assert "classDiagram" not in h, "only data-model pages carry the class diagram"
+
+
+def test_block_05_shows_the_whole_model_like_block_03_shows_the_context():
+    """req42 block 05 is Supporting Models, and the class diagram is the model.
+    Scope (03) has always rendered its context diagram inline; this is the same
+    move, so the diagram is reachable without knowing /data-model exists."""
+    h = app.app.test_client().get("/req42/models").get_data(as_text=True)
+    assert 'class="mermaid"' in h and "classDiagram" in h, "block 05 must draw the model"
+    assert "class Artwork" in h and "class Payment" in h, "the WHOLE model, unfiltered"
+    assert 'href="/data-model"' in h, "and a way through to the filterable view"
+
+
+def test_the_home_tile_offers_the_diagram_not_just_the_page_list():
+    h = app.app.test_client().get("/").get_data(as_text=True)
+    tile = h[h.index("tile-models"):h.index("tile-quality")]
+    assert 'href="/data-model"' in tile, "the diagram needs its own call to action"
+    assert 'href="/req42/models"' in tile, "the page list stays reachable too"
+
+
 def test_the_contexts_are_listed_for_the_filter_ui():
     assert app.data_model_contexts() == ["Billing", "Catalog"], app.data_model_contexts()
 

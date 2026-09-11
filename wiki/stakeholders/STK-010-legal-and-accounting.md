@@ -10,6 +10,14 @@ sources:
 related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GOAL-003-operational-excellence]]"
+  - "[[EIF-014-regulatory-and-compliance]]"
+  - "[[GLO-010-aml-screening]]"
+  - "[[GLO-020-commission]]"
+  - "[[FR-002-settle-finances-and-legal-obligations]]"
+  - "[[FR-007-settlement-and-compliance]]"
+  - "[[GOAL-006-settlement-correct-and-on-time]]"
+  - "[[FR-014-contract-management]]"
+  - "[[FR-026-sign-the-artist-contract]]"
 tags: [stakeholder]
 aliases: [tax management, finance]
 role: Owns contracts, commission settlement, tax and regulatory compliance

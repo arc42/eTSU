@@ -11,6 +11,7 @@ related:
   - "[[GOAL-002-global-market-expansion]]"
   - "[[GOAL-003-operational-excellence]]"
   - "[[GOAL-004-trust-and-authentication]]"
+  - "[[ISS-003-year-one-vs-2029-target-divergence]]"
 tags: [issue]
 severity: major
 kind: gap

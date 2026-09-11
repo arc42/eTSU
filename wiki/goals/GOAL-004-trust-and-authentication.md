@@ -13,6 +13,20 @@ related:
   - "[[ISS-002-unsourced-objective-baselines]]"
   - "[[ISS-003-year-one-vs-2029-target-divergence]]"
   - "[[ISS-004-scope-inflation-marketplace-vs-back-office]]"
+  - "[[EIF-003-appraisers-and-authenticators]]"
+  - "[[EIF-005-fraud-and-security-prevention]]"
+  - "[[EIF-010-institutional-buyers]]"
+  - "[[EIF-014-regulatory-and-compliance]]"
+  - "[[GLO-007-appraiser]]"
+  - "[[GLO-010-aml-screening]]"
+  - "[[ISS-017-twelve-candidate-capabilities-undefined]]"
+  - "[[ISS-021-authentication-card-ambiguous]]"
+  - "[[STK-002-artist]]"
+  - "[[STK-004-buyer]]"
+  - "[[STK-007-customs-authority]]"
+  - "[[STK-008-museum]]"
+  - "[[STK-010-legal-and-accounting]]"
+  - "[[STK-014-art-collector]]"
 tags: [goal]
 stereotype: objective
 parent:

@@ -14,6 +14,7 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[EIF-005-fraud-and-security-prevention]]"
   - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
+  - "[[GLO-010-aml-screening]]"
 tags: [external-interface]
 partner: Tax authorities, AML/KYC providers and law enforcement
 tier: core-operations

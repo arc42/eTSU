@@ -12,6 +12,8 @@ related:
   - "[[STK-008-museum]]"
   - "[[STK-013-private-owner]]"
   - "[[ISS-012-bundled-eif-nodes-hide-partners]]"
+  - "[[GLO-008-lender]]"
+  - "[[EIF-010-institutional-buyers]]"
 tags: [external-interface]
 partner: Museums and private owners who lend artwork
 tier: supply

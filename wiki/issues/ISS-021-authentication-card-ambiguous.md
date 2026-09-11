@@ -12,6 +12,7 @@ related:
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[EIF-003-appraisers-and-authenticators]]"
   - "[[GLO-003-provenance]]"
+  - "[[GLO-007-appraiser]]"
 tags: [issue]
 severity: major
 kind: ambiguity

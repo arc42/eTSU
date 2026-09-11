@@ -13,6 +13,7 @@ related:
   - "[[ISS-013-three-way-buyer-segmentation]]"
   - "[[GOAL-004-trust-and-authentication]]"
   - "[[GLO-001-tour]]"
+  - "[[GLO-013-buyer]]"
 tags: [stakeholder]
 aliases: []
 role: Recurring private acquirer whom TSU cultivates across tours

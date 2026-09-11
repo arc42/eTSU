@@ -15,6 +15,14 @@ related:
   - "[[GLO-001-tour]]"
   - "[[GOAL-003-operational-excellence]]"
   - "[[GOAL-004-trust-and-authentication]]"
+  - "[[FR-005-piece-management]]"
+  - "[[FR-013-artist-management]]"
+  - "[[FR-014-contract-management]]"
+  - "[[FR-015-tour-scheduling]]"
+  - "[[FR-016-piece-protection]]"
+  - "[[FR-007-settlement-and-compliance]]"
+  - "[[ISS-022-tsu-brief-only-partially-ingested]]"
+  - "[[ISS-023-sandra-stories-lack-benefit-and-criteria]]"
 tags: [issue]
 severity: major
 kind: gap
@@ -31,8 +39,8 @@ to [[req42]] Product Backlog items, because a name alone is not a functional
 requirement — it cannot be sized, prioritised under [[MoSCoW]], or tested. The
 list is the finding; converting it is the next session's work.
 
-**Affects.** The `wiki/functional-requirements/` folder, which stays empty until
-this closes. Several cards also touch open questions already on the board, marked
+**Affects.** The `wiki/functional-requirements/` folder. **Four of the twelve are
+no longer held here** — see the note below — but the other eight still are. Several cards also touch open questions already on the board, marked
 in the table below.
 
 **Context / evidence.** Transcribed verbatim from
@@ -66,6 +74,29 @@ Two further observations that are evidence, not interpretation:
   [[ISS-004-scope-inflation-marketplace-vs-back-office]] and it points the
   opposite way from [[SRC-006-workshop-etsu-context-sketch]], drawn in the same
   session.
+
+> [!note] Five cards were absorbed on 2026-09-09, seven remain held
+> Creating epics to un-orphan the backlog took four of the twelve names with it,
+> without the definition pass this Issue asks for:
+>
+> | Card | Now |
+> |---|---|
+> | 1. Artist Management | [[FR-013-artist-management]] |
+> | 2. Artwork Management | [[FR-005-piece-management]], renamed into the ubiquitous language |
+> | 7. contract handling | [[FR-014-contract-management]], after a few hours inside the settlement epic |
+> | 8. payment handling | absorbed into [[FR-007-settlement-and-compliance]] |
+> | 10. insurance claim handling | [[FR-016-piece-protection]], after a few hours inside the settlement epic |
+>
+> Card **6, tour planning**, is *not* absorbed: [[FR-015-tour-scheduling]] takes
+> its name from the workshop's own Schedule Mechanism card, and planning a tour
+> may not be the same capability as scheduling one.
+>
+> The absorption is an agent's grouping, not the group's, and two cards were
+> re-homed within a day of being absorbed, which is itself evidence that grouping
+> undefined names is guesswork. **The remaining seven cards are still undefined
+> and unowned** — tour planning, shipping handling, cleaning & restorations,
+> authentication, communication, and the two purchasing processes — and the
+> definition pass below still applies to them.
 
 **Options.**
 1. **Run a definition pass over the twelve, then convert.** Each card gets a

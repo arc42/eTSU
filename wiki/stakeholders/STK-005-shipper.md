@@ -13,6 +13,10 @@ related:
   - "[[GOAL-003-operational-excellence]]"
   - "[[GLO-001-tour]]"
   - "[[STK-006-insurer]]"
+  - "[[GLO-009-logistics-partner]]"
+  - "[[GLO-016-home-gallery]]"
+  - "[[FR-016-piece-protection]]"
+  - "[[FR-023-modify-piece-location]]"
 tags: [stakeholder]
 aliases: [logistics provider, fine-art shipper]
 role: Moves the Tour's pieces between galleries and back to the home gallery

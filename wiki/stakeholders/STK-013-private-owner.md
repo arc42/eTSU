@@ -13,6 +13,8 @@ related:
   - "[[STK-006-insurer]]"
   - "[[STK-009-conservator]]"
   - "[[GLO-001-tour]]"
+  - "[[GLO-008-lender]]"
+  - "[[GLO-021-lending-agreement]]"
 tags: [stakeholder]
 aliases: [lender, private lender]
 role: Owns a piece and lends it to a Tour under a lending agreement

@@ -11,6 +11,12 @@ related:
   - "[[GOAL-003-operational-excellence]]"
   - "[[GOAL-005-frictionless-global-art-trade]]"
   - "[[GLO-002-show]]"
+  - "[[EIF-011-gallery-operations]]"
+  - "[[GLO-015-gallery]]"
+  - "[[GLO-022-intent-to-purchase]]"
+  - "[[FR-006-tour-visibility]]"
+  - "[[FR-015-tour-scheduling]]"
+  - "[[FR-027-reserve-gallery-space-for-a-piece]]"
 tags: [stakeholder]
 aliases: [gallerist]
 role: Runs one TSU gallery and the Shows hosted there
